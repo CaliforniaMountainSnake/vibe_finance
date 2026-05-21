@@ -5,7 +5,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- END:nextjs-agent-rules -->
 
 ## Code
-После внесения любых изменений в кодовую базу нужно удостовериться, что линтер (`npm run lint`) не выдает ошибок.
+- После внесения любых изменений в кодовую базу нужно удостовериться, что линтер (`npm run lint`) не выдает ошибок. Затем прогнать юнит-тесты (`npm run test`).
 
 ## UI
 - В проекте используется `shadcn/ui` как готовая библиотека компонентов.
