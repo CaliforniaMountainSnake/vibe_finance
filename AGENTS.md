@@ -12,7 +12,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Удостовериться, что линтер (`npm run lint`) не выдает ошибок.
 - Прогнать юнит-тесты (`npm run test`).
-- Выполнить форматирование (`npm run format`).
+- Если линтер и тесты не выдают ошибок, в самом конце выполнить форматирование исходных кодов (`npm run format`).
 
 ## UI
 
