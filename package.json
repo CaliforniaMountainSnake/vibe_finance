@@ -11,6 +11,7 @@
     "start-apk": "npm run build && bash ./scripts/start_apk.sh",
     "lint": "eslint",
     "test": "vitest run",
+    "test-integration": "vitest run --config vitest.integration.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {
