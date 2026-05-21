@@ -1,0 +1,10 @@
+/.idea
+/.vscode
+/.pi_sessions
+/out
+node_modules
+.next
+dist
+build
+android
+package-lock.json
