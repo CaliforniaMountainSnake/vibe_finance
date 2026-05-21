@@ -1,7 +1,10 @@
 import { describe } from 'vitest'
-import { BinanceMockRepository } from '@/tests/mocks/BinanceMockRepository'
-import { testRepositoryInterface } from '../RepositoryInterfaceTest'
+import { BinanceRepository } from '@/repositories/BinanceRepository'
+import { BINANCE_MOCK_JSON } from '@/tests/mocks/binance-data'
+import { assertRates } from '../helpers/assertRates'
 
 describe('BinanceRepository', () => {
-    testRepositoryInterface(new BinanceMockRepository())
+    const repo = new BinanceRepository()
+
+    assertRates(() => repo.parseRates(BINANCE_MOCK_JSON))
 })

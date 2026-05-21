@@ -1,7 +1,10 @@
 import { describe } from 'vitest'
-import { CoinGeckoMockRepository } from '@/tests/mocks/CoinGeckoMockRepository'
-import { testRepositoryInterface } from '../RepositoryInterfaceTest'
+import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
+import { COINGECKO_MOCK_JSON } from '@/tests/mocks/coingecko-data'
+import { assertRates } from '../helpers/assertRates'
 
 describe('CoinGeckoRepository', () => {
-    testRepositoryInterface(new CoinGeckoMockRepository())
+    const repo = new CoinGeckoRepository()
+
+    assertRates(() => repo.parseRates(COINGECKO_MOCK_JSON))
 })

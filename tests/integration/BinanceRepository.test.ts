@@ -1,7 +1,15 @@
-import { describe } from 'vitest'
+import { describe, beforeAll } from 'vitest'
+import { ExchangeRate } from '@/entities/ExchangeRate'
 import { BinanceRepository } from '@/repositories/BinanceRepository'
-import { testRepositoryInterface } from '../RepositoryInterfaceTest'
+import { assertRates } from '../helpers/assertRates'
 
 describe('BinanceRepository', () => {
-    testRepositoryInterface(new BinanceRepository())
+    const repo = new BinanceRepository()
+    let rates: ExchangeRate[]
+
+    beforeAll(async () => {
+        rates = await repo.fetchRates()
+    }, 5_000)
+
+    assertRates(() => rates)
 })

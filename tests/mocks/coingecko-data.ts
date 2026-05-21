@@ -1,10 +1,6 @@
-import { ExchangeRate } from '@/entities/ExchangeRate'
-import { RepositoryInterface } from '@/repositories/RepositoryInterface'
-
 /**
  * Мок-данные в формате ответа CoinGecko API.
  *
- * @example Формат ответа API.
  * ```json
  *  {
  *      "rates": {
@@ -13,18 +9,12 @@ import { RepositoryInterface } from '@/repositories/RepositoryInterface'
  *              "unit": "BTC",
  *              "value": 1.0,
  *              "type": "crypto"
- *          },
- *          "eth": {
- *              "name": "Ether",
- *              "unit": "ETH",
- *              "value": 36.379,
- *              "type": "crypto"
  *          }
  *      }
  *  }
  * ```
  */
-const MOCK_RATES = {
+export const COINGECKO_MOCK_JSON = JSON.stringify({
     rates: {
         btc: {
             name: 'Bitcoin',
@@ -64,29 +54,4 @@ const MOCK_RATES = {
             type: 'crypto',
         },
     },
-}
-
-export class CoinGeckoMockRepository implements RepositoryInterface {
-    readonly sourceName = 'coingecko' as const
-
-    async fetchRates(): Promise<ExchangeRate[]> {
-        // Повторяем ту же логику трансформации, что и в CoinGeckoRepository
-        const result: ExchangeRate[] = []
-
-        for (const [ticker, rate] of Object.entries(MOCK_RATES.rates)) {
-            const lowerTicker = ticker.toLowerCase()
-
-            if (rate.value <= 0) continue
-
-            result.push({
-                source: 'coingecko',
-                ticker: lowerTicker,
-                name: rate.name,
-                unit: rate.unit,
-                btcPrice: rate.value,
-            })
-        }
-
-        return result
-    }
-}
+})

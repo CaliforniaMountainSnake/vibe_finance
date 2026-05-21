@@ -20,8 +20,23 @@ export class CoinGeckoRepository implements RepositoryInterface {
 
     /**
      * Получить курсы валют.
-     * 
-     * @example Формат ответа API.
+     */
+    async fetchRates(): Promise<ExchangeRate[]> {
+        const response = await fetch(this.baseUrl)
+        if (!response.ok) {
+            throw new Error(
+                `CoinGecko API error: ${response.status} ${response.statusText}`,
+            )
+        }
+
+        const text = await response.text()
+        return this.parseRates(text)
+    }
+
+    /**
+     * Распарсить сырой ответ API в ExchangeRate[].
+     *
+     * @example Формат входной строки.
      * ```json
      *  {
      *      "rates": {
@@ -41,15 +56,8 @@ export class CoinGeckoRepository implements RepositoryInterface {
      *  }
      * ```
      */
-    async fetchRates(): Promise<ExchangeRate[]> {
-        const response = await fetch(this.baseUrl)
-        if (!response.ok) {
-            throw new Error(
-                `CoinGecko API error: ${response.status} ${response.statusText}`,
-            )
-        }
-
-        const data: CoinGeckoResponse = await response.json()
+    parseRates(raw: string): ExchangeRate[] {
+        const data: CoinGeckoResponse = JSON.parse(raw)
         const result: ExchangeRate[] = []
 
         for (const [ticker, rate] of Object.entries(data.rates)) {

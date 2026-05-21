@@ -13,8 +13,21 @@ export class BinanceRepository implements RepositoryInterface {
 
     /**
      * Получить курсы валют.
-     * 
-     * @example Формат ответа API.
+     */
+    async fetchRates(): Promise<ExchangeRate[]> {
+        const response = await fetch(this.baseUrl)
+        if (!response.ok) {
+            throw new Error(`Binance API error: ${response.status} ${response.statusText}`)
+        }
+
+        const text = await response.text()
+        return this.parseRates(text)
+    }
+
+    /**
+     * Распарсить сырой ответ API в ExchangeRate[].
+     *
+     * @example Формат входной строки.
      * ```json
      * [
      *  {
@@ -24,13 +37,8 @@ export class BinanceRepository implements RepositoryInterface {
      * ]
      * ```
      */
-    async fetchRates(): Promise<ExchangeRate[]> {
-        const response = await fetch(this.baseUrl)
-        if (!response.ok) {
-            throw new Error(`Binance API error: ${response.status} ${response.statusText}`)
-        }
-
-        const data: BinanceTicker[] = await response.json()
+    parseRates(raw: string): ExchangeRate[] {
+        const data: BinanceTicker[] = JSON.parse(raw)
 
         // Keep only pairs to USDT
         const usdtPairs = data.filter((t) =>
