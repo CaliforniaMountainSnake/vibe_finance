@@ -10,13 +10,37 @@ export function assertRates(getRates: () => ExchangeRate[]) {
   it('every rate has valid shape', () => {
     const rates = getRates()
     for (const rate of rates) {
+      // source
       expect(typeof rate.source).toBe('string')
       expect(['coingecko', 'binance']).toContain(rate.source)
+
+      // ticker
       expect(typeof rate.ticker).toBe('string')
       expect(rate.ticker).toBe(rate.ticker.toLowerCase())
+
+      // name (optional)
+      if (rate.name !== undefined) {
+        expect(typeof rate.name).toBe('string')
+        expect(rate.name.length).toBeGreaterThan(0)
+      }
+
+      // unit (optional)
+      if (rate.unit !== undefined) {
+        expect(typeof rate.unit).toBe('string')
+        expect(rate.unit.length).toBeGreaterThan(0)
+      }
+
+      // btcPrice
       expect(typeof rate.btcPrice).toBe('number')
       expect(Number.isFinite(rate.btcPrice)).toBe(true)
       expect(rate.btcPrice).toBeGreaterThan(0)
+
+      // updatedAt
+      expect(typeof rate.updatedAt).toBe('number')
+      expect(Number.isFinite(rate.updatedAt)).toBe(true)
+      expect(rate.updatedAt).toBeGreaterThanOrEqual(0)
+      const date = new Date(rate.updatedAt * 1000)
+      expect(date.getTime()).toBeGreaterThan(0)
     }
   })
 

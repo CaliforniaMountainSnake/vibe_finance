@@ -68,6 +68,7 @@ export class BinanceRepository implements RepositoryInterface {
         source: 'binance',
         ticker,
         btcPrice,
+        updatedAt: Math.floor(Date.now() / 1000),
       })
     }
 

@@ -70,6 +70,7 @@ export class CoinGeckoRepository implements RepositoryInterface {
         name: rate.name,
         unit: rate.unit,
         btcPrice: rate.value,
+        updatedAt: Math.floor(Date.now() / 1000),
       })
     }
 
