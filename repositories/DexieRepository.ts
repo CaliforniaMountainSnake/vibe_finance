@@ -1,11 +1,11 @@
 import Dexie, { type Table } from 'dexie'
 import { type ExchangeRate, type SourceName } from '@/entities/ExchangeRate'
-import { type DexieRepositoryInterface } from '@/repositories/DexieRepositoryInterface'
+import { type DbRepositoryInterface } from '@/repositories/DbRepositoryInterface'
 
 /**
  * Схема БД
  */
-class ExchangeRateDb extends Dexie {
+class FinanceDb extends Dexie {
   exchangeRates!: Table<ExchangeRate, [string, string]>
 
   constructor() {
@@ -23,11 +23,11 @@ class ExchangeRateDb extends Dexie {
 /**
  * Репозиторий
  */
-export class DexieRepository implements DexieRepositoryInterface {
-  private readonly db: ExchangeRateDb
+export class DexieRepository implements DbRepositoryInterface {
+  private readonly db: FinanceDb
 
   constructor() {
-    this.db = new ExchangeRateDb()
+    this.db = new FinanceDb()
   }
 
   async updateDataForSource(source: SourceName, rates: ExchangeRate[]): Promise<void> {

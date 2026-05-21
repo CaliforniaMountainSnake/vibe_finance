@@ -1,9 +1,9 @@
 import { type ExchangeRate, type SourceName } from '@/entities/ExchangeRate'
 
 /**
- * Контракт Dexie-репозитория для локального хранения курсов валют в IndexedDB.
+ * Контракт репозитория для локального хранения курсов валют в IndexedDB.
  */
-export interface DexieRepositoryInterface {
+export interface DbRepositoryInterface {
   /**
    * Атомарно обновить все курсы для указанного источника:
    *  1. Удалить все старые записи с этим source.
