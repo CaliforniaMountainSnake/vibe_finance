@@ -18,6 +18,29 @@ export class CoinGeckoRepository implements RepositoryInterface {
 
     private readonly baseUrl = 'https://api.coingecko.com/api/v3/exchange_rates'
 
+    /**
+     * Получить курсы валют.
+     * 
+     * @example Формат ответа API.
+     * ```json
+     *  {
+     *      "rates": {
+     *          "btc": {
+     *              "name": "Bitcoin",
+     *              "unit": "BTC",
+     *              "value": 1.0,
+     *              "type": "crypto"
+     *          },
+     *          "eth": {
+     *              "name": "Ether",
+     *              "unit": "ETH",
+     *              "value": 36.379,
+     *              "type": "crypto"
+     *          }
+     *      }
+     *  }
+     * ```
+     */
     async fetchRates(): Promise<ExchangeRate[]> {
         const response = await fetch(this.baseUrl)
         if (!response.ok) {

@@ -11,6 +11,19 @@ export class BinanceRepository implements RepositoryInterface {
 
     private readonly baseUrl = 'https://api.binance.com/api/v3/ticker/price'
 
+    /**
+     * Получить курсы валют.
+     * 
+     * @example Формат ответа API.
+     * ```json
+     * [
+     *  {
+     *      "symbol": "BTCUSDT",
+     *      "price": "76808.44000000"
+     *  }
+     * ]
+     * ```
+     */
     async fetchRates(): Promise<ExchangeRate[]> {
         const response = await fetch(this.baseUrl)
         if (!response.ok) {
