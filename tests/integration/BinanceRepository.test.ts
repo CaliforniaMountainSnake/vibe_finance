@@ -4,12 +4,12 @@ import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { assertRates } from '../helpers/assertRates'
 
 describe('BinanceRepository', () => {
-    const repo = new BinanceRepository()
-    let rates: ExchangeRate[]
+  const repo = new BinanceRepository()
+  let rates: ExchangeRate[]
 
-    beforeAll(async () => {
-        rates = await repo.fetchRates()
-    }, 5_000)
+  beforeAll(async () => {
+    rates = await repo.fetchRates()
+  }, 5_000)
 
-    assertRates(() => rates)
+  assertRates(() => rates)
 })

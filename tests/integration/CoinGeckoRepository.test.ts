@@ -4,12 +4,12 @@ import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
 import { assertRates } from '../helpers/assertRates'
 
 describe('CoinGeckoRepository', () => {
-    const repo = new CoinGeckoRepository()
-    let rates: ExchangeRate[]
+  const repo = new CoinGeckoRepository()
+  let rates: ExchangeRate[]
 
-    beforeAll(async () => {
-        rates = await repo.fetchRates()
-    }, 5_000)
+  beforeAll(async () => {
+    rates = await repo.fetchRates()
+  }, 5_000)
 
-    assertRates(() => rates)
+  assertRates(() => rates)
 })
