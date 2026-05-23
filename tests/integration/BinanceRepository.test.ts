@@ -1,5 +1,5 @@
 import { describe, beforeAll } from 'vitest'
-import { ExchangeRate } from '@/entities/ExchangeRate'
+import type { ExchangeRate } from '@/entities/ExchangeRate'
 import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { assertRates } from '../helpers/assertRates'
 

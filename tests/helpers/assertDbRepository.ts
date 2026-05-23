@@ -64,7 +64,8 @@ export function assertDbRepository(makeRepo: () => DbRepositoryInterface) {
       const tickers = all.map((r) => r.ticker).sort()
       expect(tickers).toEqual(['btc', 'eth'])
 
-      const eth = all.find((r) => r.ticker === 'eth')!
+      const eth = all.find((r) => r.ticker === 'eth')
+      if (!eth) throw new Error('eth not found in rates')
       expect(eth.btcPrice).toBe(37.0)
     })
 

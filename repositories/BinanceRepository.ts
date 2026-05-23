@@ -1,10 +1,12 @@
-import { ExchangeRate } from '@/entities/ExchangeRate'
-import { RepositoryInterface } from '@/repositories/RepositoryInterface'
+import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { RepositoryInterface } from '@/repositories/RepositoryInterface'
 
 type BinanceTicker = {
   symbol: string
   price: string
 }
+
+const MS_PER_SECOND = 1000
 
 export class BinanceRepository implements RepositoryInterface {
   readonly sourceName = 'binance' as const
@@ -68,7 +70,7 @@ export class BinanceRepository implements RepositoryInterface {
         source: 'binance',
         ticker,
         btcPrice,
-        updatedAt: Math.floor(Date.now() / 1000),
+        updatedAt: Math.floor(Date.now() / MS_PER_SECOND),
       })
     }
 

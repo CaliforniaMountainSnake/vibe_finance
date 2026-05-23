@@ -1,5 +1,5 @@
-import { ExchangeRate } from '@/entities/ExchangeRate'
-import { RepositoryInterface } from '@/repositories/RepositoryInterface'
+import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { RepositoryInterface } from '@/repositories/RepositoryInterface'
 
 type CoinGeckoResponse = {
   rates: Record<
@@ -12,6 +12,8 @@ type CoinGeckoResponse = {
     }
   >
 }
+
+const MS_PER_SECOND = 1000
 
 export class CoinGeckoRepository implements RepositoryInterface {
   readonly sourceName = 'coingecko' as const
@@ -70,7 +72,7 @@ export class CoinGeckoRepository implements RepositoryInterface {
         name: rate.name,
         unit: rate.unit,
         btcPrice: rate.value,
-        updatedAt: Math.floor(Date.now() / 1000),
+        updatedAt: Math.floor(Date.now() / MS_PER_SECOND),
       })
     }
 

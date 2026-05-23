@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest'
-import { ExchangeRate } from '@/entities/ExchangeRate'
+import type { ExchangeRate } from '@/entities/ExchangeRate'
 
 export function assertRates(getRates: () => ExchangeRate[]) {
   it('returns a non-empty list', () => {
@@ -54,6 +54,7 @@ export function assertRates(getRates: () => ExchangeRate[]) {
     const rates = getRates()
     const btc = rates.find((r) => r.ticker === 'btc')
     expect(btc).toBeDefined()
-    expect(btc!.btcPrice).toBe(1)
+    if (!btc) throw new Error('btc not found in rates')
+    expect(btc.btcPrice).toBe(1)
   })
 }

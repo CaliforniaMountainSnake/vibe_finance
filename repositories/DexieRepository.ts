@@ -60,7 +60,7 @@ export class DexieRepository implements DbRepositoryInterface {
   }
 
   async getAllRates(): Promise<ExchangeRate[]> {
-    return this.db.exchangeRates.toArray()
+    return await this.db.exchangeRates.toArray()
   }
 
   async clearAll(): Promise<void> {

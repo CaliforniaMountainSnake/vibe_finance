@@ -1,4 +1,4 @@
-import { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
+import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 
 export interface RepositoryInterface {
   sourceName: SourceName
