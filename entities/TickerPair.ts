@@ -1,4 +1,6 @@
+import type { Ticker } from './Ticker'
+
 export type TickerPair = {
-  from: string
-  to: string
+  from: Ticker
+  to: Ticker
 }

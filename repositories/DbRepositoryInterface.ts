@@ -5,6 +5,9 @@ import { type TickerPair } from '@/entities/TickerPair'
  * Контракт репозитория для локального хранения курсов валют в IndexedDB.
  */
 export interface DbRepositoryInterface {
+  /** Очистить всю базу. */
+  clearAll(): Promise<void>
+
   /**
    * Атомарно обновить все курсы для указанного источника:
    *  1. Удалить все старые записи с этим source.
@@ -26,9 +29,6 @@ export interface DbRepositoryInterface {
 
   /** Получить все курсы из БД. */
   getAllRates(): Promise<ExchangeRate[]>
-
-  /** Очистить всю базу. */
-  clearAll(): Promise<void>
 
   /**
    * Добавить пару тикеров в избранное.
