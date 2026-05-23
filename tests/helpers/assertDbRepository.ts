@@ -12,6 +12,10 @@ function makeRate(overrides: Partial<ExchangeRate> = {}): ExchangeRate {
   }
 }
 
+function pair(from: string, to: string) {
+  return { from, to }
+}
+
 /**
  * Принимает фабрику, создающую экземпляр DbRepositoryInterface,
  * и регистрирует батарею тестов контракта этого интерфейса.
@@ -96,40 +100,40 @@ export function assertDbRepository(makeRepo: () => DbRepositoryInterface) {
     })
 
     it('returns 1 for same ticker', async () => {
-      const rate = await repo.getRate('btc', 'btc')
+      const rate = await repo.getRate(pair('btc', 'btc'))
       expect(rate).toBeCloseTo(1, 5)
     })
 
     it('computes rate between two currencies', async () => {
       // btc → eth: btcPrice(eth) / btcPrice(btc) = 36.379 / 1 = 36.379
-      const rate = await repo.getRate('btc', 'eth')
+      const rate = await repo.getRate(pair('btc', 'eth'))
       expect(rate).toBeCloseTo(36.379, 5)
     })
 
     it('computes inverse rate', async () => {
       // eth → btc: btcPrice(btc) / btcPrice(eth) = 1 / 36.379 ≈ 0.027488
-      const rate = await repo.getRate('eth', 'btc')
+      const rate = await repo.getRate(pair('eth', 'btc'))
       expect(rate).toBeCloseTo(1 / 36.379, 5)
     })
 
     it('computes rate between two fiat-like currencies', async () => {
       // gel → usdt: btcPrice(usdt) / btcPrice(gel) = 76808.44 / 205015.665 ≈ 0.37461
-      const rate = await repo.getRate('gel', 'usdt')
+      const rate = await repo.getRate(pair('gel', 'usdt'))
       expect(rate).toBeCloseTo(76808.44 / 205015.665, 5)
     })
 
     it('is case-insensitive', async () => {
-      const lower = await repo.getRate('eth', 'btc')
-      const upper = await repo.getRate('ETH', 'BTC')
+      const lower = await repo.getRate(pair('eth', 'btc'))
+      const upper = await repo.getRate(pair('ETH', 'BTC'))
       expect(lower).toBeCloseTo(upper, 5)
     })
 
     it('throws for unknown from-ticker', async () => {
-      await expect(repo.getRate('nonexistent', 'btc')).rejects.toThrow()
+      await expect(repo.getRate(pair('nonexistent', 'btc'))).rejects.toThrow()
     })
 
     it('throws for unknown to-ticker', async () => {
-      await expect(repo.getRate('btc', 'nonexistent')).rejects.toThrow()
+      await expect(repo.getRate(pair('btc', 'nonexistent'))).rejects.toThrow()
     })
 
     it('throws when from-ticker has zero or negative btcPrice', async () => {
@@ -138,7 +142,7 @@ export function assertDbRepository(makeRepo: () => DbRepositoryInterface) {
         makeRate({ source: 'coingecko', ticker: 'btc', btcPrice: 1 }),
       ])
 
-      await expect(repo.getRate('broken', 'btc')).rejects.toThrow()
+      await expect(repo.getRate(pair('broken', 'btc'))).rejects.toThrow()
     })
   })
 
@@ -178,10 +182,163 @@ export function assertDbRepository(makeRepo: () => DbRepositoryInterface) {
   })
 
   // ---------------------------------------------------------------------------
+  // addFavoriteRate
+  // ---------------------------------------------------------------------------
+
+  describe('addFavoriteRate', () => {
+    it('adds a ticker pair to favorites', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([pair('btc', 'usdt')])
+    })
+
+    it('is idempotent — adding the same pair twice does not fail', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(1)
+      expect(favorites[0]).toEqual(pair('btc', 'usdt'))
+    })
+
+    it('is case-insensitive', async () => {
+      await repo.addFavoriteRate(pair('BTC', 'USDT'))
+
+      const isFav = await repo.isFavoriteRate(pair('btc', 'usdt'))
+      expect(isFav).toBe(true)
+    })
+
+    it('treats different pairs independently', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+      await repo.addFavoriteRate(pair('eth', 'usdt'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(2)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // removeFavoriteRate
+  // ---------------------------------------------------------------------------
+
+  describe('removeFavoriteRate', () => {
+    it('removes a pair from favorites', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+      await repo.addFavoriteRate(pair('eth', 'usdt'))
+      await repo.removeFavoriteRate(pair('btc', 'usdt'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([pair('eth', 'usdt')])
+    })
+
+    it('is idempotent — removing a non-existent pair does not fail', async () => {
+      await repo.removeFavoriteRate(pair('nonexistent', 'pair'))
+      // should not throw
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([])
+    })
+
+    it('is case-insensitive', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+      await repo.removeFavoriteRate(pair('BTC', 'USDT'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([])
+    })
+
+    it('does not remove a different pair with shared ticker', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+      await repo.addFavoriteRate(pair('btc', 'eth'))
+      await repo.removeFavoriteRate(pair('btc', 'usdt'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([pair('btc', 'eth')])
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // getFavoriteRates
+  // ---------------------------------------------------------------------------
+
+  describe('getFavoriteRates', () => {
+    it('returns empty array when no favorites exist', async () => {
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([])
+    })
+
+    it('returns pairs ordered by addedAt descending (newest first)', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+      await new Promise((r) => setTimeout(r, 10))
+      await repo.addFavoriteRate(pair('eth', 'usdt'))
+      await new Promise((r) => setTimeout(r, 10))
+      await repo.addFavoriteRate(pair('btc', 'eth'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toEqual([pair('btc', 'eth'), pair('eth', 'usdt'), pair('btc', 'usdt')])
+    })
+
+    it('returns objects with from and to', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites.length).toBe(1)
+      expect(favorites[0]).toHaveProperty('from')
+      expect(favorites[0]).toHaveProperty('to')
+      expect(typeof favorites[0].from).toBe('string')
+      expect(typeof favorites[0].to).toBe('string')
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // isFavoriteRate
+  // ---------------------------------------------------------------------------
+
+  describe('isFavoriteRate', () => {
+    it('returns true for a favorited pair', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+
+      const isFav = await repo.isFavoriteRate(pair('btc', 'usdt'))
+      expect(isFav).toBe(true)
+    })
+
+    it('returns false for a non-favorited pair', async () => {
+      const isFav = await repo.isFavoriteRate(pair('btc', 'usdt'))
+      expect(isFav).toBe(false)
+    })
+
+    it('is case-insensitive', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+
+      const isFav = await repo.isFavoriteRate(pair('BTC', 'USDT'))
+      expect(isFav).toBe(true)
+    })
+
+    it('returns false for reversed pair', async () => {
+      await repo.addFavoriteRate(pair('btc', 'usdt'))
+
+      const isFav = await repo.isFavoriteRate(pair('usdt', 'btc'))
+      expect(isFav).toBe(false)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
   // clearAll
   // ---------------------------------------------------------------------------
 
   describe('clearAll', () => {
+    it('removes all data — exchange rates and favorites', async () => {
+      await repo.updateDataForSource('binance', [makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 })])
+      await repo.addFavoriteRate(pair('eth', 'usdt'))
+
+      await repo.clearAll()
+
+      const rates = await repo.getAllRates()
+      const favorites = await repo.getFavoriteRates()
+      expect(rates).toHaveLength(0)
+      expect(favorites).toHaveLength(0)
+    })
+
     it('removes all data', async () => {
       await repo.updateDataForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 }),

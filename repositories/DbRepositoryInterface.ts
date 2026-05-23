@@ -1,4 +1,5 @@
 import { type ExchangeRate, type SourceName } from '@/entities/ExchangeRate'
+import { type TickerPair } from '@/entities/TickerPair'
 
 /**
  * Контракт репозитория для локального хранения курсов валют в IndexedDB.
@@ -16,16 +17,36 @@ export interface DbRepositoryInterface {
   /**
    * Вычислить курс между двумя тикерами за O(log n).
    *
-   *   rate = btcPrice(toTicker) / btcPrice(fromTicker)
+   *   rate = btcPrice(to) / btcPrice(from)
    *
-   * @returns Сколько единиц `toTicker` можно получить за 1 единицу `fromTicker`.
+   * @returns Сколько единиц `to` можно получить за 1 единицу `from`.
    * @throws Error если любой из тикеров не найден в БД.
    */
-  getRate(fromTicker: string, toTicker: string): Promise<number>
+  getRate(pair: TickerPair): Promise<number>
 
   /** Получить все курсы из БД. */
   getAllRates(): Promise<ExchangeRate[]>
 
   /** Очистить всю базу. */
   clearAll(): Promise<void>
+
+  /**
+   * Добавить пару тикеров в избранное.
+   * Если пара уже в избранном — операция идемпотентна.
+   */
+  addFavoriteRate(pair: TickerPair): Promise<void>
+
+  /**
+   * Удалить пару тикеров из избранного.
+   * Если пары нет в избранном — операция идемпотентна.
+   */
+  removeFavoriteRate(pair: TickerPair): Promise<void>
+
+  /**
+   * Получить все избранные пары, отсортированные по дате добавления (новые сверху).
+   */
+  getFavoriteRates(): Promise<TickerPair[]>
+
+  /** Проверить, находится ли пара тикеров в избранном. */
+  isFavoriteRate(pair: TickerPair): Promise<boolean>
 }
