@@ -1,0 +1,46 @@
+import { describe, it, expect, beforeEach } from 'vitest'
+import { type DbRepositoryInterface } from '@/repositories/DbRepositoryInterface'
+import { makeRate, sameSourcePair } from './dbRepositoryTestHelpers'
+
+export function assertDbRepositoryClearAll(makeRepo: () => DbRepositoryInterface) {
+  let repo: DbRepositoryInterface
+
+  beforeEach(() => {
+    repo = makeRepo()
+    return repo.clearAll()
+  })
+
+  describe('clearAll', () => {
+    it('removes all data — exchange rates and favorites', async () => {
+      await repo.updateDataForSource('binance', [makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 })])
+      await repo.addFavoriteRate(sameSourcePair('coingecko', 'eth', 'usdt'))
+
+      await repo.clearAll()
+
+      const rates = await repo.getAllRates()
+      const favorites = await repo.getFavoriteRates()
+      expect(rates).toHaveLength(0)
+      expect(favorites).toHaveLength(0)
+    })
+
+    it('removes all data', async () => {
+      await repo.updateDataForSource('binance', [
+        makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 }),
+        makeRate({ source: 'binance', ticker: 'eth', btcPrice: 36.5 }),
+      ])
+
+      await repo.clearAll()
+
+      const rates = await repo.getAllRates()
+      expect(rates).toHaveLength(0)
+    })
+
+    it('is idempotent', async () => {
+      await repo.clearAll()
+      await repo.clearAll()
+
+      const rates = await repo.getAllRates()
+      expect(rates).toHaveLength(0)
+    })
+  })
+}

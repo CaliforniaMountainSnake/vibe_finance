@@ -1,7 +1,7 @@
 import { describe, beforeAll } from 'vitest'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
-import { assertRates } from '../helpers/assertRates'
+import { assertFinanceApiRates } from '../helpers/assertFinanceApiRates'
 
 describe('CoinGeckoRepository', () => {
   const repo = new CoinGeckoRepository()
@@ -11,5 +11,5 @@ describe('CoinGeckoRepository', () => {
     rates = await repo.fetchRates()
   }, 5_000)
 
-  assertRates(() => rates)
+  assertFinanceApiRates(() => rates)
 })

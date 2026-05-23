@@ -15,7 +15,7 @@ function makeRate(overrides: Partial<ExchangeRate> = {}): ExchangeRate {
 /**
  * Регистрирует тесты контракта метода getUpdateTime интерфейса DbRepositoryInterface.
  */
-export function assertGetUpdateTime(makeRepo: () => DbRepositoryInterface) {
+export function assertDbRepositoryGetUpdateTime(makeRepo: () => DbRepositoryInterface) {
   let repo: DbRepositoryInterface
 
   beforeEach(() => {

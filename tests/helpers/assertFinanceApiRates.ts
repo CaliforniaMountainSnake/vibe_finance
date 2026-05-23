@@ -1,7 +1,7 @@
 import { it, expect } from 'vitest'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 
-export function assertRates(getRates: () => ExchangeRate[]) {
+export function assertFinanceApiRates(getRates: () => ExchangeRate[]) {
   it('returns a non-empty list', () => {
     const rates = getRates()
     expect(rates.length).toBeGreaterThan(0)
