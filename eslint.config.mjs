@@ -159,9 +159,6 @@ const eslintConfig = defineConfig([
       // async без await внутри — бессмысленно
       'require-await': 'error',
 
-      // return await — лишнее
-      'no-return-await': 'error',
-
       // new Promise(async ...) — антипаттерн
       'no-async-promise-executor': 'error',
 
