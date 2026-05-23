@@ -1,5 +1,5 @@
 import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { RepositoryInterface } from '@/repositories/RepositoryInterface'
+import type { FinanceApiRepositoryInterface } from '@/repositories/FinanceApiRepositoryInterface'
 
 type CoinGeckoResponse = {
   rates: Record<
@@ -15,7 +15,7 @@ type CoinGeckoResponse = {
 
 const MS_PER_SECOND = 1000
 
-export class CoinGeckoRepository implements RepositoryInterface {
+export class CoinGeckoRepository implements FinanceApiRepositoryInterface {
   readonly sourceName = 'coingecko' as const
 
   private readonly baseUrl = 'https://api.coingecko.com/api/v3/exchange_rates'

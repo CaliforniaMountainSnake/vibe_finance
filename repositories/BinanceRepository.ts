@@ -1,5 +1,5 @@
 import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { RepositoryInterface } from '@/repositories/RepositoryInterface'
+import type { FinanceApiRepositoryInterface } from '@/repositories/FinanceApiRepositoryInterface'
 
 type BinanceTicker = {
   symbol: string
@@ -8,7 +8,7 @@ type BinanceTicker = {
 
 const MS_PER_SECOND = 1000
 
-export class BinanceRepository implements RepositoryInterface {
+export class BinanceRepository implements FinanceApiRepositoryInterface {
   readonly sourceName = 'binance' as const
 
   private readonly baseUrl = 'https://api.binance.com/api/v3/ticker/price'
