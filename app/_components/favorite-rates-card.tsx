@@ -153,6 +153,7 @@ type AddFavoritesDropdownProps = {
 function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) {
   const [selectedFrom, setSelectedFrom] = useState<Ticker | null>(null)
   const [open, setOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -169,6 +170,8 @@ function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) 
     async (ticker: Ticker) => {
       if (!selectedFrom) {
         setSelectedFrom(ticker)
+        setSearchQuery('')
+        inputRef.current?.focus()
         return
       }
       if (isTickerEqual(ticker, selectedFrom)) {
@@ -185,7 +188,10 @@ function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) 
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     setOpen(newOpen)
-    if (!newOpen) setSelectedFrom(null)
+    if (!newOpen) {
+      setSelectedFrom(null)
+      setSearchQuery('')
+    }
   }, [])
 
   return (
@@ -202,6 +208,8 @@ function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) 
           selectedFrom={selectedFrom}
           onSelect={(t) => void handleSelect(t)}
           inputRef={inputRef}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -216,13 +224,15 @@ export function FavoriteRatesCard() {
   const [rates, setRates] = useState<Record<string, number>>({})
 
   const loadFavorites = useCallback(async () => {
-    setFavorites(await dbRepo.getFavoriteRates())
+    const fav = await dbRepo.getFavoriteRates()
+    // Репозиторий возвращает новые сверху — переворачиваем, чтобы старые были вверху
+    setFavorites(fav.reverse())
   }, [])
 
   useEffect(() => {
     void (async () => {
       const [fav, all] = await Promise.all([dbRepo.getFavoriteRates(), dbRepo.getAllRates()])
-      setFavorites(fav)
+      setFavorites(fav.reverse())
       setAllRates(all)
     })()
   }, [])
@@ -245,7 +255,8 @@ export function FavoriteRatesCard() {
 
   const handleRemove = useCallback(async (pair: TickerPair) => {
     await dbRepo.removeFavoriteRate(pair)
-    setFavorites(await dbRepo.getFavoriteRates())
+    const fav = await dbRepo.getFavoriteRates()
+    setFavorites(fav.reverse())
   }, [])
 
   return (

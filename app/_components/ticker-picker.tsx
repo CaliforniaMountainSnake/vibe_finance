@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {
   return `${t.source}:${t.ticker.toUpperCase()}`
@@ -64,8 +64,21 @@ function TickerPickerSearch({
           placeholder={selectedFrom ? `Вторая валюта для ${tickerLabel(selectedFrom)} → …` : 'Поиск валюты…'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="pl-7 h-7 text-sm"
+          className="pl-7 pr-7 h-7 text-sm"
         />
+        {value && (
+          <button
+            type="button"
+            onClick={() => {
+              onChange('')
+              inputRef.current?.focus()
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Очистить поиск"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
       </div>
       {selectedFrom && (
         <p className="mt-1.5 text-[11px] text-muted-foreground px-1">
@@ -84,12 +97,20 @@ type TickerPickerProps = {
   selectedFrom: Ticker | null
   onSelect: (ticker: Ticker) => void
   inputRef?: React.RefObject<HTMLInputElement | null>
+  searchQuery: string
+  onSearchChange: (v: string) => void
 }
 
-export function TickerPicker({ allRates, selectedFrom, onSelect, inputRef }: TickerPickerProps) {
+export function TickerPicker({
+  allRates,
+  selectedFrom,
+  onSelect,
+  inputRef,
+  searchQuery,
+  onSearchChange,
+}: TickerPickerProps) {
   const fallbackRef = useRef<HTMLInputElement>(null)
   const ref = inputRef ?? fallbackRef
-  const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
@@ -108,7 +129,7 @@ export function TickerPicker({ allRates, selectedFrom, onSelect, inputRef }: Tic
 
   return (
     <>
-      <TickerPickerSearch selectedFrom={selectedFrom} value={searchQuery} onChange={setSearchQuery} inputRef={ref} />
+      <TickerPickerSearch selectedFrom={selectedFrom} value={searchQuery} onChange={onSearchChange} inputRef={ref} />
       <DropdownMenuSeparator />
       {filtered.length === 0 ? (
         <p className="px-3 py-4 text-sm text-muted-foreground text-center">Ничего не найдено</p>
