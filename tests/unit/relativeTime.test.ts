@@ -1,17 +1,19 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { relativeTime } from '@/app/_components/exchange-rate-helpers'
-
-const SEC_PER_MINUTE = 60
-const SEC_PER_HOUR = 3600
-const SEC_PER_DAY = 86400
-const SEC_PER_MONTH = 2592000
-const SEC_PER_YEAR = 31536000
+import {
+  relativeTime,
+  SEC_PER_MINUTE,
+  SEC_PER_HOUR,
+  SEC_PER_DAY,
+  SEC_PER_MONTH,
+  SEC_PER_YEAR,
+  MS_PER_SEC,
+} from '@/lib/time-helpers'
 
 /**
  * Возвращает timestamp в прошлом: now - diffSeconds
  */
 function pastTs(diffSeconds: number): number {
-  const now = Math.floor(Date.now() / 1000)
+  const now = Math.floor(Date.now() / MS_PER_SEC)
   return now - diffSeconds
 }
 

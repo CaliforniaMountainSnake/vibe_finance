@@ -6,8 +6,29 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
 import { DexieRepository } from '@/repositories/DexieRepository'
-import type { SourceName } from '@/entities/ExchangeRate'
-import { computeStatus, maxUpdatedAt, MS_PER_SEC, relativeTime, type SourceStatus } from './exchange-rate-helpers'
+import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
+import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
+
+type SourceStatus = {
+  updatedAt: number | null
+  error: string | null
+  loading: boolean
+}
+
+function maxUpdatedAt(rates: ExchangeRate[]): number {
+  if (rates.length === 0) {
+    return Math.floor(Date.now() / MS_PER_SEC)
+  }
+  return Math.max(...rates.map((r) => r.updatedAt))
+}
+
+function computeStatus(rates: ExchangeRate[], source: SourceName, prev: SourceStatus): SourceStatus {
+  const sourceRates = rates.filter((r) => r.source === source)
+  return {
+    ...prev,
+    updatedAt: sourceRates.length > 0 ? maxUpdatedAt(sourceRates) : null,
+  }
+}
 
 const SOURCES: SourceName[] = ['coingecko', 'binance']
 
