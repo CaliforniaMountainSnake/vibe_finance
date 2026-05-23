@@ -218,7 +218,11 @@ function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) 
 
 /* ── FavoriteRatesCard ────────────────────────────────────────── */
 
-export function FavoriteRatesCard() {
+type FavoriteRatesCardProps = {
+  refreshKey?: number
+}
+
+export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
   const [favorites, setFavorites] = useState<TickerPair[]>([])
   const [allRates, setAllRates] = useState<ExchangeRate[]>([])
   const [rates, setRates] = useState<Record<string, number>>({})
@@ -235,7 +239,7 @@ export function FavoriteRatesCard() {
       setFavorites(fav.reverse())
       setAllRates(all)
     })()
-  }, [])
+  }, [refreshKey])
 
   useEffect(() => {
     const compute = async () => {

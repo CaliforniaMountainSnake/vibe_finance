@@ -53,7 +53,40 @@ function DateCell({ status }: { status: SourceStatus }) {
   return '—'
 }
 
-export function ExchangeRateRefreshCard() {
+function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceStatus> }) {
+  return (
+    <table className="w-full text-xs">
+      <thead>
+        <tr className="border-t text-muted-foreground">
+          <th className="px-4 py-2 text-left font-medium">Источник</th>
+          <th className="px-4 py-2 text-left font-medium">Дата обновления</th>
+          <th className="px-4 py-2 text-left font-medium">Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {SOURCES.map((source) => (
+          <Fragment key={source}>
+            <tr className="border-t">
+              <td className="px-4 py-2 capitalize font-medium">{source}</td>
+              <td className="px-4 py-2 text-muted-foreground">
+                <DateCell status={statuses[source]} />
+              </td>
+              <td className="px-4 py-2 text-muted-foreground">
+                <StatusCell status={statuses[source]} />
+              </td>
+            </tr>
+          </Fragment>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+type ExchangeRateRefreshCardProps = {
+  onRefreshed?: () => void
+}
+
+export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCardProps) {
   const [statuses, setStatuses] = useState<Record<SourceName, SourceStatus>>({
     binance: { ...DEFAULT_STATUS },
     coingecko: { ...DEFAULT_STATUS },
@@ -95,8 +128,10 @@ export function ExchangeRateRefreshCard() {
   }, [])
 
   const refreshAll = useCallback(() => {
-    void Promise.allSettled(SOURCES.map((source) => refreshSource(source)))
-  }, [refreshSource])
+    void Promise.allSettled(SOURCES.map((source) => refreshSource(source))).then(() => {
+      onRefreshed?.()
+    })
+  }, [refreshSource, onRefreshed])
 
   const isLoading = statuses.binance.loading || statuses.coingecko.loading
 
@@ -112,30 +147,7 @@ export function ExchangeRateRefreshCard() {
         </Button>
       </CardContent>
       <CardFooter className="block p-0">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-t text-muted-foreground">
-              <th className="px-4 py-2 text-left font-medium">Источник</th>
-              <th className="px-4 py-2 text-left font-medium">Дата обновления</th>
-              <th className="px-4 py-2 text-left font-medium">Статус</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SOURCES.map((source) => (
-              <Fragment key={source}>
-                <tr className="border-t">
-                  <td className="px-4 py-2 capitalize font-medium">{source}</td>
-                  <td className="px-4 py-2 text-muted-foreground">
-                    <DateCell status={statuses[source]} />
-                  </td>
-                  <td className="px-4 py-2 text-muted-foreground">
-                    <StatusCell status={statuses[source]} />
-                  </td>
-                </tr>
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
+        <SourcesStatusTable statuses={statuses} />
       </CardFooter>
     </Card>
   )
