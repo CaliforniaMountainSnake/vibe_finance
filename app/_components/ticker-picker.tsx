@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
@@ -48,16 +48,19 @@ function TickerPickerSearch({
   selectedFrom,
   value,
   onChange,
+  inputRef,
 }: {
   selectedFrom: Ticker | null
   value: string
   onChange: (v: string) => void
+  inputRef: React.RefObject<HTMLInputElement | null>
 }) {
   return (
     <div className="p-2">
       <div className="relative">
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
         <Input
+          ref={inputRef}
           placeholder={selectedFrom ? `Вторая валюта для ${tickerLabel(selectedFrom)} → …` : 'Поиск валюты…'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -80,9 +83,12 @@ type TickerPickerProps = {
   allRates: ExchangeRate[]
   selectedFrom: Ticker | null
   onSelect: (ticker: Ticker) => void
+  inputRef?: React.RefObject<HTMLInputElement | null>
 }
 
-export function TickerPicker({ allRates, selectedFrom, onSelect }: TickerPickerProps) {
+export function TickerPicker({ allRates, selectedFrom, onSelect, inputRef }: TickerPickerProps) {
+  const fallbackRef = useRef<HTMLInputElement>(null)
+  const ref = inputRef ?? fallbackRef
   const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -102,7 +108,7 @@ export function TickerPicker({ allRates, selectedFrom, onSelect }: TickerPickerP
 
   return (
     <>
-      <TickerPickerSearch selectedFrom={selectedFrom} value={searchQuery} onChange={setSearchQuery} />
+      <TickerPickerSearch selectedFrom={selectedFrom} value={searchQuery} onChange={setSearchQuery} inputRef={ref} />
       <DropdownMenuSeparator />
       {filtered.length === 0 ? (
         <p className="px-3 py-4 text-sm text-muted-foreground text-center">Ничего не найдено</p>

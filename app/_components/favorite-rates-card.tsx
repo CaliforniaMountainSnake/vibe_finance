@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -153,6 +153,17 @@ type AddFavoritesDropdownProps = {
 function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) {
   const [selectedFrom, setSelectedFrom] = useState<Ticker | null>(null)
   const [open, setOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    if (open) {
+      timer = setTimeout(() => inputRef.current?.focus(), 0)
+    }
+    return () => {
+      if (timer !== undefined) clearTimeout(timer)
+    }
+  }, [open])
 
   const handleSelect = useCallback(
     async (ticker: Ticker) => {
@@ -186,7 +197,12 @@ function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) 
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] p-0" sideOffset={8}>
-        <TickerPicker allRates={allRates} selectedFrom={selectedFrom} onSelect={(t) => void handleSelect(t)} />
+        <TickerPicker
+          allRates={allRates}
+          selectedFrom={selectedFrom}
+          onSelect={(t) => void handleSelect(t)}
+          inputRef={inputRef}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   )
