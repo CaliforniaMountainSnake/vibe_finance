@@ -122,4 +122,9 @@ export class DexieRepository implements DbRepositoryInterface {
     const record = await this.db.favoriteRates.get(pairId(pair.from, pair.to))
     return record !== undefined
   }
+
+  async getUpdateTime(source: SourceName): Promise<number | null> {
+    const row = await this.db.exchangeRates.where('source').equals(source).first()
+    return row ? row.updatedAt : null
+  }
 }

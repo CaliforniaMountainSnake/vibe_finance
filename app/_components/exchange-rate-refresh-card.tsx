@@ -22,14 +22,6 @@ function maxUpdatedAt(rates: ExchangeRate[]): number {
   return Math.max(...rates.map((r) => r.updatedAt))
 }
 
-function computeStatus(rates: ExchangeRate[], source: SourceName, prev: SourceStatus): SourceStatus {
-  const sourceRates = rates.filter((r) => r.source === source)
-  return {
-    ...prev,
-    updatedAt: sourceRates.length > 0 ? maxUpdatedAt(sourceRates) : null,
-  }
-}
-
 const SOURCES: SourceName[] = ['coingecko', 'binance']
 
 const coinGeckoRepo = new CoinGeckoRepository()
@@ -68,12 +60,14 @@ export function ExchangeRateRefreshCard() {
   })
 
   useEffect(() => {
-    void dbRepo.getAllRates().then((rates) => {
-      setStatuses((prev) => ({
-        binance: computeStatus(rates, 'binance', prev.binance),
-        coingecko: computeStatus(rates, 'coingecko', prev.coingecko),
-      }))
-    })
+    for (const source of SOURCES) {
+      void dbRepo.getUpdateTime(source).then((updatedAt) => {
+        setStatuses((prev) => ({
+          ...prev,
+          [source]: { ...prev[source], updatedAt },
+        }))
+      })
+    }
   }, [])
 
   const refreshSource = useCallback(async (source: SourceName): Promise<void> => {

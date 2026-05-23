@@ -49,4 +49,11 @@ export interface DbRepositoryInterface {
 
   /** Проверить, находится ли пара тикеров в избранном. */
   isFavoriteRate(pair: TickerPair): Promise<boolean>
+
+  /**
+   * Получить время последнего обновления курсов для указанного источника.
+   *
+   * @returns Наибольший updatedAt среди всех курсов source, либо null если данных нет.
+   */
+  getUpdateTime(source: SourceName): Promise<number | null>
 }
