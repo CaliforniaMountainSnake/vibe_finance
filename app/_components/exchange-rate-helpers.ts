@@ -20,12 +20,11 @@ function relativeTime(ts: number): string {
   const diff = now - ts
 
   const intervals: [number, string][] = [
-    [SEC_PER_MINUTE, 'сек.'],
-    [SEC_PER_HOUR, 'мин.'],
-    [SEC_PER_DAY, 'ч.'],
-    [SEC_PER_MONTH, 'дн.'],
-    [SEC_PER_YEAR, 'мес.'],
-    [Infinity, 'г.'],
+    [SEC_PER_MINUTE, 'мин.'],
+    [SEC_PER_HOUR, 'ч.'],
+    [SEC_PER_DAY, 'дн.'],
+    [SEC_PER_MONTH, 'мес.'],
+    [SEC_PER_YEAR, 'г.'],
   ]
 
   let value = diff
