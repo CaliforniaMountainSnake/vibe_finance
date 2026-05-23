@@ -1,5 +1,5 @@
 {
-  "name": "vibe_app_skeleton",
+  "name": "vibe-app-finance",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "next start",
     "serve": "npm run build && npx serve@latest out",
     "build-apk": "npm run build && npx cap sync && bash ./scripts/build_apk.sh",
-    "start-apk": "npm run build && bash ./scripts/start_apk.sh",
+    "start-apk": "npm run build && npx cap sync && bash ./scripts/start_apk.sh",
     "lint": "eslint",
     "test": "vitest run",
     "test-integration": "vitest run --config vitest.integration.config.ts",

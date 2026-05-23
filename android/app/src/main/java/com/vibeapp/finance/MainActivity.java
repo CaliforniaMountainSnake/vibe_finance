@@ -1,4 +1,4 @@
-package com.vibeapp.skeleton;
+package com.vibeapp.finance;
 
 import android.content.res.Configuration;
 import android.graphics.Color;

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">vibe_app_skeleton</string>
-    <string name="title_activity_main">vibe_app_skeleton</string>
-    <string name="package_name">com.vibeapp.skeleton</string>
-    <string name="custom_url_scheme">com.vibeapp.skeleton</string>
+    <string name="app_name">Vibe Finance</string>
+    <string name="title_activity_main">Vibe Finance</string>
+    <string name="package_name">com.vibeapp.finance</string>
+    <string name="custom_url_scheme">com.vibeapp.finance</string>
 </resources>
