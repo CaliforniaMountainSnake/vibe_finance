@@ -1,3 +1,4 @@
+import { MS_PER_SEC } from '@/lib/time-helpers'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { FinanceApiRepositoryInterface } from '@/repositories/FinanceApiRepositoryInterface'
 
@@ -5,8 +6,6 @@ type BinanceTicker = {
   symbol: string
   price: string
 }
-
-const MS_PER_SECOND = 1000
 
 export class BinanceRepository implements FinanceApiRepositoryInterface {
   readonly sourceName = 'binance' as const
@@ -70,9 +69,18 @@ export class BinanceRepository implements FinanceApiRepositoryInterface {
         source: 'binance',
         ticker,
         btcPrice,
-        updatedAt: Math.floor(Date.now() / MS_PER_SECOND),
+        updatedAt: Math.floor(Date.now() / MS_PER_SEC),
       })
     }
+
+    // USDT is the quote currency in all pairs, so it doesn't appear as a base
+    // ticker in the API response. Add it explicitly: btcPrice = how many USDT per 1 BTC.
+    result.push({
+      source: 'binance',
+      ticker: 'usdt',
+      btcPrice: btcUsdtPrice,
+      updatedAt: Math.floor(Date.now() / MS_PER_SEC),
+    })
 
     return result
   }
