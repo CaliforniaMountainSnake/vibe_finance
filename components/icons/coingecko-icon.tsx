@@ -44,8 +44,6 @@ export function CoinGeckoIcon(props: SVGProps<SVGSVGElement>) {
             fillOpacity={0.85}
           />
         </g>
-        {/* Eye — sits in the transparent cutout, visible against page background */}
-        <ellipse cx="469.845" cy="379.216" rx="56.7287" ry="79.4202" fill="currentColor" />
       </g>
     </svg>
   )
