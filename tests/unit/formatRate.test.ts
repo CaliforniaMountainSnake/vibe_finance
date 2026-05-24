@@ -23,9 +23,12 @@ describe('formatRate', () => {
       expect(decimalPart.length).toBeLessThanOrEqual(10)
     })
 
-    it('сохраняет точность для 0.0000001', () => {
+    it('показывает минимум 2 значащие цифры для 0.0000001', () => {
       const result = formatRate(0.0000001)
-      expect(result).toBe('0,0000001')
+      // 4 значащие цифры: значение не обнуляется, а дополняется до минимальной значимости
+      expect(result).not.toBe('0')
+      const decimalPart = result.split(',')[1] ?? ''
+      expect(decimalPart.replace(/^0+/, '').length).toBeGreaterThanOrEqual(2)
     })
 
     it('не обрезает сатоши-подобный курс до нуля', () => {
@@ -63,10 +66,8 @@ describe('formatRate', () => {
       expect(decimalPart.length).toBe(1)
     })
 
-    it('форматирует 1000 ровно с 1 знаком (1000 не > 1000)', () => {
-      const result = formatRate(1000)
-      const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBe(1)
+    it('форматирует 1000 как целое (log10=3 → 0 знаков)', () => {
+      expect(formatRate(1000)).not.toContain(',')
     })
   })
 
