@@ -7,6 +7,7 @@ import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
 import { DexieRepository } from '@/repositories/DexieRepository'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
+import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
 
 type SourceStatus = {
@@ -67,7 +68,12 @@ function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceS
         {SOURCES.map((source) => (
           <Fragment key={source}>
             <tr className="border-t">
-              <td className="px-4 py-2 capitalize font-medium">{source}</td>
+              <td className="px-4 py-2 capitalize font-medium">
+                <span className="inline-flex items-center gap-1.5">
+                  <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
+                  {source}
+                </span>
+              </td>
               <td className="px-4 py-2 text-muted-foreground">
                 <DateCell status={statuses[source]} />
               </td>
