@@ -8,106 +8,100 @@ describe('formatRate', () => {
     })
   })
 
-  describe('очень маленькие числа (< 0.0001)', () => {
-    it('форматирует 0.00000001 с 2–10 знаками', () => {
-      const result = formatRate(0.00000001)
-      // Должно быть не меньше 2 знаков после запятой
+  describe('числа ≤ 1 (старое поведение: 2–8 знаков)', () => {
+    it('форматирует 1 с минимум 2 знаками', () => {
+      expect(formatRate(1)).toBe('1,00')
+    })
+
+    it('форматирует 0.5 с минимум 2 знаками', () => {
+      expect(formatRate(0.5)).toBe('0,50')
+    })
+
+    it('ограничивает 0.00002731960749285592 максимум 10 знаками', () => {
+      const result = formatRate(0.00002731960749285592)
       const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
       expect(decimalPart.length).toBeLessThanOrEqual(10)
     })
 
-    it('форматирует 0.00009999 с 2–10 знаками', () => {
-      const result = formatRate(0.00009999)
+    it('сохраняет точность для 0.0000001', () => {
+      const result = formatRate(0.0000001)
+      expect(result).toBe('0,0000001')
+    })
+
+    it('не обрезает сатоши-подобный курс до нуля', () => {
+      const result = formatRate(0.000000123456)
+      expect(result).not.toBe('0')
       const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(10)
+      expect(decimalPart.replace(/^0+/, '').length).toBeGreaterThan(0)
     })
   })
 
-  describe('маленькие числа (>= 0.0001 и < 1)', () => {
-    it('форматирует 0.0001 с 2–8 знаками', () => {
-      const result = formatRate(0.0001)
-      const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(8)
+  describe('числа > 1 (2 знака после запятой)', () => {
+    it('форматирует 1.5 ровно с 2 знаками', () => {
+      expect(formatRate(1.5)).toBe('1,50')
     })
 
-    it('форматирует 0.5 с 2–8 знаками', () => {
-      const result = formatRate(0.5)
-      const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(8)
-    })
-
-    it('форматирует 0.9999 с 2–8 знаками', () => {
-      const result = formatRate(0.9999)
-      const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(8)
-    })
-  })
-
-  describe('средние числа (>= 1 и < 1000)', () => {
-    it('форматирует 1 с 2–4 знаками', () => {
-      const result = formatRate(1)
-      // 1 → "1,00"
-      expect(result).toBe('1,00')
-    })
-
-    it('форматирует 42.123456 с 2–4 знаками', () => {
+    it('форматирует 42.123456 ровно с 2 знаками', () => {
       const result = formatRate(42.123456)
       const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(4)
+      expect(decimalPart.length).toBe(2)
     })
 
-    it('форматирует 999.9999 с 2–4 знаками', () => {
-      const result = formatRate(999.9999)
-      const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(4)
+    it('округляет 99.999 до 100,00', () => {
+      expect(formatRate(99.999)).toBe('100,00')
     })
   })
 
-  describe('большие числа (>= 1000)', () => {
-    it('форматирует 1000 ровно с 2 знаками', () => {
-      expect(formatRate(1000)).toBe('1\u00a0000,00')
+  describe('числа > 100 (1 знак после запятой)', () => {
+    it('форматирует 100.5 ровно с 1 знаком', () => {
+      expect(formatRate(100.5)).toBe('100,5')
     })
 
-    it('форматирует 1000000.55 ровно с 2 знаками', () => {
-      const result = formatRate(1000000.55)
+    it('форматирует 500.1234 ровно с 1 знаком', () => {
+      const result = formatRate(500.1234)
       const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBe(2)
+      expect(decimalPart.length).toBe(1)
+    })
+
+    it('форматирует 1000 ровно с 1 знаком (1000 не > 1000)', () => {
+      const result = formatRate(1000)
+      const decimalPart = result.split(',')[1] ?? ''
+      expect(decimalPart.length).toBe(1)
+    })
+  })
+
+  describe('числа > 1000 (целое)', () => {
+    it('форматирует 1001 как целое', () => {
+      expect(formatRate(1001)).not.toContain(',')
+    })
+
+    it('форматирует 1000000.55 как целое', () => {
+      expect(formatRate(1000000.55)).not.toContain(',')
     })
   })
 
   describe('отрицательные числа', () => {
-    it('форматирует -1 как "-1,00"', () => {
+    it('форматирует -1 с минимум 2 знаками', () => {
       expect(formatRate(-1)).toBe('-1,00')
     })
 
-    it('форматирует -0.5 с 2–8 знаками', () => {
-      const result = formatRate(-0.5)
+    it('форматирует -0.5 с минимум 2 знаками', () => {
+      expect(formatRate(-0.5)).toBe('-0,50')
+    })
+
+    it('форматирует -1.5 ровно с 2 знаками', () => {
+      expect(formatRate(-1.5)).toBe('-1,50')
+    })
+
+    it('форматирует -150.5 ровно с 1 знаком', () => {
+      const result = formatRate(-150.5)
       expect(result.startsWith('-')).toBe(true)
       const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.length).toBeGreaterThanOrEqual(2)
-      expect(decimalPart.length).toBeLessThanOrEqual(8)
+      expect(decimalPart.length).toBe(1)
     })
 
-    it('форматирует -1000 ровно с 2 знаками', () => {
-      expect(formatRate(-1000)).toBe('-1\u00a0000,00')
-    })
-  })
-
-  describe('NaN и специальные случаи', () => {
-    it('возвращает строку для очень маленького числа без потери точности', () => {
-      // Например, сатоши-подобные курсы
-      const result = formatRate(0.000000123456)
-      expect(result).not.toBe('0')
-      // Не должен обрезаться до нуля
-      const decimalPart = result.split(',')[1] ?? ''
-      expect(decimalPart.replace(/^0+/, '').length).toBeGreaterThan(0)
+    it('форматирует -1001 как целое', () => {
+      expect(formatRate(-1001)).not.toContain(',')
     })
   })
 })

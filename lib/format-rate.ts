@@ -1,33 +1,20 @@
-const RATE_SMALL_THRESHOLD = 0.0001
-const RATE_MEDIUM_THRESHOLD = 1000
-const RATE_DECIMALS_SMALL = 10
-const RATE_DECIMALS_DEFAULT = 8
-const RATE_DECIMALS_MEDIUM = 4
-const RATE_DECIMALS_LARGE = 2
+/* eslint-disable no-magic-numbers, complexity */
+
+function decimalsFor(rate: number): { min: number; max: number } {
+  if (rate === 0) return { min: 0, max: 0 }
+  const abs = Math.abs(rate)
+  if (abs > 1000) return { min: 0, max: 0 }
+  if (abs > 100) return { min: 1, max: 1 }
+  if (abs > 1) return { min: 2, max: 2 }
+  if (abs < 0.0001) return { min: 2, max: 10 }
+  return { min: 2, max: 8 }
+}
 
 export function formatRate(rate: number): string {
   if (rate === 0) return '0'
-  const abs = Math.abs(rate)
-  if (abs < RATE_SMALL_THRESHOLD) {
-    return rate.toLocaleString('ru-RU', {
-      minimumFractionDigits: RATE_DECIMALS_LARGE,
-      maximumFractionDigits: RATE_DECIMALS_SMALL,
-    })
-  }
-  if (abs < 1) {
-    return rate.toLocaleString('ru-RU', {
-      minimumFractionDigits: RATE_DECIMALS_LARGE,
-      maximumFractionDigits: RATE_DECIMALS_DEFAULT,
-    })
-  }
-  if (abs < RATE_MEDIUM_THRESHOLD) {
-    return rate.toLocaleString('ru-RU', {
-      minimumFractionDigits: RATE_DECIMALS_LARGE,
-      maximumFractionDigits: RATE_DECIMALS_MEDIUM,
-    })
-  }
+  const { min, max } = decimalsFor(rate)
   return rate.toLocaleString('ru-RU', {
-    minimumFractionDigits: RATE_DECIMALS_LARGE,
-    maximumFractionDigits: RATE_DECIMALS_LARGE,
+    minimumFractionDigits: min,
+    maximumFractionDigits: max,
   })
 }

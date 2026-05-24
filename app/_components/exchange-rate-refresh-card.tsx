@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
 import { DexieRepository } from '@/repositories/DexieRepository'
@@ -58,7 +58,7 @@ function DateCell({ status }: { status: SourceStatus }) {
 
 function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceStatus> }) {
   return (
-    <table className="w-full text-xs">
+    <table className="w-full text-sm">
       <thead>
         <tr className="border-t text-muted-foreground">
           <th className="px-4 py-2 text-left font-medium">Источник</th>
@@ -147,7 +147,6 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     <Card>
       <CardHeader>
         <CardTitle>Курсы валют</CardTitle>
-        <CardDescription>Обновление данных из API</CardDescription>
         <CardAction>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -165,7 +164,6 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
           </Tooltip>
         </CardAction>
       </CardHeader>
-      <CardContent />
       <CardFooter className="block p-0">
         <SourcesStatusTable statuses={statuses} />
       </CardFooter>
