@@ -12,6 +12,7 @@ import { AddFavoritesDropdown } from './add-favorites-dropdown'
 import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
 import { dbRepo } from '@/lib/db'
 import { ChevronUp, ChevronDown } from 'lucide-react'
+import { SourceIcon } from '@/components/icons/source-icon'
 
 function tickerLabel(t: Ticker): string {
   return `${t.source}:${t.ticker.toUpperCase()}`
@@ -25,10 +26,9 @@ function pairId(from: Ticker, to: Ticker): string {
 
 function TickerName({ ticker }: { ticker: Ticker }) {
   return (
-    <div className="leading-tight">
-      <div className="font-medium text-sm uppercase">{ticker.ticker}</div>
-      <div className="text-[10px] text-muted-foreground">{ticker.source}</div>
-      {ticker.name && <div className="text-[10px] text-muted-foreground truncate max-w-[100px]">{ticker.name}</div>}
+    <div className="inline-flex items-center gap-1 leading-tight">
+      <SourceIcon source={ticker.source} className="size-3.5 shrink-0 text-muted-foreground" />
+      <span className="font-medium text-sm uppercase">{ticker.ticker}</span>
     </div>
   )
 }

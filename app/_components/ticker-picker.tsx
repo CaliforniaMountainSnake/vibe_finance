@@ -3,9 +3,10 @@
 import { useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import { Search, X } from 'lucide-react'
+import { SourceIcon } from '@/components/icons/source-icon'
 
 function tickerLabel(t: Ticker): string {
   return `${t.source}:${t.ticker.toUpperCase()}`
@@ -16,6 +17,15 @@ export function isTickerEqual(a: Ticker, b: Ticker): boolean {
 }
 
 const SOURCE_LABELS: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko' }
+
+function SourceGroupLabel({ source }: { source: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <SourceIcon source={source as SourceName} className="size-3 text-muted-foreground" />
+      <span>{SOURCE_LABELS[source] ?? source}</span>
+    </span>
+  )
+}
 
 /* ── TickerPickerItem ─────────────────────────────────────────── */
 
@@ -36,8 +46,7 @@ function TickerPickerItem({
       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-accent text-accent-foreground' : ''}`}
     >
       <span className="font-medium uppercase text-xs w-10 shrink-0">{rate.ticker}</span>
-      {rate.name && <span className="text-xs text-muted-foreground truncate">{rate.name}</span>}
-      <span className="ml-auto text-[10px] text-muted-foreground">{SOURCE_LABELS[rate.source] ?? rate.source}</span>
+      <SourceIcon source={rate.source} className="ml-auto size-3.5 text-muted-foreground" />
     </button>
   )
 }
@@ -137,7 +146,9 @@ export function TickerPicker({
         <div className="max-h-64 overflow-y-auto">
           {Object.entries(grouped).map(([source, ratesList]) => (
             <div key={source}>
-              <DropdownMenuLabel>{SOURCE_LABELS[source] ?? source}</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                <SourceGroupLabel source={source} />
+              </DropdownMenuLabel>
               {ratesList.map((rate) => (
                 <TickerPickerItem
                   key={`${rate.source}:${rate.ticker}`}
