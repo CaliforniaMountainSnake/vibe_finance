@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
-import { formatRate, isCrossRate, pairSourceLabel } from '@/lib/utils'
+import { formatRate } from '@/lib/utils'
 import { ConfirmRemoveButton } from './confirm-remove-button'
 import { AddFavoritesDropdown } from './add-favorites-dropdown'
 import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
@@ -33,12 +33,11 @@ function TickerName({ ticker }: { ticker: Ticker }) {
   )
 }
 
-function FormatRate({ pair, rate }: { pair: TickerPair; rate: number | undefined }) {
+function FormatRate({ rate }: { rate: number | undefined }) {
   const displayRate = rate !== undefined && !isNaN(rate) ? formatRate(rate) : '—'
   return (
     <div>
       <span className="text-sm tabular-nums">{displayRate}</span>
-      {isCrossRate(pair) && <div className="text-[10px] text-muted-foreground">{pairSourceLabel(pair)}</div>}
     </div>
   )
 }
@@ -108,7 +107,7 @@ function FavoriteRow({
         <TickerName ticker={pair.to} />
       </TableCell>
       <TableCell className="text-right">
-        <FormatRate pair={pair} rate={rate} />
+        <FormatRate rate={rate} />
       </TableCell>
       <TableCell>
         {/* Мобильные: одна кнопка-меню */}
