@@ -4,16 +4,6 @@ export function CoinGeckoIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1011" {...props}>
       <defs>
-        {/* Coin circle punched out as a transparent hole in the body */}
-        <mask id="cg-cutout">
-          <rect width="1000" height="1011" fill="white" />
-          <path
-            d="M525.774 379.88C525.774 433.675 482.475 477.246 429.101 477.246C375.726 477.246 332.428 433.675 332.428 379.88C332.428 326.085 375.726 282.553 429.101 282.553C482.475 282.553 525.774 326.123 525.774 379.88Z"
-            fill="black"
-          />
-          {/* Small triangle cutout on the coin */}
-          <path d="M469.849 379.205L401.774 333.822V424.588L469.849 379.205Z" fill="black" />
-        </mask>
         <clipPath id="cg-clip">
           <rect width="1000" height="1010.61" fill="white" transform="translate(0 0.38739)" />
         </clipPath>
@@ -25,8 +15,8 @@ export function CoinGeckoIcon(props: SVGProps<SVGSVGElement>) {
           fill="currentColor"
           fillOpacity={0.25}
         />
-        {/* Body with coin cutout */}
-        <g mask="url(#cg-cutout)">
+        {/* Body */}
+        <g>
           {/* Main body */}
           <path
             d="M753.592 323.781C717.301 313.213 679.723 298.181 641.615 283.034C639.418 273.42 630.97 261.44 613.848 246.751C588.96 225.004 542.214 225.576 501.833 235.191C457.247 224.623 413.191 220.845 370.915 231.07C25.211 327.024 221.209 561.014 94.2686 796.301C112.338 834.873 311.629 1020.19 588.695 999.616C588.695 999.616 492.363 766.466 709.763 654.526C886.1 563.761 1013.5 395.203 753.554 323.743L753.592 323.781Z"
