@@ -2,7 +2,6 @@
 
 import { useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
-import { DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import { Search, X } from 'lucide-react'
@@ -139,16 +138,16 @@ export function TickerPicker({
   return (
     <>
       <TickerPickerSearch selectedFrom={selectedFrom} value={searchQuery} onChange={onSearchChange} inputRef={ref} />
-      <DropdownMenuSeparator />
+      <div className="mx-0 my-1 h-px bg-border shrink-0" />
       {filtered.length === 0 ? (
         <p className="px-3 py-4 text-sm text-muted-foreground text-center">Ничего не найдено</p>
       ) : (
-        <div className="max-h-64 overflow-y-auto">
+        <div className="overflow-y-auto flex-1">
           {Object.entries(grouped).map(([source, ratesList]) => (
             <div key={source}>
-              <DropdownMenuLabel>
+              <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground">
                 <SourceGroupLabel source={source} />
-              </DropdownMenuLabel>
+              </div>
               {ratesList.map((rate) => (
                 <TickerPickerItem
                   key={`${rate.source}:${rate.ticker}`}

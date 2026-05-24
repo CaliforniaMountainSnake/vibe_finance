@@ -2,19 +2,28 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import { TickerPicker, isTickerEqual } from './ticker-picker'
 import { dbRepo } from '@/lib/db'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
-type AddFavoritesDropdownProps = {
+type AddFavoritesDialogProps = {
   allRates: ExchangeRate[]
   onAdded: () => void
 }
 
-export function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdownProps) {
+export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProps) {
   const [selectedFrom, setSelectedFrom] = useState<Ticker | null>(null)
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -52,30 +61,42 @@ export function AddFavoritesDropdown({ allRates, onAdded }: AddFavoritesDropdown
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     setOpen(newOpen)
-    if (!newOpen) {
-      setSelectedFrom(null)
-      setSearchQuery('')
-    }
+    setSelectedFrom(null)
+    setSearchQuery('')
   }, [])
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <Plus />
-          Добавить курс
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] p-0" sideOffset={8}>
-        <TickerPicker
-          allRates={allRates}
-          selectedFrom={selectedFrom}
-          onSelect={(t) => void handleSelect(t)}
-          inputRef={inputRef}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon" aria-label="Добавить курс">
+              <Plus />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Добавить курс</TooltipContent>
+      </Tooltip>
+      <DialogContent className="max-w-sm h-[70vh] p-0 flex flex-col">
+        <DialogClose className="absolute top-3 right-3 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+          <X className="size-4" />
+          <span className="sr-only">Закрыть</span>
+        </DialogClose>
+        <DialogHeader className="sr-only">
+          <DialogTitle>Добавить курс в избранное</DialogTitle>
+          <DialogDescription>Выберите пару валют из доступных курсов</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col min-h-0 flex-1">
+          <TickerPicker
+            allRates={allRates}
+            selectedFrom={selectedFrom}
+            onSelect={(t) => void handleSelect(t)}
+            inputRef={inputRef}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -1,14 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
 import { formatRate } from '@/lib/utils'
 import { ConfirmRemoveButton } from './confirm-remove-button'
-import { AddFavoritesDropdown } from './add-favorites-dropdown'
+import { AddFavoritesDialog } from './add-favorites-dropdown'
 import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
 import { dbRepo } from '@/lib/db'
 import { ChevronUp, ChevronDown } from 'lucide-react'
@@ -62,11 +62,12 @@ function SourceIcons({ from, to }: { from: Ticker; to: Ticker }) {
   )
 }
 
-function FormatRate({ rate }: { rate: number | undefined }) {
+function FormatRate({ rate, unit }: { rate: number | undefined; unit: string | undefined }) {
   const displayRate = rate !== undefined && !isNaN(rate) ? formatRate(rate) : '—'
   return (
     <div>
       <span className="text-sm tabular-nums">{displayRate}</span>
+      {unit !== undefined && <span className="text-muted-foreground ml-1 text-sm">{unit}</span>}
     </div>
   )
 }
@@ -136,7 +137,7 @@ function FavoriteRow({
         <TickerName ticker={pair.to} />
       </TableCell>
       <TableCell className="text-right">
-        <FormatRate rate={rate} />
+        <FormatRate rate={rate} unit={pair.to.unit} />
       </TableCell>
       <TableCell className="w-px whitespace-nowrap">
         <SourceIcons from={pair.from} to={pair.to} />
@@ -267,11 +268,14 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
       <CardHeader>
         <CardTitle>Избранные курсы</CardTitle>
         <CardDescription>Быстрый доступ к важным валютным парам</CardDescription>
+        <CardAction>
+          <AddFavoritesDialog allRates={allRates} onAdded={loadFavorites} />
+        </CardAction>
       </CardHeader>
       <CardContent className="pb-0">
         {favorites.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            Нет избранных курсов. Добавьте пару кнопкой ниже.
+            Нет избранных курсов. Добавьте пару кнопкой справа вверху.
           </p>
         ) : (
           <FavoritesTable
@@ -283,9 +287,6 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
           />
         )}
       </CardContent>
-      <CardFooter>
-        <AddFavoritesDropdown allRates={allRates} onAdded={loadFavorites} />
-      </CardFooter>
     </Card>
   )
 }

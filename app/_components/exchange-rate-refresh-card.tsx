@@ -2,13 +2,15 @@
 
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
 import { DexieRepository } from '@/repositories/DexieRepository'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { RefreshCw } from 'lucide-react'
 
 type SourceStatus = {
   updatedAt: number | null
@@ -146,12 +148,24 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
       <CardHeader>
         <CardTitle>Курсы валют</CardTitle>
         <CardDescription>Обновление данных из API</CardDescription>
+        <CardAction>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={refreshAll}
+                disabled={isLoading}
+                variant="outline"
+                size="icon"
+                aria-label="Обновить курсы"
+              >
+                <RefreshCw className={isLoading ? 'animate-spin' : ''} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isLoading ? 'Обновление…' : 'Обновить'}</TooltipContent>
+          </Tooltip>
+        </CardAction>
       </CardHeader>
-      <CardContent>
-        <Button onClick={refreshAll} disabled={isLoading} className="w-full" size="lg">
-          {isLoading ? 'Обновление…' : 'Обновить'}
-        </Button>
-      </CardContent>
+      <CardContent />
       <CardFooter className="block p-0">
         <SourcesStatusTable statuses={statuses} />
       </CardFooter>
