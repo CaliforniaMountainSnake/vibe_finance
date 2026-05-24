@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
 import { formatRate } from '@/lib/utils'
@@ -13,6 +13,7 @@ import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
 import { dbRepo } from '@/lib/db'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 function tickerLabel(t: Ticker): string {
   return `${t.source}:${t.ticker.toUpperCase()}`
@@ -25,10 +26,38 @@ function pairId(from: Ticker, to: Ticker): string {
 /* ── FavoriteRow helpers ─────────────────────────────────────── */
 
 function TickerName({ ticker }: { ticker: Ticker }) {
+  return <span className="font-medium text-sm uppercase">{ticker.ticker}</span>
+}
+
+function sourceDisplayName(s: SourceName): string {
+  return s === 'binance' ? 'Binance' : 'CoinGecko'
+}
+
+function SourceIconWithTooltip({ source }: { source: SourceName }) {
   return (
-    <div className="inline-flex items-center gap-1 leading-tight">
-      <SourceIcon source={ticker.source} className="size-3.5 shrink-0 text-muted-foreground" />
-      <span className="font-medium text-sm uppercase">{ticker.ticker}</span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex">
+          <SourceIcon source={source} className="size-3.5 shrink-0 text-muted-foreground" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{sourceDisplayName(source)}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function SourceIcons({ from, to }: { from: Ticker; to: Ticker }) {
+  if (from.source === to.source) {
+    return (
+      <div className="flex items-center gap-1">
+        <SourceIconWithTooltip source={from.source} />
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center gap-1">
+      <SourceIconWithTooltip source={from.source} />
+      <SourceIconWithTooltip source={to.source} />
     </div>
   )
 }
@@ -109,6 +138,9 @@ function FavoriteRow({
       <TableCell className="text-right">
         <FormatRate rate={rate} />
       </TableCell>
+      <TableCell className="w-px whitespace-nowrap">
+        <SourceIcons from={pair.from} to={pair.to} />
+      </TableCell>
       <TableCell>
         {/* Мобильные: одна кнопка-меню */}
         <div className="md:hidden">
@@ -150,6 +182,7 @@ function FavoritesTable({ favorites, rates, onRemove, onMoveUp, onMoveDown }: Fa
           <TableHead>Из</TableHead>
           <TableHead>В</TableHead>
           <TableHead className="text-right">Курс</TableHead>
+          <TableHead className="w-px" />
           <TableHead className="w-8" />
         </TableRow>
       </TableHeader>
