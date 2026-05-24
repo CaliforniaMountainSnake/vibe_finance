@@ -9,6 +9,7 @@ import type { TickerPair } from '@/entities/TickerPair'
 import { formatRate, isCrossRate, pairSourceLabel } from '@/lib/utils'
 import { ConfirmRemoveButton } from './confirm-remove-button'
 import { AddFavoritesDropdown } from './add-favorites-dropdown'
+import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
 import { dbRepo } from '@/lib/db'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 
@@ -98,8 +99,6 @@ function FavoriteRow({
   onMoveUp: (pair: TickerPair) => void
   onMoveDown: (pair: TickerPair) => void
 }) {
-  const onlyOne = isFirst && isLast
-
   return (
     <TableRow key={pairId(pair.from, pair.to)}>
       <TableCell>
@@ -112,9 +111,21 @@ function FavoriteRow({
         <FormatRate pair={pair} rate={rate} />
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-0.5">
+        {/* Мобильные: одна кнопка-меню */}
+        <div className="md:hidden">
+          <FavoriteRowActionsDropdown
+            pair={pair}
+            isFirst={isFirst}
+            isLast={isLast}
+            onMoveUp={onMoveUp}
+            onMoveDown={onMoveDown}
+            onRemove={onRemove}
+          />
+        </div>
+        {/* Десктоп: инлайн-кнопки */}
+        <div className="hidden md:flex items-center gap-0.5">
           <ReorderButtons pair={pair} isFirst={isFirst} isLast={isLast} onMoveUp={onMoveUp} onMoveDown={onMoveDown} />
-          {!onlyOne && <div className="mx-0.5 h-5 w-px bg-border" />}
+          <div className="mx-0.5 h-5 w-px bg-border" />
           <ConfirmRemoveButton pair={pair} onRemove={onRemove} />
         </div>
       </TableCell>
