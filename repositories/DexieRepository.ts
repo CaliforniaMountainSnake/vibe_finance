@@ -5,11 +5,11 @@ import { type Ticker } from '@/entities/Ticker'
 import { type TickerPair } from '@/entities/TickerPair'
 import { type DbRepositoryInterface } from '@/repositories/DbRepositoryInterface'
 
-const MS_PER_SECOND = 1000
 const DB_VERSION_1 = 1
 const DB_VERSION_2 = 2
 const DB_VERSION_3 = 3
 const DB_VERSION_4 = 4
+const DB_VERSION_5 = 5
 
 /**
  * Схема БД
@@ -41,6 +41,24 @@ class FinanceDb extends Dexie {
       exchangeRates: '[source+ticker], source, ticker',
       favoriteRates: 'id, addedAt',
     })
+
+    // v5: заменяем addedAt на order — мигрируем существующие записи
+    this.version(DB_VERSION_5)
+      .stores({
+        exchangeRates: '[source+ticker], source, ticker',
+        favoriteRates: 'id, order',
+      })
+      .upgrade(async (tx) => {
+        const records = await tx.table('favoriteRates').toArray()
+        const sorted = records.sort((a, b) => {
+          const aTime = (a as { addedAt?: number }).addedAt ?? 0
+          const bTime = (b as { addedAt?: number }).addedAt ?? 0
+          return aTime - bTime
+        })
+        await tx.table('favoriteRates').clear()
+        const migrated = sorted.map((r, i) => ({ ...r, order: i }))
+        await tx.table('favoriteRates').bulkPut(migrated)
+      })
   }
 }
 
@@ -100,10 +118,12 @@ export class DexieRepository implements DbRepositoryInterface {
     const id = pairId(pair.from, pair.to)
     const existing = await this.db.favoriteRates.get(id)
     if (!existing) {
+      const maxOrder = await this.db.favoriteRates.orderBy('order').last()
+      const nextOrder = maxOrder !== undefined ? maxOrder.order + 1 : 0
       await this.db.favoriteRates.put({
         from: pair.from,
         to: pair.to,
-        addedAt: Date.now() / MS_PER_SECOND,
+        order: nextOrder,
         id,
       })
     }
@@ -114,7 +134,7 @@ export class DexieRepository implements DbRepositoryInterface {
   }
 
   async getFavoriteRates(): Promise<TickerPair[]> {
-    const records = await this.db.favoriteRates.orderBy('addedAt').reverse().toArray()
+    const records = await this.db.favoriteRates.orderBy('order').toArray()
     return records.map((r) => ({ from: r.from, to: r.to }))
   }
 
@@ -126,5 +146,32 @@ export class DexieRepository implements DbRepositoryInterface {
   async getUpdateTime(source: SourceName): Promise<number | null> {
     const row = await this.db.exchangeRates.where('source').equals(source).first()
     return row ? row.updatedAt : null
+  }
+
+  async moveFavoriteUp(pair: TickerPair): Promise<void> {
+    await this.swapWithNeighbor(pair, 'above')
+  }
+
+  async moveFavoriteDown(pair: TickerPair): Promise<void> {
+    await this.swapWithNeighbor(pair, 'below')
+  }
+
+  private async swapWithNeighbor(pair: TickerPair, direction: 'above' | 'below'): Promise<void> {
+    const id = pairId(pair.from, pair.to)
+    const current = await this.db.favoriteRates.get(id)
+    if (!current) return
+
+    const collection =
+      direction === 'above'
+        ? this.db.favoriteRates.where('order').below(current.order).reverse()
+        : this.db.favoriteRates.where('order').above(current.order)
+
+    const neighbor = await collection.first()
+    if (!neighbor) return
+
+    const tmp = current.order
+    current.order = neighbor.order
+    neighbor.order = tmp
+    await this.db.favoriteRates.bulkPut([current, neighbor])
   }
 }

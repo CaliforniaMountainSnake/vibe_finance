@@ -114,21 +114,19 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
       expect(favorites).toEqual([])
     })
 
-    it('returns pairs ordered by addedAt descending (newest first)', async () => {
+    it('returns pairs ordered by order (first added first)', async () => {
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'btc', 'usdt'))
-      await new Promise((r) => setTimeout(r, 10))
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'eth', 'usdt'))
-      await new Promise((r) => setTimeout(r, 10))
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'btc', 'eth'))
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(3)
       expect(favorites[0].from).toEqual(ticker('coingecko', 'btc'))
-      expect(favorites[0].to).toEqual(ticker('coingecko', 'eth'))
+      expect(favorites[0].to).toEqual(ticker('coingecko', 'usdt'))
       expect(favorites[1].from).toEqual(ticker('coingecko', 'eth'))
       expect(favorites[1].to).toEqual(ticker('coingecko', 'usdt'))
       expect(favorites[2].from).toEqual(ticker('coingecko', 'btc'))
-      expect(favorites[2].to).toEqual(ticker('coingecko', 'usdt'))
+      expect(favorites[2].to).toEqual(ticker('coingecko', 'eth'))
     })
 
     it('returns objects with Ticker-shaped from and to', async () => {
@@ -178,6 +176,134 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
 
       const isFav = await repo.isFavoriteRate(sameSourcePair('coingecko', 'usdt', 'btc'))
       expect(isFav).toBe(false)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // moveFavoriteUp / moveFavoriteDown
+  // ---------------------------------------------------------------------------
+
+  describe('moveFavoriteUp / moveFavoriteDown', () => {
+    it('moveFavoriteUp swaps the pair with its upper neighbor', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      const pair2 = sameSourcePair('coingecko', 'eth', 'usdt')
+      const pair3 = sameSourcePair('coingecko', 'btc', 'eth')
+
+      await repo.addFavoriteRate(pair1)
+      await repo.addFavoriteRate(pair2)
+      await repo.addFavoriteRate(pair3)
+
+      // Исходный порядок: pair1, pair2, pair3
+      // Двигаем pair2 вверх → должно стать: pair2, pair1, pair3
+      await repo.moveFavoriteUp(pair2)
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(3)
+      expect(favorites[0].from).toEqual(ticker('coingecko', 'eth'))
+      expect(favorites[0].to).toEqual(ticker('coingecko', 'usdt'))
+      expect(favorites[1].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[1].to).toEqual(ticker('coingecko', 'usdt'))
+      expect(favorites[2].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[2].to).toEqual(ticker('coingecko', 'eth'))
+    })
+
+    it('moveFavoriteUp on first pair is idempotent', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      const pair2 = sameSourcePair('coingecko', 'eth', 'usdt')
+
+      await repo.addFavoriteRate(pair1)
+      await repo.addFavoriteRate(pair2)
+      await repo.moveFavoriteUp(pair1)
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(2)
+      expect(favorites[0].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[1].from).toEqual(ticker('coingecko', 'eth'))
+    })
+
+    it('moveFavoriteDown swaps the pair with its lower neighbor', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      const pair2 = sameSourcePair('coingecko', 'eth', 'usdt')
+      const pair3 = sameSourcePair('coingecko', 'btc', 'eth')
+
+      await repo.addFavoriteRate(pair1)
+      await repo.addFavoriteRate(pair2)
+      await repo.addFavoriteRate(pair3)
+
+      // Исходный порядок: pair1, pair2, pair3
+      // Двигаем pair2 вниз → должно стать: pair1, pair3, pair2
+      await repo.moveFavoriteDown(pair2)
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(3)
+      expect(favorites[0].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[0].to).toEqual(ticker('coingecko', 'usdt'))
+      expect(favorites[1].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[1].to).toEqual(ticker('coingecko', 'eth'))
+      expect(favorites[2].from).toEqual(ticker('coingecko', 'eth'))
+      expect(favorites[2].to).toEqual(ticker('coingecko', 'usdt'))
+    })
+
+    it('moveFavoriteDown on last pair is idempotent', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      const pair2 = sameSourcePair('coingecko', 'eth', 'usdt')
+
+      await repo.addFavoriteRate(pair1)
+      await repo.addFavoriteRate(pair2)
+      await repo.moveFavoriteDown(pair2)
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(2)
+      expect(favorites[0].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[1].from).toEqual(ticker('coingecko', 'eth'))
+    })
+
+    it('both methods are idempotent with a single pair', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+
+      await repo.addFavoriteRate(pair1)
+      await repo.moveFavoriteUp(pair1)
+      await repo.moveFavoriteDown(pair1)
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(1)
+      expect(favorites[0].from).toEqual(ticker('coingecko', 'btc'))
+    })
+
+    it('moveFavoriteUp then moveFavoriteDown returns original order', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      const pair2 = sameSourcePair('coingecko', 'eth', 'usdt')
+
+      await repo.addFavoriteRate(pair1)
+      await repo.addFavoriteRate(pair2)
+
+      await repo.moveFavoriteUp(pair2)
+      await repo.moveFavoriteDown(pair2)
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(2)
+      expect(favorites[0].from).toEqual(ticker('coingecko', 'btc'))
+      expect(favorites[1].from).toEqual(ticker('coingecko', 'eth'))
+    })
+
+    it('moveFavoriteUp on a non-existent pair does not throw', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      await repo.addFavoriteRate(pair1)
+
+      await expect(repo.moveFavoriteUp(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(1)
+    })
+
+    it('moveFavoriteDown on a non-existent pair does not throw', async () => {
+      const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
+      await repo.addFavoriteRate(pair1)
+
+      await expect(repo.moveFavoriteDown(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
+
+      const favorites = await repo.getFavoriteRates()
+      expect(favorites).toHaveLength(1)
     })
   })
 }

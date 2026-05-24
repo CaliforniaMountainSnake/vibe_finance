@@ -43,9 +43,21 @@ export interface DbRepositoryInterface {
   removeFavoriteRate(pair: TickerPair): Promise<void>
 
   /**
-   * Получить все избранные пары, отсортированные по дате добавления (новые сверху).
+   * Получить все избранные пары, отсортированные по порядку (order).
    */
   getFavoriteRates(): Promise<TickerPair[]>
+
+  /**
+   * Переместить пару на одну позицию вверх (уменьшить order).
+   * Если пара и так первая — операция идемпотентна.
+   */
+  moveFavoriteUp(pair: TickerPair): Promise<void>
+
+  /**
+   * Переместить пару на одну позицию вниз (увеличить order).
+   * Если пара и так последняя — операция идемпотентна.
+   */
+  moveFavoriteDown(pair: TickerPair): Promise<void>
 
   /** Проверить, находится ли пара тикеров в избранном. */
   isFavoriteRate(pair: TickerPair): Promise<boolean>
