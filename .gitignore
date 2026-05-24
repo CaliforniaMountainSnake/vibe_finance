@@ -7,6 +7,9 @@
 # coding agents
 /.pi_sessions
 
+# notes
+NOTES.md
+
 # dependencies
 /node_modules
 /.pnp
