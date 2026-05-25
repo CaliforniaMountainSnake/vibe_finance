@@ -1,39 +1,24 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white">
-  <img alt="MVP" src="https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white">
-</picture>
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
-![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat-square&logo=shadcnui&logoColor=white)
-![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=flat-square&logo=capacitor&logoColor=white)
-![Dexie](https://img.shields.io/badge/Dexie.js-4B8BBE?style=flat-square&logo=indexeddb&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
+[![MVP](https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white)]()
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
+[![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=flat-square&logo=capacitor&logoColor=white)](https://capacitorjs.com/)
+[![Dexie.js](https://img.shields.io/badge/Dexie.js-4B8BBE?style=flat-square&logo=indexeddb&logoColor=white)](https://dexie.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](./LICENSE)
 
-<p align="center">
-  <br/>
-  <img src="public/favicon.ico" width="64" height="64" alt="Vibe Finance logo" />
-  <h1 align="center">Vibe Finance</h1>
-  <p align="center">
-    <strong>Минималистичный криптокошелёк и трекер курсов</strong>
-    <br />
-    <em>Всё локально. Никаких аккаунтов. Работает в браузере и на Android.</em>
-  </p>
-</p>
+# Vibe Finance
 
-<br/>
+**Минималистичный криптокошелёк и трекер курсов**
 
----
+_Всё локально. Никаких аккаунтов. Работает в браузере и на Android._
 
 **Vibe Finance** — это PWA-приложение для отслеживания криптовалютных курсов и управления личным портфелем. Данные подтягиваются из **CoinGecko** и **Binance** напрямую с клиента, а портфель и избранное хранятся локально в **IndexedDB** — никаких серверов и регистраций.
 
----
-
 ## Возможности
 
-|                                 |                                                                                                                                             |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | 📊 **Два источника курсов**     | CoinGecko (~100+ валют) и Binance (~300+ USDT-пар) — данные из реального времени                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | ⭐ **Избранные пары**           | Добавляйте любые кросс-курсы, в том числе межбиржевые (Binance BTC → CoinGecko ETH), сортируйте их порядок                                  |
 | 💼 **Портфель (Holdings)**      | Ведите учёт средств: добавляйте валюты с количеством, подписывайте позиции (например, «Карта синего банка»), отключайте строки без удаления |
 | 💰 **Общая стоимость портфеля** | Выберите базовую валюту — приложение пересчитает все активы в неё по текущему курсу и покажет итог                                          |
@@ -41,8 +26,6 @@
 | 📱 **Android APK**              | Собирается в нативное приложение через Capacitor — работает как обычное Android-приложение                                                  |
 | 🏠 **Офлайн-режим**             | После загрузки курсов все данные доступны локально, интернет нужен только для обновления                                                    |
 | 🔒 **Конфиденциальность**       | Никаких серверов, аккаунтов и телеметрии — всё хранится в вашем браузере                                                                    |
-
----
 
 ## Как это устроено
 
@@ -52,14 +35,6 @@
 
 На устройствах Android приложение работает как нативное — Capacitor упаковывает веб-сборку в APK с поддержкой системной тёмной темы и safe area.
 
----
-
-## Скриншоты
-
-> _Скоро_
-
----
-
 ## Быстрый старт
 
 ```bash
@@ -68,8 +43,6 @@ npm run dev
 ```
 
 Откройте [http://localhost:3000](http://localhost:3000) — приложение готово к использованию.
-
----
 
 ## Команды
 
@@ -100,10 +73,10 @@ npm run dev
 | `npm run build-apk` | Сборка debug APK                           |
 | `npm run start-apk` | Сборка и запуск на подключённом устройстве |
 
-> **Требования:** Java JDK 21, Android SDK (`ANDROID_HOME`).<br/>
+> **Требования:** Java JDK 21, Android SDK (`ANDROID_HOME`).
+> Минимальная версия Android: **7.0** (API level 24).
+>
 > Готовый APK: `android/app/build/outputs/apk/debug/`.
-
----
 
 ## Технологии
 
@@ -114,17 +87,9 @@ npm run dev
 - **Vitest** — тестирование (unit + integration)
 - **CoinGecko API** / **Binance API** — источники курсов
 
----
-
 ## Лицензия
 
 MIT
 
----
-
-<p align="center">
-  <sub>
-    Сделано на основе <a href="https://github.com/CaliforniaMountainSnake/vibe_app_skeleton">vibe_app_skeleton</a>.<br/>
-    С ❤️ для тех, кто ценит приватность и минимализм.
-  </sub>
-</p>
+Сделано на основе [vibe_app_skeleton](https://github.com/CaliforniaMountainSnake/vibe_app_skeleton).
+С ❤️ для тех, кто ценит приватность и минимализм.
