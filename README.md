@@ -1,4 +1,4 @@
-[![MVP](https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white)]()
+[![MVP](https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white)](https://californiamountainsnake.github.io/vibe_finance/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
@@ -14,6 +14,8 @@
 _Всё локально. Никаких аккаунтов. Работает в браузере и на Android._
 
 **Vibe Finance** — это PWA-приложение для отслеживания криптовалютных курсов и управления личным портфелем. Данные подтягиваются из **CoinGecko** и **Binance** напрямую с клиента, а портфель и избранное хранятся локально в **IndexedDB** — никаких серверов и регистраций.
+
+🌐 **Живая версия:** [californiamountainsnake.github.io/vibe_finance](https://californiamountainsnake.github.io/vibe_finance/)
 
 ## Возможности
 
