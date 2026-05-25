@@ -77,7 +77,15 @@ export function HoldingMobileActions({
   onRemoveClick: () => void
 }) {
   return (
-    <div className="md:hidden">
+    <div className="md:hidden flex items-center gap-0.5">
+      <button
+        type="button"
+        className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+        aria-label="Редактировать"
+        onClick={onEditClick}
+      >
+        <Pencil aria-hidden="true" className="size-3" />
+      </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon-xs" aria-label="Действия">
@@ -105,10 +113,6 @@ export function HoldingMobileActions({
                 Не учитывать в итоге
               </>
             )}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onEditClick}>
-            <Pencil aria-hidden="true" className="size-4" />
-            Редактировать
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={onRemoveClick}>
             <X aria-hidden="true" className="size-4" />
