@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
-import { HoldingRow, SourceIconWithTooltip } from './holding-row'
+import { HoldingRow } from './holding-row'
 import { formatAmount } from '@/lib/utils'
 import { TotalCurrencyPicker } from './total-currency-picker'
 
@@ -36,7 +36,7 @@ function TotalRow({
       <TableCell colSpan={3}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            {totalTicker && <SourceIconWithTooltip source={totalTicker.source} />}
+            <span className="inline-flex size-3 shrink-0" />
             <span className="text-sm tabular-nums font-semibold">{totalTicker ? formatAmount(totalAmount) : '—'}</span>
             {totalUnit && <span className="text-muted-foreground text-sm">{totalUnit}</span>}
           </div>

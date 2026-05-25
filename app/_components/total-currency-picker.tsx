@@ -17,6 +17,7 @@ import { dbRepo } from '@/lib/db'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import { Calculator, X } from 'lucide-react'
+import { SourceIcon } from '@/components/icons/source-icon'
 
 type TotalCurrencyPickerProps = {
   allRates: ExchangeRate[]
@@ -55,6 +56,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
   }, [])
 
   const label = value ? `${value.ticker.toUpperCase()}` : '?'
+  const showIcon = value !== null
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -62,7 +64,11 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
-              <Calculator className="size-3.5" />
+              {showIcon ? (
+                <SourceIcon source={value.source} className="size-3.5" />
+              ) : (
+                <Calculator className="size-3.5" />
+              )}
               {label}
             </Button>
           </DialogTrigger>
