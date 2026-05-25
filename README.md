@@ -1,92 +1,130 @@
-# Vibe App Skeleton
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white">
+  <img alt="MVP" src="https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white">
+</picture>
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat-square&logo=shadcnui&logoColor=white)
+![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=flat-square&logo=capacitor&logoColor=white)
+![Dexie](https://img.shields.io/badge/Dexie.js-4B8BBE?style=flat-square&logo=indexeddb&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
 
-Приложение-скелетон для быстрого создания HTML/JS веб-приложений с возможностью сборки в APK для Android.
+<p align="center">
+  <br/>
+  <img src="public/favicon.ico" width="64" height="64" alt="Vibe Finance logo" />
+  <h1 align="center">Vibe Finance</h1>
+  <p align="center">
+    <strong>Минималистичный криптокошелёк и трекер курсов</strong>
+    <br />
+    <em>Всё локально. Никаких аккаунтов. Работает в браузере и на Android.</em>
+  </p>
+</p>
 
-Используйте этот проект как основу для своих идей — вся инфраструктура уже настроена, остаётся только писать код.
+<br/>
 
-Минимальная поддерживаемая версия Android: **7.0** (API level 24).
+---
+
+**Vibe Finance** — это PWA-приложение для отслеживания криптовалютных курсов и управления личным портфелем. Данные подтягиваются из **CoinGecko** и **Binance** напрямую с клиента, а портфель и избранное хранятся локально в **IndexedDB** — никаких серверов и регистраций.
+
+---
 
 ## Возможности
 
-- 🌐 **Веб-приложение** — современный стек с Next.js и React
-- 📱 **APK для Android** — сборка нативного Android-приложения из веб-кода через Capacitor
-- 🎨 **UI-компоненты** — готовая библиотека shadcn/ui с Tailwind CSS
-- 🌓 **Автоматическая тема** — дневная/ночная тема переключается по системным настройкам устройства (в том числе в Android-приложении через Capacitor)
-- ⚡ **Быстрый старт** — клонируй и начинай разработку сразу
+|                                 |                                                                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📊 **Два источника курсов**     | CoinGecko (~100+ валют) и Binance (~300+ USDT-пар) — данные из реального времени                                                            |
+| ⭐ **Избранные пары**           | Добавляйте любые кросс-курсы, в том числе межбиржевые (Binance BTC → CoinGecko ETH), сортируйте их порядок                                  |
+| 💼 **Портфель (Holdings)**      | Ведите учёт средств: добавляйте валюты с количеством, подписывайте позиции (например, «Карта синего банка»), отключайте строки без удаления |
+| 💰 **Общая стоимость портфеля** | Выберите базовую валюту — приложение пересчитает все активы в неё по текущему курсу и покажет итог                                          |
+| 🌓 **Автоматическая тема**      | Светлая и тёмная темы — следуют за системными настройками устройства                                                                        |
+| 📱 **Android APK**              | Собирается в нативное приложение через Capacitor — работает как обычное Android-приложение                                                  |
+| 🏠 **Офлайн-режим**             | После загрузки курсов все данные доступны локально, интернет нужен только для обновления                                                    |
+| 🔒 **Конфиденциальность**       | Никаких серверов, аккаунтов и телеметрии — всё хранится в вашем браузере                                                                    |
 
-## Технологии
+---
 
-| Технология                                   | Назначение                                           |
-| -------------------------------------------- | ---------------------------------------------------- |
-| [Next.js](https://nextjs.org)                | React-фреймворк (App Router)                         |
-| [React](https://react.dev)                   | UI-библиотека                                        |
-| [TypeScript](https://www.typescriptlang.org) | Типизация                                            |
-| [Tailwind CSS](https://tailwindcss.com)      | Утилитарный CSS-фреймворк                            |
-| [shadcn/ui](https://ui.shadcn.com)           | Библиотека готовых UI-компонентов                    |
-| [Lucide React](https://lucide.dev)           | Иконки                                               |
-| [Capacitor](https://capacitorjs.com)         | Обёртка веб-приложения в нативное Android-приложение |
-| [Radix UI](https://www.radix-ui.com)         | Безголовые (headless) примитивы для shadcn/ui        |
-| [Vitest](https://vitest.dev)                 | Фреймворк для тестирования                           |
-| [Prettier](https://prettier.io)              | Форматирование кода                                  |
+## Как это устроено
 
-## Команды
+Приложение получает курсы из двух независимых источников, приводит их к единому формату и сохраняет локально. Для конвертации одной валюты в другую используется цена в BTC (btcPrice) — универсальный якорь, через который вычисляется cross-rate для любой пары, в том числе межбиржевой.
 
-| Команда                    | Описание                                                       |
-| -------------------------- | -------------------------------------------------------------- |
-| `npm run build`            | Сборка production-бандла                                       |
-| `npm run serve`            | Сборка и запуск production-бандла                              |
-| `npm run build-apk`        | Сборка APK (debug)                                             |
-| `npm run start-apk`        | Запуск приложения на подключённом Android-устройстве/эмуляторе |
-| `npm run lint`             | Проверка кода линтером                                         |
-| `npm run format`           | Форматирование кода                                            |
-| `npm run format-check`     | Проверка форматирования без изменений                          |
-| `npm run test`             | Запуск unit-тестов                                             |
-| `npm run test-integration` | Запуск интеграционных тестов                                   |
+Вся персистентность — на клиенте: IndexedDB через Dexie.js. Четыре таблицы: курсы валют, избранные пары, средства пользователя и настройки. При обновлении курсы для источника перезаписываются целиком.
 
-### Сборка APK
+На устройствах Android приложение работает как нативное — Capacitor упаковывает веб-сборку в APK с поддержкой системной тёмной темы и safe area.
 
-```bash
-npm run build-apk
-```
+---
 
-Готовый APK-файл будет находиться в `android/app/build/outputs/apk/debug/`.
+## Скриншоты
 
-Для сборки APK требуются:
+> _Скоро_
 
-- Java JDK 21
-- Android SDK (переменная окружения `ANDROID_HOME`)
-
-### Запуск на устройстве
-
-```bash
-npm run start-apk
-```
-
-Соберёт проект и сразу запустит на подключённом Android-устройстве или эмуляторе.
-
-## Структура проекта
-
-| Путь                           | Описание                                |
-| ------------------------------ | --------------------------------------- |
-| `app/`                         | Страницы и роутинг Next.js (App Router) |
-| `components/`                  | UI-компоненты (shadcn/ui)               |
-| `lib/`                         | Утилиты и хелперы                       |
-| `public/`                      | Статические файлы                       |
-| `scripts/`                     | Bash-скрипты для сборки APK             |
-| `tests/`                       | Тесты (unit и integration)              |
-| `android/`                     | Нативный Android-проект Capacitor       |
-| `capacitor.config.ts`          | Конфигурация Capacitor                  |
-| `vitest.config.ts`             | Конфигурация unit-тестов                |
-| `vitest.integration.config.ts` | Конфигурация интеграционных тестов      |
+---
 
 ## Быстрый старт
 
 ```bash
-# Установка зависимостей
 npm install
-
-# Запуск в режиме разработки
 npm run dev
 ```
 
-Откройте [http://localhost:3000](http://localhost:3000) и начинайте редактировать `app/page.tsx` — изменения отображаются мгновенно.
+Откройте [http://localhost:3000](http://localhost:3000) — приложение готово к использованию.
+
+---
+
+## Команды
+
+### Разработка
+
+| Команда                | Описание                           |
+| ---------------------- | ---------------------------------- |
+| `npm run dev`          | Дев-сервер с HMR                   |
+| `npm run build`        | Production-сборка                  |
+| `npm run serve`        | Сборка и запуск production-сервера |
+| `npm run lint`         | Линтер (ESLint)                    |
+| `npm run format`       | Форматирование кода (Prettier)     |
+| `npm run format-check` | Проверка форматирования            |
+
+### Тестирование
+
+| Команда                    | Описание                                        |
+| -------------------------- | ----------------------------------------------- |
+| `npm run test`             | Unit-тесты (Vitest)                             |
+| `npm run test:watch`       | Unit-тесты в режиме наблюдения                  |
+| `npm run test-integration` | Интеграционные тесты с реальными HTTP-запросами |
+| `npm run check-all`        | Всё сразу: тесты + линтер + формат              |
+
+### Android
+
+| Команда             | Описание                                   |
+| ------------------- | ------------------------------------------ |
+| `npm run build-apk` | Сборка debug APK                           |
+| `npm run start-apk` | Сборка и запуск на подключённом устройстве |
+
+> **Требования:** Java JDK 21, Android SDK (`ANDROID_HOME`).<br/>
+> Готовый APK: `android/app/build/outputs/apk/debug/`.
+
+---
+
+## Технологии
+
+- **Next.js** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS v4** + **shadcn/ui** (Radix UI, Lucide icons)
+- **Dexie.js** — клиентская БД на IndexedDB
+- **Capacitor** — нативная обёртка для Android
+- **Vitest** — тестирование (unit + integration)
+- **CoinGecko API** / **Binance API** — источники курсов
+
+---
+
+## Лицензия
+
+MIT
+
+---
+
+<p align="center">
+  <sub>
+    Сделано на основе <a href="https://github.com/CaliforniaMountainSnake/vibe_app_skeleton">vibe_app_skeleton</a>.<br/>
+    С ❤️ для тех, кто ценит приватность и минимализм.
+  </sub>
+</p>
