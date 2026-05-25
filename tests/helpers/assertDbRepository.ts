@@ -17,12 +17,16 @@ import { assertDbRepositoryGetAllRates } from './assertDbRepositoryGetAllRates'
 import { assertDbRepositoryGetRate } from './assertDbRepositoryGetRate'
 import { assertDbRepositoryGetUpdateTime } from './assertDbRepositoryGetUpdateTime'
 import { assertDbRepositoryUpdateData } from './assertDbRepositoryUpdateData'
+import { assertDbRepositoryHoldings } from './assertDbRepositoryHoldings'
+import { assertDbRepositorySettings } from './assertDbRepositorySettings'
 
 export function assertDbRepository(makeRepo: () => DbRepositoryInterface) {
   assertDbRepositoryUpdateData(makeRepo)
   assertDbRepositoryGetRate(makeRepo)
   assertDbRepositoryGetAllRates(makeRepo)
   assertDbRepositoryFavorites(makeRepo)
+  assertDbRepositoryHoldings(makeRepo)
+  assertDbRepositorySettings(makeRepo)
   assertDbRepositoryClearAll(makeRepo)
   assertDbRepositoryGetUpdateTime(makeRepo)
 }

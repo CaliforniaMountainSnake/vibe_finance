@@ -1,10 +1,18 @@
 import { type ExchangeRate, type SourceName } from '@/entities/ExchangeRate'
 import { type TickerPair } from '@/entities/TickerPair'
+import { type Holding, type HoldingUpdate } from '@/entities/Holding'
+import { type Ticker } from '@/entities/Ticker'
+import { type AppSettingsMap } from '@/entities/AppSetting'
 
 /**
  * Контракт репозитория для локального хранения курсов валют в IndexedDB.
  */
-export interface DbRepositoryInterface extends ExchangeRatesDbRepositoryInterface, FavoriteRatesDbRepositoryInterface {
+export interface DbRepositoryInterface
+  extends
+    ExchangeRatesDbRepositoryInterface,
+    FavoriteRatesDbRepositoryInterface,
+    HoldingsDbRepositoryInterface,
+    SettingsDbRepositoryInterface {
   /**
    * Очистить всю базу
    */
@@ -78,4 +86,67 @@ interface FavoriteRatesDbRepositoryInterface {
    * Проверить, находится ли пара тикеров в избранном.
    */
   isFavoriteRate(pair: TickerPair): Promise<boolean>
+}
+
+/**
+ * Контракт для работы с холдингами (средствами пользователя в разных валютах).
+ */
+export interface HoldingsDbRepositoryInterface {
+  /**
+   * Получить все холдинги, отсортированные по order (0 — первый).
+   */
+  getHoldings(): Promise<Holding[]>
+
+  /**
+   * Добавить новый холдинг.
+   * Новый холдинг получает order = max+1 и enabled = true.
+   */
+  addHolding(ticker: Ticker, amount: number, label: string): Promise<void>
+
+  /**
+   * Частично обновить поля холдинга.
+   * Передаются только те поля, которые нужно изменить (см. HoldingUpdate).
+   */
+  updateHolding(id: string, updates: HoldingUpdate): Promise<void>
+
+  /**
+   * Удалить холдинг по id.
+   * Если холдинга с таким id нет — операция идемпотентна.
+   */
+  removeHolding(id: string): Promise<void>
+
+  /**
+   * Переместить холдинг на одну позицию вверх (уменьшить order).
+   * Если холдинг уже первый — операция идемпотентна.
+   */
+  moveHoldingUp(id: string): Promise<void>
+
+  /**
+   * Переместить холдинг на одну позицию вниз (увеличить order).
+   * Если холдинг уже последний — операция идемпотентна.
+   */
+  moveHoldingDown(id: string): Promise<void>
+}
+
+/**
+ * Контракт для работы с пользовательскими настройками.
+ * Настройки хранятся как key-value пары в IndexedDB.
+ */
+export interface SettingsDbRepositoryInterface {
+  /**
+   * Получить значение настройки по ключу.
+   * Возвращает undefined, если настройка не установлена.
+   */
+  getSetting<K extends keyof AppSettingsMap>(key: K): Promise<AppSettingsMap[K] | undefined>
+
+  /**
+   * Сохранить значение настройки.
+   */
+  setSetting<K extends keyof AppSettingsMap>(key: K, value: AppSettingsMap[K]): Promise<void>
+
+  /**
+   * Удалить настройку.
+   * Если настройки с таким ключом нет — операция идемпотентна.
+   */
+  removeSetting(key: string): Promise<void>
 }

@@ -300,7 +300,9 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
       const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
       await repo.addFavoriteRate(pair1)
 
-      await expect(repo.moveFavoriteRateDown(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
+      await expect(
+        repo.moveFavoriteRateDown(sameSourcePair('coingecko', 'nonexistent', 'pair'))
+      ).resolves.toBeUndefined()
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(1)
