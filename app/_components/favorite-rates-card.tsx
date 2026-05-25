@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
-import { formatRate } from '@/lib/utils'
+import { formatAmount } from '@/lib/utils'
 import { ConfirmRemoveButton } from './confirm-remove-button'
 import { AddFavoritesDialog } from './add-favorites-dropdown'
 import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
@@ -63,7 +63,7 @@ function SourceIcons({ from, to }: { from: Ticker; to: Ticker }) {
 }
 
 function FormatRate({ rate, unit }: { rate: number | undefined; unit: string | undefined }) {
-  const displayRate = rate !== undefined && !isNaN(rate) ? formatRate(rate) : '—'
+  const displayRate = rate !== undefined && !isNaN(rate) ? formatAmount(rate) : '—'
   return (
     <div>
       <span className="text-sm tabular-nums">{displayRate}</span>

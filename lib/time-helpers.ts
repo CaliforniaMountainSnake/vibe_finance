@@ -1,5 +1,4 @@
 const MS_PER_SEC = 1000
-
 const SEC_PER_MINUTE = 60
 const SEC_PER_HOUR = 3600
 const SEC_PER_DAY = 86400

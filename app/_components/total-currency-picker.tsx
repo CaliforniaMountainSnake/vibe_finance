@@ -12,27 +12,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
 import { TickerPicker } from './ticker-picker'
 import { dbRepo } from '@/lib/db'
-import { Plus, X } from 'lucide-react'
+import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { Ticker } from '@/entities/Ticker'
+import { Calculator, X } from 'lucide-react'
+import { SourceIcon } from '@/components/icons/source-icon'
 
-function tickerLabel(t: Ticker): string {
-  return `${t.source}:${t.ticker.toUpperCase()}`
-}
-
-function isTickerEqual(a: Ticker, b: Ticker): boolean {
-  return a.source === b.source && a.ticker === b.ticker
-}
-
-type AddFavoritesDialogProps = {
+type TotalCurrencyPickerProps = {
   allRates: ExchangeRate[]
-  onAdded: () => void
+  value: Ticker | null
+  onChange: (ticker: Ticker | null) => void
 }
 
-export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProps) {
-  const [selectedFrom, setSelectedFrom] = useState<Ticker | null>(null)
+export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrencyPickerProps) {
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -49,41 +42,38 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
 
   const handleSelect = useCallback(
     async (ticker: Ticker) => {
-      if (!selectedFrom) {
-        setSelectedFrom(ticker)
-        setSearchQuery('')
-        inputRef.current?.focus()
-        return
-      }
-      if (isTickerEqual(ticker, selectedFrom)) {
-        setSelectedFrom(null)
-        return
-      }
-      await dbRepo.addFavoriteRate({ from: selectedFrom, to: ticker })
-      setSelectedFrom(null)
+      await dbRepo.setSetting('totalBaseTicker', ticker)
+      onChange(ticker)
       setOpen(false)
-      onAdded()
+      setSearchQuery('')
     },
-    [selectedFrom, onAdded]
+    [onChange]
   )
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     setOpen(newOpen)
-    setSelectedFrom(null)
-    setSearchQuery('')
+    if (!newOpen) setSearchQuery('')
   }, [])
+
+  const label = value ? `${value.ticker.toUpperCase()}` : '?'
+  const showIcon = value !== null
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Добавить курс">
-              <Plus />
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
+              {showIcon ? (
+                <SourceIcon source={value.source} className="size-3.5" />
+              ) : (
+                <Calculator className="size-3.5" />
+              )}
+              {label}
             </Button>
           </DialogTrigger>
         </TooltipTrigger>
-        <TooltipContent>Добавить курс</TooltipContent>
+        <TooltipContent>Выбрать валюту для подсчёта итога</TooltipContent>
       </Tooltip>
       <DialogContent className="max-w-sm h-[70vh] p-0 flex flex-col">
         <DialogClose className="absolute top-3 right-3 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
@@ -91,24 +81,18 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
           <span className="sr-only">Закрыть</span>
         </DialogClose>
         <DialogHeader className="sr-only">
-          <DialogTitle>Добавить курс в избранное</DialogTitle>
-          <DialogDescription>Выберите пару валют из доступных курсов</DialogDescription>
+          <DialogTitle>Выбрать валюту для итога</DialogTitle>
+          <DialogDescription>Выберите валюту, в которой будет отображаться общая сумма портфеля</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col min-h-0 flex-1">
-          {selectedFrom && (
-            <p className="px-3 pt-2 text-[11px] text-muted-foreground">
-              Первая валюта: <span className="font-medium text-foreground">{tickerLabel(selectedFrom)}</span>
-              {' — выберите вторую валюту'}
-            </p>
-          )}
           <TickerPicker
             allRates={allRates}
-            selected={selectedFrom}
-            onSelect={(t) => void handleSelect(t)}
+            selected={value}
+            onSelect={handleSelect}
             inputRef={inputRef}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            searchPlaceholder={selectedFrom ? `Вторая валюта для ${tickerLabel(selectedFrom)} → …` : 'Поиск валюты…'}
+            searchPlaceholder="Валюта для подсчёта итога…"
           />
         </div>
       </DialogContent>

@@ -37,8 +37,8 @@ function decimalsFor(rate: number): Intl.NumberFormatOptions {
 }
 
 /**
- * Форматирует курс валюты в человеко-читаемую строку.
+ * Форматирует число (сумму или курс) в человеко-читаемую строку.
  */
-export function formatRate(rate: number): string {
+export function formatAmount(rate: number): string {
   return rate.toLocaleString('ru-RU', decimalsFor(rate))
 }

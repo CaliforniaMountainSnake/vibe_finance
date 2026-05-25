@@ -7,14 +7,6 @@ import type { Ticker } from '@/entities/Ticker'
 import { Search, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 
-function tickerLabel(t: Ticker): string {
-  return `${t.source}:${t.ticker.toUpperCase()}`
-}
-
-export function isTickerEqual(a: Ticker, b: Ticker): boolean {
-  return a.source === b.source && a.ticker === b.ticker
-}
-
 const SOURCE_LABELS: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko' }
 
 function SourceGroupLabel({ source }: { source: string }) {
@@ -53,14 +45,14 @@ function TickerPickerItem({
 /* ── TickerPickerSearch ───────────────────────────────────────── */
 
 function TickerPickerSearch({
-  selectedFrom,
   value,
   onChange,
+  placeholder,
   inputRef,
 }: {
-  selectedFrom: Ticker | null
   value: string
   onChange: (v: string) => void
+  placeholder?: string
   inputRef: React.RefObject<HTMLInputElement | null>
 }) {
   return (
@@ -69,7 +61,7 @@ function TickerPickerSearch({
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
         <Input
           ref={inputRef}
-          placeholder={selectedFrom ? `Вторая валюта для ${tickerLabel(selectedFrom)} → …` : 'Поиск валюты…'}
+          placeholder={placeholder ?? 'Поиск валюты…'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="pl-7 pr-7 h-7 text-sm"
@@ -88,12 +80,6 @@ function TickerPickerSearch({
           </button>
         )}
       </div>
-      {selectedFrom && (
-        <p className="mt-1.5 text-[11px] text-muted-foreground px-1">
-          Выбрано: <span className="font-medium text-foreground">{tickerLabel(selectedFrom)}</span>
-          {' — нажмите на вторую валюту для создания пары'}
-        </p>
-      )}
     </div>
   )
 }
@@ -102,20 +88,23 @@ function TickerPickerSearch({
 
 type TickerPickerProps = {
   allRates: ExchangeRate[]
-  selectedFrom: Ticker | null
+  selected: Ticker | null
   onSelect: (ticker: Ticker) => void
   inputRef?: React.RefObject<HTMLInputElement | null>
   searchQuery: string
   onSearchChange: (v: string) => void
+  /** Кастомный плейсхолдер для поля поиска */
+  searchPlaceholder?: string
 }
 
 export function TickerPicker({
   allRates,
-  selectedFrom,
+  selected,
   onSelect,
   inputRef,
   searchQuery,
   onSearchChange,
+  searchPlaceholder,
 }: TickerPickerProps) {
   const fallbackRef = useRef<HTMLInputElement>(null)
   const ref = inputRef ?? fallbackRef
@@ -137,7 +126,12 @@ export function TickerPicker({
 
   return (
     <>
-      <TickerPickerSearch selectedFrom={selectedFrom} value={searchQuery} onChange={onSearchChange} inputRef={ref} />
+      <TickerPickerSearch
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder={searchPlaceholder}
+        inputRef={ref}
+      />
       <div className="mx-0 my-1 h-px bg-border shrink-0" />
       {filtered.length === 0 ? (
         <p className="px-3 py-4 text-sm text-muted-foreground text-center">Ничего не найдено</p>
@@ -152,7 +146,7 @@ export function TickerPicker({
                 <TickerPickerItem
                   key={`${rate.source}:${rate.ticker}`}
                   rate={rate}
-                  isSelected={selectedFrom !== null && isTickerEqual(rate, selectedFrom)}
+                  isSelected={selected !== null && selected.source === rate.source && selected.ticker === rate.ticker}
                   onSelect={onSelect}
                 />
               ))}
