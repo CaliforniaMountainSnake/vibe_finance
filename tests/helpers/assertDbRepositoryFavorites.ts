@@ -195,7 +195,7 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
 
       // Исходный порядок: pair1, pair2, pair3
       // Двигаем pair2 вверх → должно стать: pair2, pair1, pair3
-      await repo.moveFavoriteUp(pair2)
+      await repo.moveFavoriteRateUp(pair2)
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(3)
@@ -213,7 +213,7 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
 
       await repo.addFavoriteRate(pair1)
       await repo.addFavoriteRate(pair2)
-      await repo.moveFavoriteUp(pair1)
+      await repo.moveFavoriteRateUp(pair1)
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(2)
@@ -232,7 +232,7 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
 
       // Исходный порядок: pair1, pair2, pair3
       // Двигаем pair2 вниз → должно стать: pair1, pair3, pair2
-      await repo.moveFavoriteDown(pair2)
+      await repo.moveFavoriteRateDown(pair2)
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(3)
@@ -250,7 +250,7 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
 
       await repo.addFavoriteRate(pair1)
       await repo.addFavoriteRate(pair2)
-      await repo.moveFavoriteDown(pair2)
+      await repo.moveFavoriteRateDown(pair2)
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(2)
@@ -262,8 +262,8 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
       const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
 
       await repo.addFavoriteRate(pair1)
-      await repo.moveFavoriteUp(pair1)
-      await repo.moveFavoriteDown(pair1)
+      await repo.moveFavoriteRateUp(pair1)
+      await repo.moveFavoriteRateDown(pair1)
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(1)
@@ -277,8 +277,8 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
       await repo.addFavoriteRate(pair1)
       await repo.addFavoriteRate(pair2)
 
-      await repo.moveFavoriteUp(pair2)
-      await repo.moveFavoriteDown(pair2)
+      await repo.moveFavoriteRateUp(pair2)
+      await repo.moveFavoriteRateDown(pair2)
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(2)
@@ -290,7 +290,7 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
       const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
       await repo.addFavoriteRate(pair1)
 
-      await expect(repo.moveFavoriteUp(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
+      await expect(repo.moveFavoriteRateUp(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(1)
@@ -300,7 +300,7 @@ export function assertDbRepositoryFavorites(makeRepo: () => DbRepositoryInterfac
       const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
       await repo.addFavoriteRate(pair1)
 
-      await expect(repo.moveFavoriteDown(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
+      await expect(repo.moveFavoriteRateDown(sameSourcePair('coingecko', 'nonexistent', 'pair'))).resolves.toBeUndefined()
 
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toHaveLength(1)

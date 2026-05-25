@@ -12,7 +12,7 @@ export function assertDbRepositoryGetRate(makeRepo: () => DbRepositoryInterface)
 
   describe('getRate', () => {
     beforeEach(async () => {
-      await repo.updateDataForSource('coingecko', [
+      await repo.updateRatesForSource('coingecko', [
         makeRate({ source: 'coingecko', ticker: 'btc', btcPrice: 1 }),
         makeRate({ source: 'coingecko', ticker: 'eth', btcPrice: 36.379 }),
         makeRate({ source: 'coingecko', ticker: 'usdt', btcPrice: 76808.44 }),
@@ -52,7 +52,7 @@ export function assertDbRepositoryGetRate(makeRepo: () => DbRepositoryInterface)
     })
 
     it('throws when from-ticker has zero or negative btcPrice', async () => {
-      await repo.updateDataForSource('coingecko', [
+      await repo.updateRatesForSource('coingecko', [
         makeRate({ source: 'coingecko', ticker: 'broken', btcPrice: 0 }),
         makeRate({ source: 'coingecko', ticker: 'btc', btcPrice: 1 }),
       ])
@@ -61,7 +61,7 @@ export function assertDbRepositoryGetRate(makeRepo: () => DbRepositoryInterface)
     })
 
     it('differentiates same ticker from different sources', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 }),
         makeRate({ source: 'binance', ticker: 'gel', btcPrice: 200000 }),
       ])

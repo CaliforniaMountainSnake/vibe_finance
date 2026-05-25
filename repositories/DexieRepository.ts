@@ -77,7 +77,7 @@ export class DexieRepository implements DbRepositoryInterface {
     this.db = new FinanceDb()
   }
 
-  async updateDataForSource(source: SourceName, rates: ExchangeRate[]): Promise<void> {
+  async updateRatesForSource(source: SourceName, rates: ExchangeRate[]): Promise<void> {
     await this.db.transaction('rw', this.db.exchangeRates, async () => {
       await this.db.exchangeRates.where('source').equals(source).delete()
       await this.db.exchangeRates.bulkPut(rates)
@@ -148,11 +148,11 @@ export class DexieRepository implements DbRepositoryInterface {
     return row ? row.updatedAt : null
   }
 
-  async moveFavoriteUp(pair: TickerPair): Promise<void> {
+  async moveFavoriteRateUp(pair: TickerPair): Promise<void> {
     await this.swapWithNeighbor(pair, 'above')
   }
 
-  async moveFavoriteDown(pair: TickerPair): Promise<void> {
+  async moveFavoriteRateDown(pair: TickerPair): Promise<void> {
     await this.swapWithNeighbor(pair, 'below')
   }
 

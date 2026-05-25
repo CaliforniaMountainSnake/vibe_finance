@@ -120,7 +120,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     try {
       const repo = source === 'coingecko' ? coinGeckoRepo : binanceRepo
       const rates = await repo.fetchRates()
-      await dbRepo.updateDataForSource(source, rates)
+      await dbRepo.updateRatesForSource(source, rates)
 
       setStatuses((prev) => ({
         ...prev,

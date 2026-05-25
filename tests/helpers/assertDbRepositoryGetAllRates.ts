@@ -17,11 +17,11 @@ export function assertDbRepositoryGetAllRates(makeRepo: () => DbRepositoryInterf
     })
 
     it('returns all stored rates', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 }),
         makeRate({ source: 'binance', ticker: 'eth', btcPrice: 36.5 }),
       ])
-      await repo.updateDataForSource('coingecko', [
+      await repo.updateRatesForSource('coingecko', [
         makeRate({ source: 'coingecko', ticker: 'usdt', btcPrice: 76808.44 }),
       ])
 

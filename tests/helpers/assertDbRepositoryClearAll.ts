@@ -12,7 +12,7 @@ export function assertDbRepositoryClearAll(makeRepo: () => DbRepositoryInterface
 
   describe('clearAll', () => {
     it('removes all data — exchange rates and favorites', async () => {
-      await repo.updateDataForSource('binance', [makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 })])
+      await repo.updateRatesForSource('binance', [makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 })])
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'eth', 'usdt'))
 
       await repo.clearAll()
@@ -24,7 +24,7 @@ export function assertDbRepositoryClearAll(makeRepo: () => DbRepositoryInterface
     })
 
     it('removes all data', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 }),
         makeRate({ source: 'binance', ticker: 'eth', btcPrice: 36.5 }),
       ])

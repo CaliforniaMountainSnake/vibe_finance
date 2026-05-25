@@ -252,13 +252,13 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
   }, [])
 
   const handleMoveUp = useCallback(async (pair: TickerPair) => {
-    await dbRepo.moveFavoriteUp(pair)
+    await dbRepo.moveFavoriteRateUp(pair)
     const fav = await dbRepo.getFavoriteRates()
     setFavorites(fav)
   }, [])
 
   const handleMoveDown = useCallback(async (pair: TickerPair) => {
-    await dbRepo.moveFavoriteDown(pair)
+    await dbRepo.moveFavoriteRateDown(pair)
     const fav = await dbRepo.getFavoriteRates()
     setFavorites(fav)
   }, [])

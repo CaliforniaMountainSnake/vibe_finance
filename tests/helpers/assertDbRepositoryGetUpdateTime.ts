@@ -29,7 +29,7 @@ export function assertDbRepositoryGetUpdateTime(makeRepo: () => DbRepositoryInte
     })
 
     it('returns null when only other source has data', async () => {
-      await repo.updateDataForSource('coingecko', [
+      await repo.updateRatesForSource('coingecko', [
         makeRate({ source: 'coingecko', ticker: 'btc', btcPrice: 1, updatedAt: 1700000000 }),
       ])
 
@@ -37,7 +37,7 @@ export function assertDbRepositoryGetUpdateTime(makeRepo: () => DbRepositoryInte
     })
 
     it('returns updatedAt from a row for the given source', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1, updatedAt: 1700000050 }),
       ])
 
@@ -45,10 +45,10 @@ export function assertDbRepositoryGetUpdateTime(makeRepo: () => DbRepositoryInte
     })
 
     it('returns updatedAt after data replacement', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1, updatedAt: 1700000000 }),
       ])
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'eth', btcPrice: 36.5, updatedAt: 1700000200 }),
       ])
 
@@ -56,10 +56,10 @@ export function assertDbRepositoryGetUpdateTime(makeRepo: () => DbRepositoryInte
     })
 
     it('differentiates sources', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1, updatedAt: 1700000000 }),
       ])
-      await repo.updateDataForSource('coingecko', [
+      await repo.updateRatesForSource('coingecko', [
         makeRate({ source: 'coingecko', ticker: 'eth', btcPrice: 36.5, updatedAt: 1700000100 }),
       ])
 
@@ -68,7 +68,7 @@ export function assertDbRepositoryGetUpdateTime(makeRepo: () => DbRepositoryInte
     })
 
     it('returns null after clearAll', async () => {
-      await repo.updateDataForSource('binance', [
+      await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1, updatedAt: 1700000000 }),
       ])
       await repo.clearAll()

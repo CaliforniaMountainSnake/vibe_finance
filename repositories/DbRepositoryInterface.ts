@@ -4,10 +4,14 @@ import { type TickerPair } from '@/entities/TickerPair'
 /**
  * Контракт репозитория для локального хранения курсов валют в IndexedDB.
  */
-export interface DbRepositoryInterface {
-  /** Очистить всю базу. */
+export interface DbRepositoryInterface extends ExchangeRatesDbRepositoryInterface, FavoriteRatesDbRepositoryInterface {
+  /**
+   * Очистить всю базу
+   */
   clearAll(): Promise<void>
+}
 
+interface ExchangeRatesDbRepositoryInterface {
   /**
    * Атомарно обновить все курсы для указанного источника:
    *  1. Удалить все старые записи с этим source.
@@ -15,7 +19,7 @@ export interface DbRepositoryInterface {
    *
    * Гарантирует, что при делистинге монеты её тикер не останется в БД.
    */
-  updateDataForSource(source: SourceName, rates: ExchangeRate[]): Promise<void>
+  updateRatesForSource(source: SourceName, rates: ExchangeRate[]): Promise<void>
 
   /**
    * Вычислить курс между двумя тикерами за O(log n).
@@ -27,8 +31,24 @@ export interface DbRepositoryInterface {
    */
   getRate(pair: TickerPair): Promise<number>
 
-  /** Получить все курсы из БД. */
+  /**
+   * Получить все курсы из БД.
+   */
   getAllRates(): Promise<ExchangeRate[]>
+
+  /**
+   * Получить время последнего обновления курсов для указанного источника.
+   *
+   * @returns Наибольший updatedAt среди всех курсов source, либо null если данных нет.
+   */
+  getUpdateTime(source: SourceName): Promise<number | null>
+}
+
+interface FavoriteRatesDbRepositoryInterface {
+  /**
+   * Получить все избранные пары, отсортированные по порядку (order).
+   */
+  getFavoriteRates(): Promise<TickerPair[]>
 
   /**
    * Добавить пару тикеров в избранное.
@@ -43,29 +63,19 @@ export interface DbRepositoryInterface {
   removeFavoriteRate(pair: TickerPair): Promise<void>
 
   /**
-   * Получить все избранные пары, отсортированные по порядку (order).
-   */
-  getFavoriteRates(): Promise<TickerPair[]>
-
-  /**
    * Переместить пару на одну позицию вверх (уменьшить order).
    * Если пара и так первая — операция идемпотентна.
    */
-  moveFavoriteUp(pair: TickerPair): Promise<void>
+  moveFavoriteRateUp(pair: TickerPair): Promise<void>
 
   /**
    * Переместить пару на одну позицию вниз (увеличить order).
    * Если пара и так последняя — операция идемпотентна.
    */
-  moveFavoriteDown(pair: TickerPair): Promise<void>
-
-  /** Проверить, находится ли пара тикеров в избранном. */
-  isFavoriteRate(pair: TickerPair): Promise<boolean>
+  moveFavoriteRateDown(pair: TickerPair): Promise<void>
 
   /**
-   * Получить время последнего обновления курсов для указанного источника.
-   *
-   * @returns Наибольший updatedAt среди всех курсов source, либо null если данных нет.
+   * Проверить, находится ли пара тикеров в избранном.
    */
-  getUpdateTime(source: SourceName): Promise<number | null>
+  isFavoriteRate(pair: TickerPair): Promise<boolean>
 }
