@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const SOURCE_DISPLAY: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko' }
 
-function SourceIconWithTooltip({ source }: { source: SourceName }) {
+export function SourceIconWithTooltip({ source }: { source: SourceName }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>

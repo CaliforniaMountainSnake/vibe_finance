@@ -4,16 +4,53 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
-import { HoldingRow } from './holding-row'
+import { HoldingRow, SourceIconWithTooltip } from './holding-row'
 import { formatAmount } from '@/lib/utils'
 import { TotalCurrencyPicker } from './total-currency-picker'
+
+function computeTotalAmount(holdings: Holding[], conversionRates: Record<string, number | undefined>): number {
+  return holdings
+    .filter((h) => h.enabled)
+    .reduce((sum, h) => {
+      const rate = conversionRates[h.id]
+      if (rate === undefined || isNaN(rate)) return sum
+      return sum + h.amount * rate
+    }, 0)
+}
+
+function TotalRow({
+  totalAmount,
+  totalTicker,
+  totalUnit,
+  allRates,
+  onTotalTickerChange,
+}: {
+  totalAmount: number
+  totalTicker: Ticker | null
+  totalUnit: string | null
+  allRates: ExchangeRate[]
+  onTotalTickerChange: (ticker: Ticker | null) => void
+}) {
+  return (
+    <TableRow>
+      <TableCell colSpan={3}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            {totalTicker && <SourceIconWithTooltip source={totalTicker.source} />}
+            <span className="text-sm tabular-nums font-semibold">{totalTicker ? formatAmount(totalAmount) : '—'}</span>
+            {totalUnit && <span className="text-muted-foreground text-sm">{totalUnit}</span>}
+          </div>
+          <TotalCurrencyPicker allRates={allRates} value={totalTicker} onChange={onTotalTickerChange} />
+        </div>
+      </TableCell>
+    </TableRow>
+  )
+}
 
 type HoldingsTableProps = {
   holdings: Holding[]
   allRates: ExchangeRate[]
-  /** Курсы пересчёта каждой валюты холдинга к total-валюте */
   conversionRates: Record<string, number | undefined>
-  /** Total-валюта */
   totalTicker: Ticker | null
   onTotalTickerChange: (ticker: Ticker | null) => void
   onMoveUp: (id: string) => void
@@ -35,14 +72,7 @@ export function HoldingsTable({
   onRemove,
   onEdited,
 }: HoldingsTableProps) {
-  const totalAmount = holdings
-    .filter((h) => h.enabled)
-    .reduce((sum, h) => {
-      const rate = conversionRates[h.id]
-      if (rate === undefined || isNaN(rate)) return sum
-      return sum + h.amount * rate
-    }, 0)
-
+  const totalAmount = computeTotalAmount(holdings, conversionRates)
   const totalUnit = totalTicker?.unit ?? null
 
   return (
@@ -73,19 +103,13 @@ export function HoldingsTable({
         ))}
       </TableBody>
       <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm tabular-nums font-semibold">
-                  {totalTicker ? formatAmount(totalAmount) : '—'}
-                </span>
-                {totalUnit && <span className="text-muted-foreground text-sm">{totalUnit}</span>}
-              </div>
-              <TotalCurrencyPicker allRates={allRates} value={totalTicker} onChange={onTotalTickerChange} />
-            </div>
-          </TableCell>
-        </TableRow>
+        <TotalRow
+          totalAmount={totalAmount}
+          totalTicker={totalTicker}
+          totalUnit={totalUnit}
+          allRates={allRates}
+          onTotalTickerChange={onTotalTickerChange}
+        />
       </TableFooter>
     </Table>
   )
