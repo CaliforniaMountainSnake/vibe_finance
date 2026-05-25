@@ -65,7 +65,7 @@ function AmountCell({
 function LabelCell({ label }: { label: string }) {
   return (
     <TableCell>
-      <span className="text-sm">{label || '—'}</span>
+      <span className="text-sm whitespace-normal break-words">{label || '—'}</span>
     </TableCell>
   )
 }

@@ -60,26 +60,26 @@ function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceS
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="border-t text-muted-foreground">
-          <th className="px-4 py-2 text-left font-medium">Источник</th>
-          <th className="px-4 py-2 text-left font-medium">Дата обновления</th>
-          <th className="px-4 py-2 text-left font-medium">Статус</th>
+        <tr className="border-t bg-muted/30">
+          <th className="px-1.5 py-1.5 text-left text-foreground text-xs font-medium">Источник</th>
+          <th className="px-1.5 py-1.5 text-left text-foreground text-xs font-medium">Дата обновления</th>
+          <th className="px-1.5 py-1.5 text-left text-foreground text-xs font-medium">Статус</th>
         </tr>
       </thead>
       <tbody>
         {SOURCES.map((source) => (
           <Fragment key={source}>
             <tr className="border-t">
-              <td className="px-4 py-2 capitalize font-medium">
+              <td className="px-1.5 py-1.5 capitalize font-medium">
                 <span className="inline-flex items-center gap-1.5">
                   <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
                   {source}
                 </span>
               </td>
-              <td className="px-4 py-2 text-muted-foreground">
+              <td className="px-1.5 py-1.5">
                 <DateCell status={statuses[source]} />
               </td>
-              <td className="px-4 py-2 text-muted-foreground">
+              <td className="px-1.5 py-1.5">
                 <StatusCell status={statuses[source]} />
               </td>
             </tr>
@@ -146,7 +146,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Курсы валют</CardTitle>
+        <CardTitle>Данные API</CardTitle>
         <CardAction>
           <Tooltip>
             <TooltipTrigger asChild>

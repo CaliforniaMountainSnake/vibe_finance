@@ -16,7 +16,7 @@ export default function Home() {
     <div className="flex flex-col flex-1 p-2 gap-3 mx-auto w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
       <ExchangeRateRefreshCard onRefreshed={handleRefreshed} />
       <FavoriteRatesCard refreshKey={refreshKey} />
-      <HoldingsCard />
+      <HoldingsCard refreshKey={refreshKey} />
     </div>
   )
 }

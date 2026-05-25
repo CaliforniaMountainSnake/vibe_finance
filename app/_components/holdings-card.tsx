@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
@@ -30,7 +30,7 @@ async function computeConversionRates(
   return map
 }
 
-function useHoldingsState() {
+function useHoldingsState(refreshKey: number) {
   const [holdings, setHoldings] = useState<Holding[]>([])
   const [allRates, setAllRates] = useState<ExchangeRate[]>([])
   const [totalTicker, setTotalTicker] = useState<Ticker | null>(null)
@@ -51,7 +51,7 @@ function useHoldingsState() {
         computeConversionRates(hld, tt).then(setConversionRates)
       }
     })()
-  }, [])
+  }, [refreshKey])
 
   async function refreshHoldingsAndRates() {
     const [hld, rates] = await Promise.all([dbRepo.getHoldings(), dbRepo.getAllRates()])
@@ -119,8 +119,8 @@ function useHoldingsState() {
 
 /* ── HoldingsCard ─────────────────── */
 
-export function HoldingsCard() {
-  const state = useHoldingsState()
+export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
+  const state = useHoldingsState(refreshKey)
 
   return (
     <Card>
@@ -130,7 +130,7 @@ export function HoldingsCard() {
           <AddHoldingDialog allRates={state.allRates} onAdded={() => void state.refreshHoldingsAndRates()} />
         </CardAction>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardFooter className="block p-0">
         {state.holdings.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
             Нет сохранённых средств. Добавьте кнопкой справа вверху.
@@ -149,7 +149,7 @@ export function HoldingsCard() {
             onEdited={() => void state.refreshHoldingsAndRates()}
           />
         )}
-      </CardContent>
+      </CardFooter>
     </Card>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
@@ -271,7 +271,7 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
           <AddFavoritesDialog allRates={allRates} onAdded={loadFavorites} />
         </CardAction>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardFooter className="block p-0">
         {favorites.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
             Нет избранных курсов. Добавьте пару кнопкой справа вверху.
@@ -285,7 +285,7 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
             onMoveDown={handleMoveDown}
           />
         )}
-      </CardContent>
+      </CardFooter>
     </Card>
   )
 }
