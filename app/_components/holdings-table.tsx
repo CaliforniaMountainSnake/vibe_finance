@@ -20,6 +20,7 @@ type HoldingsTableProps = {
   onMoveDown: (id: string) => void
   onToggleEnabled: (id: string) => void
   onRemove: (id: string) => void
+  onEdited: () => void
 }
 
 export function HoldingsTable({
@@ -32,6 +33,7 @@ export function HoldingsTable({
   onMoveDown,
   onToggleEnabled,
   onRemove,
+  onEdited,
 }: HoldingsTableProps) {
   const totalAmount = holdings
     .filter((h) => h.enabled)
@@ -61,10 +63,12 @@ export function HoldingsTable({
             isLast={index === holdings.length - 1}
             conversionRate={conversionRates[holding.id]}
             totalTicker={totalTicker}
+            allRates={allRates}
             onMoveUp={onMoveUp}
             onMoveDown={onMoveDown}
             onToggleEnabled={onToggleEnabled}
             onRemove={onRemove}
+            onEdited={onEdited}
           />
         ))}
       </TableBody>

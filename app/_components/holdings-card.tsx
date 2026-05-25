@@ -146,6 +146,7 @@ export function HoldingsCard() {
             onMoveDown={(id) => void state.moveDown(id)}
             onToggleEnabled={(id) => void state.toggleEnabled(id)}
             onRemove={(id) => void state.remove(id)}
+            onEdited={() => void state.refreshHoldingsAndRates()}
           />
         )}
       </CardContent>

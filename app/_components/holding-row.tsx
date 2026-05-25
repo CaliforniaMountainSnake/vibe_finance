@@ -1,26 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
+import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
+import { EditHoldingDialog } from './edit-holding-dialog'
+import { HoldingRemoveDialog, HoldingMobileActions, HoldingDesktopActions } from './holding-row-actions'
 import { formatAmount } from '@/lib/utils'
-import { ChevronUp, ChevronDown, EllipsisVertical, X, Eye, EyeOff } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import type { SourceName } from '@/entities/ExchangeRate'
 
 const SOURCE_DISPLAY: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko' }
 
@@ -81,160 +70,6 @@ function LabelCell({ label }: { label: string }) {
   )
 }
 
-function RemoveDialog({
-  open,
-  onOpenChange,
-  onConfirm,
-  holding,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  holding: Holding
-}) {
-  return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent size="sm">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Удалить сумму?</AlertDialogTitle>
-          <AlertDialogDescription>
-            {holding.label || tickerLabel(holding.ticker)} — {formatAmount(holding.amount)}{' '}
-            {tickerLabel(holding.ticker)}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onConfirm}>
-            Удалить
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
-/* ── MobileActions ─────────────────────── */
-
-function MobileActions({
-  isFirst,
-  isLast,
-  disabled,
-  onMoveUp,
-  onMoveDown,
-  onToggleEnabled,
-  onRemoveClick,
-}: {
-  isFirst: boolean
-  isLast: boolean
-  disabled: boolean
-  onMoveUp: () => void
-  onMoveDown: () => void
-  onToggleEnabled: () => void
-  onRemoveClick: () => void
-}) {
-  return (
-    <div className="md:hidden">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-xs" aria-label="Действия">
-            <EllipsisVertical aria-hidden="true" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled={isFirst} onClick={onMoveUp}>
-            <ChevronUp aria-hidden="true" className="size-4" />
-            Переместить вверх
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled={isLast} onClick={onMoveDown}>
-            <ChevronDown aria-hidden="true" className="size-4" />
-            Переместить вниз
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onToggleEnabled}>
-            {disabled ? (
-              <>
-                <Eye aria-hidden="true" className="size-4" />
-                Учитывать в итоге
-              </>
-            ) : (
-              <>
-                <EyeOff aria-hidden="true" className="size-4" />
-                Не учитывать в итоге
-              </>
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onClick={onRemoveClick}>
-            <X aria-hidden="true" className="size-4" />
-            Удалить
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  )
-}
-
-/* ── DesktopActions ────────────────────── */
-
-function DesktopActions({
-  isFirst,
-  isLast,
-  disabled,
-  onMoveUp,
-  onMoveDown,
-  onToggleEnabled,
-  onRemoveClick,
-}: {
-  isFirst: boolean
-  isLast: boolean
-  disabled: boolean
-  onMoveUp: () => void
-  onMoveDown: () => void
-  onToggleEnabled: () => void
-  onRemoveClick: () => void
-}) {
-  const reorderBtnClasses =
-    'inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30'
-
-  return (
-    <div className="hidden md:flex items-center gap-0.5">
-      <button
-        type="button"
-        className={reorderBtnClasses}
-        disabled={isFirst}
-        aria-label="Переместить вверх"
-        onClick={onMoveUp}
-      >
-        <ChevronUp aria-hidden="true" className="size-3" />
-      </button>
-      <button
-        type="button"
-        className={reorderBtnClasses}
-        disabled={isLast}
-        aria-label="Переместить вниз"
-        onClick={onMoveDown}
-      >
-        <ChevronDown aria-hidden="true" className="size-3" />
-      </button>
-      <div className="mx-0.5 h-5 w-px bg-border" />
-      <button
-        type="button"
-        className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-        aria-label={disabled ? 'Учитывать в итоге' : 'Не учитывать в итоге'}
-        onClick={onToggleEnabled}
-      >
-        {disabled ? <Eye aria-hidden="true" className="size-3" /> : <EyeOff aria-hidden="true" className="size-3" />}
-      </button>
-      <button
-        type="button"
-        className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive"
-        aria-label="Удалить"
-        onClick={onRemoveClick}
-      >
-        <X aria-hidden="true" className="size-3" />
-      </button>
-    </div>
-  )
-}
-
 /* ── HoldingRow ────────────────────────── */
 
 type HoldingRowProps = {
@@ -243,10 +78,12 @@ type HoldingRowProps = {
   isLast: boolean
   conversionRate: number | undefined
   totalTicker: Ticker | null
+  allRates: ExchangeRate[]
   onMoveUp: (id: string) => void
   onMoveDown: (id: string) => void
   onToggleEnabled: (id: string) => void
   onRemove: (id: string) => void
+  onEdited: () => void
 }
 
 function computeConverted(amount: number, rate: number | undefined): string | undefined {
@@ -260,12 +97,15 @@ export function HoldingRow({
   isLast,
   conversionRate,
   totalTicker,
+  allRates,
   onMoveUp,
   onMoveDown,
   onToggleEnabled,
   onRemove,
+  onEdited,
 }: HoldingRowProps) {
   const [removeOpen, setRemoveOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const disabled = !holding.enabled
 
   const converted = computeConverted(holding.amount, conversionRate)
@@ -279,32 +119,41 @@ export function HoldingRow({
         <AmountCell holding={holding} converted={converted} totalLabel={totalLabel} showConverted={!sameCurrency} />
         <LabelCell label={holding.label} />
         <TableCell className="w-px whitespace-nowrap">
-          <MobileActions
+          <HoldingMobileActions
             isFirst={isFirst}
             isLast={isLast}
             disabled={disabled}
             onMoveUp={() => onMoveUp(holding.id)}
             onMoveDown={() => onMoveDown(holding.id)}
             onToggleEnabled={() => onToggleEnabled(holding.id)}
+            onEditClick={() => setEditOpen(true)}
             onRemoveClick={() => setRemoveOpen(true)}
           />
-          <DesktopActions
+          <HoldingDesktopActions
             isFirst={isFirst}
             isLast={isLast}
             disabled={disabled}
             onMoveUp={() => onMoveUp(holding.id)}
             onMoveDown={() => onMoveDown(holding.id)}
             onToggleEnabled={() => onToggleEnabled(holding.id)}
+            onEditClick={() => setEditOpen(true)}
             onRemoveClick={() => setRemoveOpen(true)}
           />
         </TableCell>
       </TableRow>
 
-      <RemoveDialog
+      <HoldingRemoveDialog
         open={removeOpen}
         onOpenChange={setRemoveOpen}
         onConfirm={() => onRemove(holding.id)}
         holding={holding}
+      />
+      <EditHoldingDialog
+        holding={holding}
+        allRates={allRates}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={onEdited}
       />
     </>
   )

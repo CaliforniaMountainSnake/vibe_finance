@@ -9,18 +9,17 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HoldingForm } from './holding-form'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import { dbRepo } from '@/lib/db'
-import { Plus, X } from 'lucide-react'
+import { X } from 'lucide-react'
 
-/* ── AddHoldingDialogContent ───────────── */
+/* ── EditHoldingDialogContent ──────────── */
 
-function AddHoldingDialogContent({
+function EditHoldingDialogContent({
   amount,
   onAmountChange,
   label,
@@ -30,8 +29,8 @@ function AddHoldingDialogContent({
   inputRef,
   labelRef,
   allRates,
-  canAdd,
-  onAdd,
+  canSave,
+  onSave,
 }: {
   amount: string
   onAmountChange: (v: string) => void
@@ -42,8 +41,8 @@ function AddHoldingDialogContent({
   inputRef: React.RefObject<HTMLInputElement | null>
   labelRef: React.RefObject<HTMLTextAreaElement | null>
   allRates: ExchangeRate[]
-  canAdd: boolean
-  onAdd: () => void
+  canSave: boolean
+  onSave: () => void
 }) {
   return (
     <>
@@ -52,11 +51,11 @@ function AddHoldingDialogContent({
         <span className="sr-only">Закрыть</span>
       </DialogClose>
       <DialogHeader className="sr-only">
-        <DialogTitle>Добавить сумму</DialogTitle>
-        <DialogDescription>Введите сумму, выберите валюту и добавьте название</DialogDescription>
+        <DialogTitle>Редактировать сумму</DialogTitle>
+        <DialogDescription>Измените сумму, валюту или название</DialogDescription>
       </DialogHeader>
       <div className="p-4">
-        <h2 className="font-heading text-base leading-snug font-medium mb-3">Добавить сумму</h2>
+        <h2 className="font-heading text-base leading-snug font-medium mb-3">Редактировать сумму</h2>
         <HoldingForm
           amount={amount}
           onAmountChange={onAmountChange}
@@ -68,23 +67,25 @@ function AddHoldingDialogContent({
           inputRef={inputRef}
           labelRef={labelRef}
         />
-        <Button onClick={onAdd} disabled={!canAdd} className="w-full mt-3">
-          Добавить
+        <Button onClick={onSave} disabled={!canSave} className="w-full mt-3">
+          Сохранить
         </Button>
       </div>
     </>
   )
 }
 
-/* ── AddHoldingDialog ─────────────────── */
+/* ── EditHoldingDialog ─────────────────── */
 
-type AddHoldingDialogProps = {
+type EditHoldingDialogProps = {
+  holding: Holding
   allRates: ExchangeRate[]
-  onAdded: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSaved: () => void
 }
 
-export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
-  const [open, setOpen] = useState(false)
+export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSaved }: EditHoldingDialogProps) {
   const [amount, setAmount] = useState('')
   const [label, setLabel] = useState('')
   const [selectedTicker, setSelectedTicker] = useState<Ticker | null>(null)
@@ -102,49 +103,46 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
     setSelectedTicker(null)
   }, [])
 
+  // Заполняем поля из пропсов при каждом открытии диалога родителем.
+  // Диалог вызывает onOpenChange только при закрытии, поэтому используем effect на проп open.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined
     if (open) {
-      timer = setTimeout(() => inputRef.current?.focus(), 0)
+      setAmount(holding.amount.toString())
+      setLabel(holding.label)
+      setSelectedTicker(holding.ticker)
+      setTimeout(() => inputRef.current?.focus(), 0)
     }
-    return () => {
-      if (timer !== undefined) clearTimeout(timer)
-    }
-  }, [open])
-
-  const handleAdd = useCallback(async () => {
-    const parsed = parseFloat(amount.replace(',', '.'))
-    if (isNaN(parsed) || !selectedTicker) return
-    await dbRepo.addHolding(selectedTicker, parsed, label.trim())
-    reset()
-    setOpen(false)
-    onAdded()
-  }, [amount, selectedTicker, label, reset, onAdded])
+  }, [open, holding])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
       if (!newOpen) reset()
-      setOpen(newOpen)
+      onOpenChange(newOpen)
     },
-    [reset]
+    [reset, onOpenChange]
   )
 
-  const canAdd = selectedTicker !== null && amount.trim() !== '' && !isNaN(parseFloat(amount.replace(',', '.')))
+  const handleSave = useCallback(async () => {
+    const parsed = parseFloat(amount.replace(',', '.'))
+    if (isNaN(parsed) || !selectedTicker) return
+    await dbRepo.updateHolding(holding.id, {
+      ticker: selectedTicker,
+      amount: parsed,
+      label: label.trim(),
+    })
+    reset()
+    onOpenChange(false)
+    onSaved()
+  }, [amount, selectedTicker, label, holding.id, reset, onOpenChange, onSaved])
+
+  const canSave = selectedTicker !== null && amount.trim() !== '' && !isNaN(parseFloat(amount.replace(',', '.')))
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Добавить сумму">
-              <Plus />
-            </Button>
-          </DialogTrigger>
-        </TooltipTrigger>
-        <TooltipContent>Добавить сумму</TooltipContent>
-      </Tooltip>
       <DialogContent className="max-w-sm p-0 flex flex-col">
-        <AddHoldingDialogContent
+        <EditHoldingDialogContent
           amount={amount}
           onAmountChange={setAmount}
           label={label}
@@ -154,8 +152,8 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
           inputRef={inputRef}
           labelRef={labelRef}
           allRates={allRates}
-          canAdd={canAdd}
-          onAdd={handleAdd}
+          canSave={canSave}
+          onSave={handleSave}
         />
       </DialogContent>
     </Dialog>
