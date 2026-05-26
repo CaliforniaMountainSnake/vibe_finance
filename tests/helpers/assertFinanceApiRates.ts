@@ -12,7 +12,7 @@ export function assertFinanceApiRates(getRates: () => ExchangeRate[]) {
     for (const rate of rates) {
       // source
       expect(typeof rate.source).toBe('string')
-      expect(['coingecko', 'binance']).toContain(rate.source)
+      expect(['coingecko', 'binance', 'moex']).toContain(rate.source)
 
       // ticker
       expect(typeof rate.ticker).toBe('string')
