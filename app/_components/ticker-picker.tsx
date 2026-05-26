@@ -7,7 +7,7 @@ import type { Ticker } from '@/entities/Ticker'
 import { Search, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 
-const SOURCE_LABELS: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko' }
+const SOURCE_LABELS: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko', moex: 'MOEX' }
 
 function SourceGroupLabel({ source }: { source: string }) {
   return (

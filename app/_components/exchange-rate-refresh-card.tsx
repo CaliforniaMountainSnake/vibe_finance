@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { BinanceRepository } from '@/repositories/BinanceRepository'
 import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
+import { MoexRepository } from '@/repositories/MoexRepository'
 import { DexieRepository } from '@/repositories/DexieRepository'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import { SourceIcon } from '@/components/icons/source-icon'
@@ -25,10 +26,11 @@ function maxUpdatedAt(rates: ExchangeRate[]): number {
   return Math.max(...rates.map((r) => r.updatedAt))
 }
 
-const SOURCES: SourceName[] = ['coingecko', 'binance']
+const SOURCES: SourceName[] = ['coingecko', 'binance', 'moex']
 
 const coinGeckoRepo = new CoinGeckoRepository()
 const binanceRepo = new BinanceRepository()
+const moexRepo = new MoexRepository()
 const dbRepo = new DexieRepository()
 
 const DEFAULT_STATUS: SourceStatus = { updatedAt: null, error: null, loading: false }
@@ -98,6 +100,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
   const [statuses, setStatuses] = useState<Record<SourceName, SourceStatus>>({
     binance: { ...DEFAULT_STATUS },
     coingecko: { ...DEFAULT_STATUS },
+    moex: { ...DEFAULT_STATUS },
   })
 
   useEffect(() => {
@@ -118,7 +121,10 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     }))
 
     try {
-      const repo = source === 'coingecko' ? coinGeckoRepo : binanceRepo
+      let repo: CoinGeckoRepository | BinanceRepository | MoexRepository
+      if (source === 'coingecko') repo = coinGeckoRepo
+      else if (source === 'moex') repo = moexRepo
+      else repo = binanceRepo
       const rates = await repo.fetchRates()
       await dbRepo.updateRatesForSource(source, rates)
 
