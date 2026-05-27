@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
-import { formatAmount } from '@/lib/utils'
+import { formatAmount } from '@/lib/format-rate'
 import { ChevronUp, ChevronDown, EllipsisVertical, X, Eye, EyeOff, Pencil } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {

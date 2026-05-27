@@ -6,8 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export { formatAmount } from '@/lib/format-rate'
-
 export function isCrossRate(pair: TickerPair): boolean {
   return pair.from.source !== pair.to.source
 }
