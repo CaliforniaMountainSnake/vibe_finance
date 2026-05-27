@@ -43,6 +43,8 @@ export const MOEX_MOCK_INDEXES = JSON.stringify({
       ['RTSI', 'RTSI', 'USD', 'Индекс РТС'],
       ['RUCNYCP', 'RTSI', 'CNY', 'Индекс МосБиржи облигаций в CNY RUCNYCP'],
       ['IMOEX', 'SNDX', 'RUB', 'Индекс МосБиржи'],
+      // Коллизия: один SECID на разных бордах
+      ['BCSGA', 'SNDX', 'RUB', 'БКС Золото (дубликат на SNDX)'],
     ],
   },
   marketdata: {
@@ -55,6 +57,7 @@ export const MOEX_MOCK_INDEXES = JSON.stringify({
       ['RTSI', 1140.61],
       ['RUCNYCP', 96.45],
       ['IMOEX', 2590.48],
+      ['BCSGA', 12.35],
     ],
   },
 })

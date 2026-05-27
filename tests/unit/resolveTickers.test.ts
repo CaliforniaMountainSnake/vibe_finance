@@ -108,25 +108,25 @@ describe('resolveTickers', () => {
   })
 
   // Indexes
-  it('no collisions — stays secid_currency', () => {
+  it('no collisions — stays secid', () => {
     const entries = [
-      makeIndex({ ticker: 'imoex_rub', secId: 'imoex', boardId: 'sndx' }),
-      makeIndex({ ticker: 'rtsi_usd', secId: 'rtsi', boardId: 'rtsi' }),
+      makeIndex({ ticker: 'imoex', secId: 'imoex', boardId: 'sndx' }),
+      makeIndex({ ticker: 'rtsi', secId: 'rtsi', boardId: 'rtsi' }),
     ]
     const result = resolveTickers(entries)
     expect(result).toHaveLength(2)
-    expect(result[0].ticker).toBe('imoex_rub')
-    expect(result[1].ticker).toBe('rtsi_usd')
+    expect(result[0].ticker).toBe('imoex')
+    expect(result[1].ticker).toBe('rtsi')
   })
 
   it('index collision — second falls back to secid_boardid', () => {
     const entries = [
-      makeIndex({ ticker: 'moexbtc_usd', secId: 'moexbtc', boardId: 'rtsi' }),
-      makeIndex({ ticker: 'moexbtc_usd', secId: 'moexbtc', boardId: 'sndx' }),
+      makeIndex({ ticker: 'moexbtc', secId: 'moexbtc', boardId: 'rtsi' }),
+      makeIndex({ ticker: 'moexbtc', secId: 'moexbtc', boardId: 'sndx' }),
     ]
     const result = resolveTickers(entries)
     expect(result).toHaveLength(2)
-    expect(result[0].ticker).toBe('moexbtc_usd')
+    expect(result[0].ticker).toBe('moexbtc')
     expect(result[1].ticker).toBe('moexbtc_sndx')
   })
 
@@ -134,11 +134,11 @@ describe('resolveTickers', () => {
   it('no cross-type collision when tickers differ', () => {
     const entries = [
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqbr' }),
-      makeIndex({ ticker: 'imoex_rub', secId: 'imoex', boardId: 'sndx' }),
+      makeIndex({ ticker: 'imoex', secId: 'imoex', boardId: 'sndx' }),
     ]
     const result = resolveTickers(entries)
     expect(result).toHaveLength(2)
     expect(result[0].ticker).toBe('sber')
-    expect(result[1].ticker).toBe('imoex_rub')
+    expect(result[1].ticker).toBe('imoex')
   })
 })

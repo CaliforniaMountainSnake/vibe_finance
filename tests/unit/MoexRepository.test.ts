@@ -43,12 +43,20 @@ describe('MoexRepository', () => {
   it('includes index entries', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
-    // BCSGA / RUB → bcsga_rub
-    expect(tickers).toContain('bcsga_rub')
-    // RTSI / USD → rtsi_usd
-    expect(tickers).toContain('rtsi_usd')
-    // IMOEX / RUB → imoex_rub
-    expect(tickers).toContain('imoex_rub')
+    // BCSGA → bcsga
+    expect(tickers).toContain('bcsga')
+    // RTSI → rtsi
+    expect(tickers).toContain('rtsi')
+    // IMOEX → imoex
+    expect(tickers).toContain('imoex')
+  })
+
+  it('index collision — same SECID on different boards falls back to secid_boardid', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const tickers = rates.map((r) => r.ticker)
+    // BCSGA на INAV выигрывает (первый), BCSGA на SNDX получает bcsga_sndx
+    expect(tickers).toContain('bcsga')
+    expect(tickers).toContain('bcsga_sndx')
   })
 
   it('includes share entries with dedup tickers', () => {

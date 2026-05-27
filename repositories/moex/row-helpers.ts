@@ -3,7 +3,9 @@ import type { MoexColumnarData } from './types'
 /**
  * Превращает колонки + строки в Map, где ключ — SECID, значение — объект-запись.
  *
- * Используется для валют и индексов, где SECID уникален.
+ * Используется для валют, где SECID уникален.
+ * Для акций и индексов (где SECID может повторяться на разных бордах)
+ * используйте buildCompositeMap.
  */
 export function buildRowMap(columnar: MoexColumnarData): Map<string, Record<string, string | number | null>> {
   const { columns, data } = columnar
@@ -39,6 +41,35 @@ export function getNumericField(record: Record<string, string | number | null>, 
   const num = Number(raw)
   if (!Number.isFinite(num) || num === 0) return null
   return num
+}
+
+/**
+ * Превращает колонки + строки в Map, где ключ — SECID_BOARDID, значение — объект-запись.
+ *
+ * Используется для акций и индексов, где один SECID может быть
+ * на нескольких бордах (TQBR, TQTF, INAV, SNDX и т.д.).
+ */
+export function buildCompositeMap(columnar: MoexColumnarData): Map<string, Record<string, string | number | null>> {
+  const { columns, data } = columnar
+  const map = new Map<string, Record<string, string | number | null>>()
+
+  for (const row of data) {
+    const record = buildRecord(columns, row)
+    const key = compositeKey(record)
+    if (key) {
+      map.set(key, record)
+    }
+  }
+
+  return map
+}
+
+/** Строит составной ключ SECID_BOARDID из записи. Возвращает null, если SECID или BOARDID отсутствуют. */
+function compositeKey(record: Record<string, string | number | null>): string | null {
+  const secId = String(record['SECID'] ?? '')
+  const boardId = String(record['BOARDID'] ?? '')
+  if (!secId || !boardId) return null
+  return `${secId}_${boardId}`
 }
 
 /** Извлекает строковое значение поля из записи, возвращает '' если отсутствует. */

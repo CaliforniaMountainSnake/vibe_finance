@@ -46,12 +46,12 @@ describe('MoexRepository with real raw data', () => {
     expect(tqty.length).toBeGreaterThan(0)
   })
 
-  it('contains index entries (secid_cur format)', () => {
-    // Индексы теперь: SECID_CURRENCY, без BOARDID
+  it('contains index entries (ticker = secid, no currency suffix)', () => {
+    // Индексы теперь: SECID, без CURRENCYID
     const tickers = new Set(rates.map((r) => r.ticker))
-    expect(tickers).toContain('imoex_rub')
-    expect(tickers).toContain('rtsi_usd')
-    expect(tickers).toContain('bcsga_rub')
+    expect(tickers).toContain('imoex')
+    expect(tickers).toContain('rtsi')
+    expect(tickers).toContain('bcsga')
   })
 
   it('no duplicate tickers', () => {

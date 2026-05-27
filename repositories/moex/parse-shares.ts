@@ -1,5 +1,5 @@
-import type { MoexColumnarData, MoexResponse } from './types'
-import { getNumericField, getStringField } from './row-helpers'
+import type { MoexResponse } from './types'
+import { buildCompositeMap, getNumericField, getStringField } from './row-helpers'
 
 /** Режимы торгов (борды), которые мы обрабатываем. */
 const ALLOWED_BOARDS = new Set(['TQBR', 'TQTF', 'TQTY'])
@@ -36,7 +36,7 @@ export type ShareEntry = {
  * - TQTY — ETF в юанях
  *
  * Первичный тикер: `SECID` для TQBR/TQTF, `SECID_CNY` для TQTY.
- * Коллизии разрешаются отдельно через resolveShareTickers().
+ * Коллизии разрешаются отдельно через resolveTickers().
  */
 export function parseShares(sharesJson: MoexResponse): ShareEntry[] {
   const secMap = buildCompositeMap(sharesJson.securities)
@@ -80,42 +80,4 @@ function buildShareEntry(params: ShareBuildParams): ShareEntry | null {
   const ticker = boardId === 'TQTY' ? `${secId}_cny`.toLowerCase() : secId.toLowerCase()
 
   return { ticker, secId: secId.toLowerCase(), boardId: boardId.toLowerCase(), priceInCurrency: price, currency, name }
-}
-
-/**
- * Строит Map с составным ключом SECID_BOARDID.
- * Это необходимо, т.к. один и тот же SECID может быть
- * на разных бордах (TQBR, SMAL, SPEQ и т.д.).
- */
-function buildCompositeMap(columnar: MoexColumnarData): Map<string, Record<string, string | number | null>> {
-  const { columns, data } = columnar
-  const map = new Map<string, Record<string, string | number | null>>()
-
-  for (const row of data) {
-    const result = parseCompositeRow(columns, row)
-    if (result) map.set(result.key, result.record)
-  }
-
-  return map
-}
-
-/** Разбирает одну строку columnar-данных в составной ключ + объект-запись. */
-function parseCompositeRow(
-  columns: string[],
-  row: (string | number | null)[]
-): { key: string; record: Record<string, string | number | null> } | null {
-  const record = toRecord(columns, row)
-  const secId = String(record['SECID'] ?? '')
-  const boardId = String(record['BOARDID'] ?? '')
-  if (!secId || !boardId) return null
-  return { key: `${secId}_${boardId}`, record }
-}
-
-/** Собирает объект-запись из массива имён колонок и массива значений. */
-function toRecord(columns: string[], row: (string | number | null)[]): Record<string, string | number | null> {
-  const record: Record<string, string | number | null> = {}
-  for (let i = 0; i < columns.length; i++) {
-    record[columns[i]] = row[i] ?? null
-  }
-  return record
 }
