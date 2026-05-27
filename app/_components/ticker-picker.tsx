@@ -129,6 +129,8 @@ export function TickerPicker({
     return fuse.search(q).map((r) => r.item)
   }, [fuse, searchQuery, allRates])
 
+  const matchCount = searchQuery.trim() ? filtered.length : allRates.length
+
   const grouped = useMemo(() => {
     const map: Record<string, ExchangeRate[]> = {}
     for (const rate of filtered) {
@@ -147,6 +149,7 @@ export function TickerPicker({
         inputRef={ref}
         rightElement={searchRightElement}
       />
+      {matchCount > 0 && <p className="px-3 pb-0.5 text-xs text-muted-foreground">Найдено {matchCount}</p>}
       <div className="mx-0 my-1 h-px bg-border shrink-0" />
       {filtered.length === 0 ? (
         <p className="px-3 py-4 text-sm text-muted-foreground text-center">Ничего не найдено</p>
