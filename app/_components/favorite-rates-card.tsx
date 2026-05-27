@@ -56,28 +56,24 @@ function SourceIconWithTooltip({ source }: { source: SourceName }) {
   )
 }
 
-function SourceIcons({ from, to }: { from: Ticker; to: Ticker }) {
-  if (from.source === to.source) {
-    return (
-      <div className="flex items-center gap-1">
-        <SourceIconWithTooltip source={from.source} />
-      </div>
-    )
-  }
-  return (
-    <div className="flex items-center gap-1">
-      <SourceIconWithTooltip source={from.source} />
-      <SourceIconWithTooltip source={to.source} />
-    </div>
-  )
-}
-
-function FormatRate({ rate, unit }: { rate: number | undefined; unit: string | undefined }) {
+function FormatRate({
+  rate,
+  unit,
+  ticker,
+  toSource,
+}: {
+  rate: number | undefined
+  unit: string | undefined
+  ticker: string
+  toSource: SourceName
+}) {
   const displayRate = rate !== undefined && !isNaN(rate) ? formatAmount(rate) : '—'
+  const suffix = unit ?? ticker.toUpperCase()
   return (
-    <div>
+    <div className="flex items-center justify-end gap-1">
       <span className="text-sm tabular-nums">{displayRate}</span>
-      {unit !== undefined && <span className="text-muted-foreground ml-1 text-sm">{unit}</span>}
+      <span className="text-muted-foreground text-sm">{suffix}</span>
+      <SourceIconWithTooltip source={toSource} />
     </div>
   )
 }
@@ -141,16 +137,13 @@ function FavoriteRow({
   return (
     <TableRow key={pairId(pair.from, pair.to)}>
       <TableCell>
-        <TickerName ticker={pair.from} />
-      </TableCell>
-      <TableCell>
-        <TickerName ticker={pair.to} />
+        <div className="flex items-center gap-1.5">
+          <SourceIconWithTooltip source={pair.from.source} />
+          <TickerName ticker={pair.from} />
+        </div>
       </TableCell>
       <TableCell className="text-right">
-        <FormatRate rate={rate} unit={pair.to.unit} />
-      </TableCell>
-      <TableCell className="w-px whitespace-nowrap">
-        <SourceIcons from={pair.from} to={pair.to} />
+        <FormatRate rate={rate} unit={pair.to.unit} ticker={pair.to.ticker} toSource={pair.to.source} />
       </TableCell>
       <TableCell>
         {/* Мобильные: одна кнопка-меню */}
@@ -190,10 +183,8 @@ function FavoritesTable({ favorites, rates, onRemove, onMoveUp, onMoveDown }: Fa
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Из</TableHead>
-          <TableHead>В</TableHead>
+          <TableHead>Валюта</TableHead>
           <TableHead className="text-right">Курс</TableHead>
-          <TableHead className="w-px" />
           <TableHead className="w-8" />
         </TableRow>
       </TableHeader>
