@@ -34,6 +34,7 @@ const moexRepo = new MoexRepository()
 const dbRepo = new DexieRepository()
 
 const DEFAULT_STATUS: SourceStatus = { updatedAt: null, error: null, loading: false }
+const RELATIVE_TIME_UPDATE_INTERVAL_MS = 30_000
 
 function StatusCell({ status }: { status: SourceStatus }) {
   if (status.error !== null) {
@@ -103,6 +104,8 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     moex: { ...DEFAULT_STATUS },
   })
 
+  const [, setTick] = useState(0)
+
   useEffect(() => {
     for (const source of SOURCES) {
       void dbRepo.getUpdateTime(source).then((updatedAt) => {
@@ -112,6 +115,13 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
         }))
       })
     }
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((t) => t + 1)
+    }, RELATIVE_TIME_UPDATE_INTERVAL_MS)
+    return () => clearInterval(interval)
   }, [])
 
   const refreshSource = useCallback(async (source: SourceName): Promise<void> => {
