@@ -85,7 +85,7 @@ function pairId(from: Ticker, to: Ticker): string {
 function applyUpdates(holding: Holding, updates: HoldingUpdate): void {
   if (updates.ticker !== undefined) holding.ticker = updates.ticker
   if (updates.amount !== undefined) holding.amount = updates.amount
-  if (updates.label !== undefined) holding.label = updates.label
+  if (updates.label !== undefined) holding.label = updates.label.trim()
   if (updates.enabled !== undefined) holding.enabled = updates.enabled
 }
 
@@ -195,7 +195,7 @@ export class DexieRepository implements DbRepositoryInterface {
       id: uuidv4(),
       ticker,
       amount,
-      label,
+      label: label.trim(),
       order: nextOrder,
       enabled: true,
     })
