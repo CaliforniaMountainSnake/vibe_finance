@@ -7,14 +7,13 @@ import type { Ticker } from '@/entities/Ticker'
 import { Search, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { useCurrencySearch } from './currency-search-provider'
-
-const SOURCE_LABELS: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko', moex: 'MOEX' }
+import { sourceDisplayName } from '@/lib/source-display-name'
 
 function SourceGroupLabel({ source }: { source: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <SourceIcon source={source as SourceName} className="size-3 text-muted-foreground" />
-      <span>{SOURCE_LABELS[source] ?? source}</span>
+      <span>{sourceDisplayName(source as SourceName)}</span>
     </span>
   )
 }
@@ -42,9 +41,7 @@ function TickerPickerItem({
           {rate.ticker}
           {rate.unit && <span className="text-muted-foreground ml-1">{rate.unit}</span>}
         </span>
-        <span className="ml-auto text-xs text-muted-foreground shrink-0">
-          {SOURCE_LABELS[rate.source] ?? rate.source}
-        </span>
+        <span className="ml-auto text-xs text-muted-foreground shrink-0">{sourceDisplayName(rate.source)}</span>
       </div>
       {rate.name && <div className="text-xs text-muted-foreground">{rate.name}</div>}
     </button>

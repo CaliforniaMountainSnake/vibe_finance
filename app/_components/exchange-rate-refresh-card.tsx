@@ -10,6 +10,7 @@ import { DexieRepository } from '@/repositories/DexieRepository'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
+import { sourceDisplayName } from '@/lib/source-display-name'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RefreshCw } from 'lucide-react'
 
@@ -76,7 +77,7 @@ function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceS
               <td className="px-1.5 py-1.5 capitalize font-medium">
                 <span className="inline-flex items-center gap-1.5">
                   <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
-                  {source}
+                  {sourceDisplayName(source)}
                 </span>
               </td>
               <td className="px-1.5 py-1.5">

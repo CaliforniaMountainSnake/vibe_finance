@@ -41,10 +41,7 @@ function TickerName({ ticker }: { ticker: Ticker }) {
   )
 }
 
-function sourceDisplayName(s: SourceName): string {
-  if (s === 'moex') return 'MOEX'
-  return s === 'binance' ? 'Binance' : 'CoinGecko'
-}
+import { sourceDisplayName } from '@/lib/source-display-name'
 
 function SourceIconWithTooltip({ source }: { source: SourceName }) {
   return (

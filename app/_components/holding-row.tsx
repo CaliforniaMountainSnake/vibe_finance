@@ -10,8 +10,7 @@ import { HoldingRemoveDialog, HoldingMobileActions, HoldingDesktopActions } from
 import { formatAmount } from '@/lib/utils'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-
-const SOURCE_DISPLAY: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko' }
+import { sourceDisplayName } from '@/lib/source-display-name'
 
 function SourceIconWithTooltip({ source }: { source: SourceName }) {
   return (
@@ -21,7 +20,7 @@ function SourceIconWithTooltip({ source }: { source: SourceName }) {
           <SourceIcon source={source} className="size-3 shrink-0 text-muted-foreground" />
         </span>
       </TooltipTrigger>
-      <TooltipContent>{SOURCE_DISPLAY[source] ?? source}</TooltipContent>
+      <TooltipContent>{sourceDisplayName(source)}</TooltipContent>
     </Tooltip>
   )
 }

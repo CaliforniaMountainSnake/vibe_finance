@@ -3,6 +3,7 @@ import type { SourceName } from '@/entities/ExchangeRate'
 import { BinanceIcon } from './binance-icon'
 import { CoinGeckoIcon } from './coingecko-icon'
 import { MoexIcon } from './moex-icon'
+import { sourceDisplayName } from '@/lib/source-display-name'
 
 const iconMap: Record<SourceName, React.ComponentType<SVGProps<SVGSVGElement>>> = {
   binance: BinanceIcon,
@@ -17,5 +18,5 @@ type SourceIconProps = SVGProps<SVGSVGElement> & {
 export function SourceIcon({ source, ...svgProps }: SourceIconProps) {
   const Icon = iconMap[source]
   if (!Icon) return null
-  return <Icon aria-label={source} {...svgProps} />
+  return <Icon aria-label={sourceDisplayName(source)} {...svgProps} />
 }
