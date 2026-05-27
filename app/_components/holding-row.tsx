@@ -62,10 +62,23 @@ function AmountCell({
 
 /* ── LabelCell ─────────────────────────── */
 
-function LabelCell({ label }: { label: string }) {
+function LabelCell({ label, tickerName }: { label: string; tickerName?: string }) {
+  const displayText = label || tickerName
+  const isFallback = !label
+
+  if (!displayText) {
+    return (
+      <TableCell>
+        <span className="text-sm whitespace-normal break-words">—</span>
+      </TableCell>
+    )
+  }
+
   return (
     <TableCell>
-      <span className="text-sm whitespace-normal break-words">{label || '—'}</span>
+      <span className={`text-sm whitespace-normal break-words${isFallback ? ' text-muted-foreground' : ''}`}>
+        {displayText}
+      </span>
     </TableCell>
   )
 }
@@ -117,7 +130,7 @@ export function HoldingRow({
     <>
       <TableRow className={disabled ? 'opacity-40 hover:opacity-60' : ''}>
         <AmountCell holding={holding} converted={converted} totalLabel={totalLabel} showConverted={!sameCurrency} />
-        <LabelCell label={holding.label} />
+        <LabelCell label={holding.label} tickerName={holding.ticker.name} />
         <TableCell className="w-px whitespace-nowrap">
           <HoldingMobileActions
             isFirst={isFirst}
