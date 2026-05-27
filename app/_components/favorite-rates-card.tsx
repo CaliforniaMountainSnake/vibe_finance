@@ -60,19 +60,29 @@ function FormatRate({
   rate,
   unit,
   ticker,
+  toName,
   toSource,
 }: {
   rate: number | undefined
   unit: string | undefined
   ticker: string
+  toName: string | undefined
   toSource: SourceName
 }) {
   const displayRate = rate !== undefined && !isNaN(rate) ? formatAmount(rate) : '—'
   const suffix = unit ?? ticker.toUpperCase()
+  const suffixNode = <span className="text-muted-foreground text-sm">{suffix}</span>
   return (
     <div className="flex items-center justify-end gap-1">
       <span className="text-sm tabular-nums">{displayRate}</span>
-      <span className="text-muted-foreground text-sm">{suffix}</span>
+      {toName !== undefined ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{suffixNode}</TooltipTrigger>
+          <TooltipContent side="top">{toName}</TooltipContent>
+        </Tooltip>
+      ) : (
+        suffixNode
+      )}
       <SourceIconWithTooltip source={toSource} />
     </div>
   )
@@ -143,7 +153,13 @@ function FavoriteRow({
         </div>
       </TableCell>
       <TableCell className="text-right">
-        <FormatRate rate={rate} unit={pair.to.unit} ticker={pair.to.ticker} toSource={pair.to.source} />
+        <FormatRate
+          rate={rate}
+          unit={pair.to.unit}
+          ticker={pair.to.ticker}
+          toName={pair.to.name}
+          toSource={pair.to.source}
+        />
       </TableCell>
       <TableCell>
         {/* Мобильные: одна кнопка-меню */}
