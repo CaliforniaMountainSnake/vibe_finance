@@ -43,12 +43,12 @@ describe('MoexRepository', () => {
   it('includes index entries', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
-    // BCSGA_INAV_RUB from indexes
-    expect(tickers).toContain('bcsga_inav_rub')
-    // RTSI_RTSI_USD
-    expect(tickers).toContain('rtsi_rtsi_usd')
-    // IMOEX_SNDX_RUB
-    expect(tickers).toContain('imoex_sndx_rub')
+    // BCSGA / RUB → bcsga_rub
+    expect(tickers).toContain('bcsga_rub')
+    // RTSI / USD → rtsi_usd
+    expect(tickers).toContain('rtsi_usd')
+    // IMOEX / RUB → imoex_rub
+    expect(tickers).toContain('imoex_rub')
   })
 
   it('includes share entries with dedup tickers', () => {

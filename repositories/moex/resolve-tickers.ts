@@ -1,13 +1,17 @@
+import type { IndexEntry } from './parse-indexes'
 import type { ShareEntry } from './parse-shares'
 
+/** Entry с полями для дедупликации тикеров. */
+type ResolvableEntry = ShareEntry | IndexEntry
+
 /**
- * Разрешает коллизии тикеров среди акций.
+ * Разрешает коллизии тикеров среди акций и индексов.
  *
- * Если несколько акций претендуют на один и тот же первичный тикер,
+ * Если несколько entry претендуют на один и тот же первичный тикер,
  * первая сохраняет его, а остальные получают тикер вида SECID_BOARDID.
  */
-export function resolveShareTickers(entries: ShareEntry[]): ShareEntry[] {
-  const groups = new Map<string, ShareEntry[]>()
+export function resolveTickers<T extends ResolvableEntry>(entries: T[]): T[] {
+  const groups = new Map<string, T[]>()
 
   for (const entry of entries) {
     const key = entry.ticker.toLowerCase()
@@ -19,7 +23,7 @@ export function resolveShareTickers(entries: ShareEntry[]): ShareEntry[] {
     }
   }
 
-  const result: ShareEntry[] = []
+  const result: T[] = []
   for (const [, group] of groups) {
     result.push(group[0])
 

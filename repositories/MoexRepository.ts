@@ -5,7 +5,7 @@ import { parseCurrencyRates } from './moex/parse-currencies'
 import type { IndexEntry } from './moex/parse-indexes'
 import { parseIndexes } from './moex/parse-indexes'
 import { parseShares } from './moex/parse-shares'
-import { resolveShareTickers } from './moex/resolve-share-tickers'
+import { resolveTickers } from './moex/resolve-tickers'
 import { buildCurrencyToRubMap, convertToBtcPrice } from './moex/price-converter'
 
 /** URL API MOEX ISS для валют (CETS, WAPRICE). */
@@ -127,7 +127,7 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
 /** Извлекает цену BTC/USD из ответа индексов. Бросает ошибку, если отсутствует. */
 function extractBtcPrice(indexJson: ReturnType<typeof parseJsonOrThrow>): number {
   const entries = parseIndexes(indexJson)
-  const btcEntry = entries.find((e) => e.ticker === 'moexbtc_rtsi_usd')
+  const btcEntry = entries.find((e) => e.secId === 'moexbtc')
   if (!btcEntry || btcEntry.priceInCurrency <= 0) {
     throw new Error('MOEX: BTC/USD price (MOEXBTC) is missing or zero')
   }
@@ -143,9 +143,11 @@ type ConvertContext = {
 
 /** Конвертирует массив индексов в ExchangeRate и добавляет в результат. */
 function appendIndexEntries(result: ExchangeRate[], entries: IndexEntry[], ctx: ConvertContext): void {
-  for (const entry of entries) {
+  const deduped = resolveTickers(entries)
+
+  for (const entry of deduped) {
     // Пропускаем MOEXBTC — уже добавлен как базовый тикер 'btc'
-    if (entry.ticker === 'moexbtc_rtsi_usd') continue
+    if (entry.secId === 'moexbtc') continue
 
     const btcPrice = convertToBtcPrice({
       priceInCurrency: entry.priceInCurrency,
@@ -228,7 +230,7 @@ function appendShareEntries(
   sharesJson: ReturnType<typeof parseJsonOrThrow>,
   ctx: { btcRub: number; currencyToRub: Map<string, number>; updatedAt: number }
 ): void {
-  const shareEntries = resolveShareTickers(parseShares(sharesJson))
+  const shareEntries = resolveTickers(parseShares(sharesJson))
 
   for (const entry of shareEntries) {
     const btcPrice = convertToBtcPrice({
