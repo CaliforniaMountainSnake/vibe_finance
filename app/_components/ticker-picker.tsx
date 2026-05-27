@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
+import Fuse from 'fuse.js'
 import { Input } from '@/components/ui/input'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
@@ -114,11 +115,25 @@ export function TickerPicker({
   const fallbackRef = useRef<HTMLInputElement>(null)
   const ref = inputRef ?? fallbackRef
 
+  const fuse = useMemo(
+    () =>
+      new Fuse(allRates, {
+        keys: [
+          { name: 'ticker', weight: 0.5 },
+          { name: 'name', weight: 0.35 },
+          { name: 'source', weight: 0.15 },
+        ],
+        threshold: 0.3,
+        includeScore: true,
+      }),
+    [allRates]
+  )
+
   const filtered = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
+    const q = searchQuery.trim()
     if (!q) return allRates
-    return allRates.filter((r) => r.ticker.toLowerCase().includes(q) || (r.name && r.name.toLowerCase().includes(q)))
-  }, [allRates, searchQuery])
+    return fuse.search(q).map((r) => r.item)
+  }, [fuse, searchQuery, allRates])
 
   const grouped = useMemo(() => {
     const map: Record<string, ExchangeRate[]> = {}
