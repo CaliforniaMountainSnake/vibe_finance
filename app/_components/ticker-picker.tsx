@@ -34,10 +34,15 @@ function TickerPickerItem({
     <button
       type="button"
       onClick={() => onSelect(ticker)}
-      className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-accent text-accent-foreground' : ''}`}
+      className={`w-full px-3 py-1.5 text-sm text-left hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-accent text-accent-foreground' : ''}`}
     >
-      <span className="font-medium uppercase text-xs w-10 shrink-0">{rate.ticker}</span>
-      <span className="ml-auto text-xs text-muted-foreground">{SOURCE_LABELS[rate.source] ?? rate.source}</span>
+      <div className="flex items-center gap-2">
+        <span className="font-medium uppercase text-xs">{rate.ticker}</span>
+        <span className="ml-auto text-xs text-muted-foreground shrink-0">
+          {SOURCE_LABELS[rate.source] ?? rate.source}
+        </span>
+      </div>
+      {rate.name && <div className="text-xs text-muted-foreground">{rate.name}</div>}
     </button>
   )
 }
