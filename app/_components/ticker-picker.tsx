@@ -38,7 +38,10 @@ function TickerPickerItem({
       className={`w-full px-3 py-1.5 text-sm text-left hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-accent text-accent-foreground' : ''}`}
     >
       <div className="flex items-center gap-2">
-        <span className="font-medium uppercase text-xs">{rate.ticker}</span>
+        <span className="font-medium uppercase text-xs">
+          {rate.ticker}
+          {rate.unit && <span className="text-muted-foreground ml-1">{rate.unit}</span>}
+        </span>
         <span className="ml-auto text-xs text-muted-foreground shrink-0">
           {SOURCE_LABELS[rate.source] ?? rate.source}
         </span>
