@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
-import Fuse from 'fuse.js'
 import { Input } from '@/components/ui/input'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import { Search, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
+import { useCurrencySearch } from './currency-search-provider'
 
 const SOURCE_LABELS: Record<string, string> = { binance: 'Binance', coingecko: 'CoinGecko', moex: 'MOEX' }
 
@@ -115,23 +115,11 @@ export function TickerPicker({
   const fallbackRef = useRef<HTMLInputElement>(null)
   const ref = inputRef ?? fallbackRef
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(allRates, {
-        keys: [
-          { name: 'ticker', weight: 0.5 },
-          { name: 'name', weight: 0.35 },
-          { name: 'source', weight: 0.15 },
-        ],
-        threshold: 0.3,
-        includeScore: true,
-      }),
-    [allRates]
-  )
+  const fuse = useCurrencySearch()
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim()
-    if (!q) return allRates
+    if (!q || !fuse) return allRates
     return fuse.search(q).map((r) => r.item)
   }, [fuse, searchQuery, allRates])
 

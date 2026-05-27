@@ -10,6 +10,7 @@ import { formatAmount } from '@/lib/utils'
 import { ConfirmRemoveButton } from './confirm-remove-button'
 import { AddFavoritesDialog } from './add-favorites-dropdown'
 import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
+import { CurrencySearchProvider } from './currency-search-provider'
 import { dbRepo } from '@/lib/db'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
@@ -269,7 +270,9 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProps) {
       <CardHeader>
         <CardTitle>Избранные курсы</CardTitle>
         <CardAction>
-          <AddFavoritesDialog allRates={allRates} onAdded={loadFavorites} />
+          <CurrencySearchProvider allRates={allRates}>
+            <AddFavoritesDialog allRates={allRates} onAdded={loadFavorites} />
+          </CurrencySearchProvider>
         </CardAction>
       </CardHeader>
       <CardFooter className="block p-0">

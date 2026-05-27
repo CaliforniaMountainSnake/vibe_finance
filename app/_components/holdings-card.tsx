@@ -9,6 +9,7 @@ import type { TickerPair } from '@/entities/TickerPair'
 import { dbRepo } from '@/lib/db'
 import { HoldingsTable } from './holdings-table'
 import { AddHoldingDialog } from './add-holding-dialog'
+import { CurrencySearchProvider } from './currency-search-provider'
 
 async function computeRate(from: Ticker, to: Ticker): Promise<number | undefined> {
   const pair: TickerPair = { from, to }
@@ -123,33 +124,35 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
   const state = useHoldingsState(refreshKey)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Мои средства</CardTitle>
-        <CardAction className="flex items-center gap-1.5">
-          <AddHoldingDialog allRates={state.allRates} onAdded={() => void state.refreshHoldingsAndRates()} />
-        </CardAction>
-      </CardHeader>
-      <CardFooter className="block p-0">
-        {state.holdings.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Нет сохранённых средств. Добавьте кнопкой справа вверху.
-          </p>
-        ) : (
-          <HoldingsTable
-            holdings={state.holdings}
-            allRates={state.allRates}
-            conversionRates={state.conversionRates}
-            totalTicker={state.totalTicker}
-            onTotalTickerChange={state.changeTotal}
-            onMoveUp={(id) => void state.moveUp(id)}
-            onMoveDown={(id) => void state.moveDown(id)}
-            onToggleEnabled={(id) => void state.toggleEnabled(id)}
-            onRemove={(id) => void state.remove(id)}
-            onEdited={() => void state.refreshHoldingsAndRates()}
-          />
-        )}
-      </CardFooter>
-    </Card>
+    <CurrencySearchProvider allRates={state.allRates}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Мои средства</CardTitle>
+          <CardAction className="flex items-center gap-1.5">
+            <AddHoldingDialog allRates={state.allRates} onAdded={() => void state.refreshHoldingsAndRates()} />
+          </CardAction>
+        </CardHeader>
+        <CardFooter className="block p-0">
+          {state.holdings.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Нет сохранённых средств. Добавьте кнопкой справа вверху.
+            </p>
+          ) : (
+            <HoldingsTable
+              holdings={state.holdings}
+              allRates={state.allRates}
+              conversionRates={state.conversionRates}
+              totalTicker={state.totalTicker}
+              onTotalTickerChange={state.changeTotal}
+              onMoveUp={(id) => void state.moveUp(id)}
+              onMoveDown={(id) => void state.moveDown(id)}
+              onToggleEnabled={(id) => void state.toggleEnabled(id)}
+              onRemove={(id) => void state.remove(id)}
+              onEdited={() => void state.refreshHoldingsAndRates()}
+            />
+          )}
+        </CardFooter>
+      </Card>
+    </CurrencySearchProvider>
   )
 }
