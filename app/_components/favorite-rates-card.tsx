@@ -27,7 +27,18 @@ function pairId(from: Ticker, to: Ticker): string {
 /* ── FavoriteRow helpers ─────────────────────────────────────── */
 
 function TickerName({ ticker }: { ticker: Ticker }) {
-  return <span className="font-medium text-sm uppercase">{ticker.ticker}</span>
+  const label = <span className="font-medium text-sm uppercase">{ticker.ticker}</span>
+
+  if (!ticker.name) {
+    return label
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{label}</TooltipTrigger>
+      <TooltipContent side="top">{ticker.name}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 function sourceDisplayName(s: SourceName): string {
