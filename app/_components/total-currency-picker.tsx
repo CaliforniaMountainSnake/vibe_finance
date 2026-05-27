@@ -19,6 +19,15 @@ import type { Ticker } from '@/entities/Ticker'
 import { Calculator, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 
+function DialogCloseButton() {
+  return (
+    <DialogClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+      <X className="size-4" />
+      <span className="sr-only">Закрыть</span>
+    </DialogClose>
+  )
+}
+
 type TotalCurrencyPickerProps = {
   allRates: ExchangeRate[]
   value: Ticker | null
@@ -76,10 +85,6 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
         <TooltipContent>Выбрать валюту для подсчёта итога</TooltipContent>
       </Tooltip>
       <DialogContent className="max-w-sm h-[70vh] p-0 flex flex-col">
-        <DialogClose className="absolute top-3 right-3 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-          <X className="size-4" />
-          <span className="sr-only">Закрыть</span>
-        </DialogClose>
         <DialogHeader className="sr-only">
           <DialogTitle>Выбрать валюту для итога</DialogTitle>
           <DialogDescription>Выберите валюту, в которой будет отображаться общая сумма портфеля</DialogDescription>
@@ -93,6 +98,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder="Валюта для подсчёта итога…"
+            searchRightElement={<DialogCloseButton />}
           />
         </div>
       </DialogContent>

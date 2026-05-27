@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
+import { type ReactNode, useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
@@ -58,15 +58,17 @@ function TickerPickerSearch({
   onChange,
   placeholder,
   inputRef,
+  rightElement,
 }: {
   value: string
   onChange: (v: string) => void
   placeholder?: string
   inputRef: React.RefObject<HTMLInputElement | null>
+  rightElement?: ReactNode
 }) {
   return (
-    <div className="p-2">
-      <div className="relative">
+    <div className="flex items-center gap-1.5 p-2">
+      <div className="relative flex-1">
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
         <Input
           ref={inputRef}
@@ -89,6 +91,7 @@ function TickerPickerSearch({
           </button>
         )}
       </div>
+      {rightElement}
     </div>
   )
 }
@@ -104,6 +107,8 @@ type TickerPickerProps = {
   onSearchChange: (v: string) => void
   /** Кастомный плейсхолдер для поля поиска */
   searchPlaceholder?: string
+  /** Элемент справа от строки поиска (например, кнопка закрытия диалога) */
+  searchRightElement?: ReactNode
 }
 
 export function TickerPicker({
@@ -114,6 +119,7 @@ export function TickerPicker({
   searchQuery,
   onSearchChange,
   searchPlaceholder,
+  searchRightElement,
 }: TickerPickerProps) {
   const fallbackRef = useRef<HTMLInputElement>(null)
   const ref = inputRef ?? fallbackRef
@@ -142,6 +148,7 @@ export function TickerPicker({
         onChange={onSearchChange}
         placeholder={searchPlaceholder}
         inputRef={ref}
+        rightElement={searchRightElement}
       />
       <div className="mx-0 my-1 h-px bg-border shrink-0" />
       {filtered.length === 0 ? (

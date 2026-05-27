@@ -26,6 +26,15 @@ function isTickerEqual(a: Ticker, b: Ticker): boolean {
   return a.source === b.source && a.ticker === b.ticker
 }
 
+function DialogCloseButton() {
+  return (
+    <DialogClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+      <X className="size-4" />
+      <span className="sr-only">Закрыть</span>
+    </DialogClose>
+  )
+}
+
 type AddFavoritesDialogProps = {
   allRates: ExchangeRate[]
   onAdded: () => void
@@ -86,10 +95,6 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
         <TooltipContent>Добавить курс</TooltipContent>
       </Tooltip>
       <DialogContent className="max-w-sm h-[70vh] p-0 flex flex-col">
-        <DialogClose className="absolute top-3 right-3 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-          <X className="size-4" />
-          <span className="sr-only">Закрыть</span>
-        </DialogClose>
         <DialogHeader className="sr-only">
           <DialogTitle>Добавить курс в избранное</DialogTitle>
           <DialogDescription>Выберите пару валют из доступных курсов</DialogDescription>
@@ -109,6 +114,7 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder={selectedFrom ? `Вторая валюта для ${tickerLabel(selectedFrom)} → …` : 'Поиск валюты…'}
+            searchRightElement={<DialogCloseButton />}
           />
         </div>
       </DialogContent>
