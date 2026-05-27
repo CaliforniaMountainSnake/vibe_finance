@@ -51,13 +51,21 @@ describe('MoexRepository', () => {
     expect(tickers).toContain('imoex_sndx_rub')
   })
 
-  it('includes share entries with correct board tickers', () => {
+  it('includes share entries with dedup tickers', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
-    expect(tickers).toContain('enpg_tqbr')
-    expect(tickers).toContain('sber_tqbr')
-    expect(tickers).toContain('sila_tqtf')
-    expect(tickers).toContain('akmc_tqty')
+    // TQBR: ENPG → enpg (no collision)
+    expect(tickers).toContain('enpg')
+    // TQBR: SBER → sber (first wins)
+    expect(tickers).toContain('sber')
+    // TQTF: SBER → sber_tqtf (collision fallback)
+    expect(tickers).toContain('sber_tqtf')
+    // TQTF: SILA → sila (no collision)
+    expect(tickers).toContain('sila')
+    // TQTF: AKMC → akmc (no collision)
+    expect(tickers).toContain('akmc')
+    // TQTY: AKMC → akmc_cny (no collision with primary, suffix prevents)
+    expect(tickers).toContain('akmc_cny')
   })
 
   it('throws if USD/RUB is missing', () => {

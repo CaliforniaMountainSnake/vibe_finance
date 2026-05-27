@@ -4,8 +4,8 @@ import type { FinanceApiRepositoryInterface } from '@/repositories/FinanceApiRep
 import { parseCurrencyRates } from './moex/parse-currencies'
 import type { IndexEntry } from './moex/parse-indexes'
 import { parseIndexes } from './moex/parse-indexes'
-import type { ShareEntry } from './moex/parse-shares'
 import { parseShares } from './moex/parse-shares'
+import { resolveShareTickers } from './moex/resolve-share-tickers'
 import { buildCurrencyToRubMap, convertToBtcPrice } from './moex/price-converter'
 
 /** URL API MOEX ISS для валют (CETS, WAPRICE). */
@@ -97,74 +97,28 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
   ): ExchangeRate[] {
     const { usdRub, rates: currencyRates } = parseCurrencyRates(currencyJson)
 
-    // BTC — из индексов
     const btcUsdPrice = extractBtcPrice(indexJson)
     const btcRubPrice = btcUsdPrice * usdRub
 
     const updatedAt = Math.floor(Date.now() / MS_PER_SEC)
     const currencyToRub = buildCurrencyToRubMap(currencyRates)
-    // Добавляем USD/RUB, чтобы конвертер мог работать с USD
     currencyToRub.set('USD', usdRub)
 
     const result: ExchangeRate[] = []
 
     // BTC
-    result.push({
-      source: 'moex',
-      ticker: 'btc',
-      btcPrice: 1,
-      updatedAt,
-    })
+    result.push({ source: 'moex', ticker: 'btc', btcPrice: 1, updatedAt })
 
     // Валюты
-    for (const rate of currencyRates) {
-      if (rate.ticker === 'rub') {
-        result.push({
-          source: 'moex',
-          ticker: 'rub',
-          btcPrice: btcRubPrice,
-          unit: rate.unit,
-          updatedAt,
-        })
-        continue
-      }
-      if (rate.ticker === 'usd') {
-        result.push({
-          source: 'moex',
-          ticker: 'usd',
-          btcPrice: btcRubPrice / usdRub,
-          unit: rate.unit,
-          updatedAt,
-        })
-        continue
-      }
-
-      const btcPrice = convertToBtcPrice({
-        priceInCurrency: rate.priceInRub,
-        currency: 'RUB',
-        currencyToRub,
-        btcRub: btcRubPrice,
-      })
-      if (btcPrice !== null) {
-        result.push({
-          source: 'moex',
-          ticker: rate.ticker,
-          btcPrice,
-          unit: rate.unit,
-          name: rate.name,
-          updatedAt,
-        })
-      }
-    }
+    appendCurrencyRates(result, currencyRates, { usdRub, btcRub: btcRubPrice, currencyToRub, updatedAt })
 
     // Индексы
     const indexEntries = parseIndexes(indexJson)
     const convertCtx = { currencyToRub, btcRub: btcRubPrice, updatedAt }
-    appendEntries(result, indexEntries, convertCtx)
+    appendIndexEntries(result, indexEntries, convertCtx)
 
     // Акции
-    const shareEntries = parseShares(sharesJson)
-    appendEntries(result, shareEntries, convertCtx)
+    appendShareEntries(result, sharesJson, { btcRub: btcRubPrice, currencyToRub, updatedAt })
 
     return result
   }
@@ -180,9 +134,6 @@ function extractBtcPrice(indexJson: ReturnType<typeof parseJsonOrThrow>): number
   return btcEntry.priceInCurrency
 }
 
-/** Общий тип для индексов и акций — оба имеют priceInCurrency, currency, name. */
-type PricedEntry = IndexEntry | ShareEntry
-
 /** Контекст конвертации: курсы валют, BTC/RUB и таймстамп. */
 type ConvertContext = {
   currencyToRub: Map<string, number>
@@ -190,12 +141,96 @@ type ConvertContext = {
   updatedAt: number
 }
 
-/** Конвертирует массив PricedEntry в ExchangeRate и добавляет в результат. */
-function appendEntries(result: ExchangeRate[], entries: PricedEntry[], ctx: ConvertContext): void {
+/** Конвертирует массив индексов в ExchangeRate и добавляет в результат. */
+function appendIndexEntries(result: ExchangeRate[], entries: IndexEntry[], ctx: ConvertContext): void {
   for (const entry of entries) {
     // Пропускаем MOEXBTC — уже добавлен как базовый тикер 'btc'
-    if ('currency' in entry && entry.ticker === 'moexbtc_rtsi_usd') continue
+    if (entry.ticker === 'moexbtc_rtsi_usd') continue
 
+    const btcPrice = convertToBtcPrice({
+      priceInCurrency: entry.priceInCurrency,
+      currency: entry.currency,
+      currencyToRub: ctx.currencyToRub,
+      btcRub: ctx.btcRub,
+    })
+    if (btcPrice === null) continue
+
+    result.push({
+      source: 'moex',
+      ticker: entry.ticker,
+      btcPrice,
+      name: entry.name,
+      updatedAt: ctx.updatedAt,
+    })
+  }
+}
+
+/** Параметры для appendCurrencyRates. */
+type CurrencyRateContext = {
+  usdRub: number
+  btcRub: number
+  currencyToRub: Map<string, number>
+  updatedAt: number
+}
+
+/** Добавляет курсы валют в result. */
+function appendCurrencyRates(
+  result: ExchangeRate[],
+  rates: ReturnType<typeof parseCurrencyRates>['rates'],
+  ctx: CurrencyRateContext
+): void {
+  const { usdRub, btcRub, currencyToRub, updatedAt } = ctx
+
+  for (const rate of rates) {
+    if (rate.ticker === 'rub') {
+      result.push({
+        source: 'moex',
+        ticker: 'rub',
+        btcPrice: btcRub,
+        unit: rate.unit,
+        updatedAt,
+      })
+      continue
+    }
+    if (rate.ticker === 'usd') {
+      result.push({
+        source: 'moex',
+        ticker: 'usd',
+        btcPrice: btcRub / usdRub,
+        unit: rate.unit,
+        updatedAt,
+      })
+      continue
+    }
+
+    const btcPrice = convertToBtcPrice({
+      priceInCurrency: rate.priceInRub,
+      currency: 'RUB',
+      currencyToRub,
+      btcRub,
+    })
+    if (btcPrice !== null) {
+      result.push({
+        source: 'moex',
+        ticker: rate.ticker,
+        btcPrice,
+        unit: rate.unit,
+        name: rate.name,
+        updatedAt,
+      })
+    }
+  }
+}
+
+/** Добавляет акции в result после дедупликации тикеров. */
+function appendShareEntries(
+  result: ExchangeRate[],
+  sharesJson: ReturnType<typeof parseJsonOrThrow>,
+  ctx: { btcRub: number; currencyToRub: Map<string, number>; updatedAt: number }
+): void {
+  const shareEntries = resolveShareTickers(parseShares(sharesJson))
+
+  for (const entry of shareEntries) {
     const btcPrice = convertToBtcPrice({
       priceInCurrency: entry.priceInCurrency,
       currency: entry.currency,

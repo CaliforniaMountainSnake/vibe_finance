@@ -13,8 +13,12 @@ const BOARD_CURRENCY: Record<string, string> = {
 
 /** Распарсенная акция/ETF с ценой в оригинальной валюте. */
 export type ShareEntry = {
-  /** Тикер вида secid_boardid (в нижнем регистре). */
+  /** Первичный тикер для дедупликации (secid для TQBR/TQTF, secid_cny для TQTY). */
   ticker: string
+  /** Код инструмента (SECID). */
+  secId: string
+  /** Режим торгов (BOARDID: TQBR, TQTF, TQTY). */
+  boardId: string
   /** Цена (WAPRICE) в оригинальной валюте борда. */
   priceInCurrency: number
   /** Валюта цены (RUB для TQBR/TQTF, CNY для TQTY). */
@@ -31,7 +35,8 @@ export type ShareEntry = {
  * - TQTF — ETF в рублях
  * - TQTY — ETF в юанях
  *
- * Тикер формируется как `SECID_BOARDID` в нижнем регистре.
+ * Первичный тикер: `SECID` для TQBR/TQTF, `SECID_CNY` для TQTY.
+ * Коллизии разрешаются отдельно через resolveShareTickers().
  */
 export function parseShares(sharesJson: MoexResponse): ShareEntry[] {
   const secMap = buildCompositeMap(sharesJson.securities)
@@ -71,7 +76,10 @@ function buildShareEntry(params: ShareBuildParams): ShareEntry | null {
   const currency = BOARD_CURRENCY[boardId] ?? 'RUB'
   const name = getStringField(sec, 'SECNAME')
 
-  return { ticker: compositeKey.toLowerCase(), priceInCurrency: price, currency, name }
+  const secId = getStringField(sec, 'SECID')
+  const ticker = boardId === 'TQTY' ? `${secId}_cny`.toLowerCase() : secId.toLowerCase()
+
+  return { ticker, secId: secId.toLowerCase(), boardId: boardId.toLowerCase(), priceInCurrency: price, currency, name }
 }
 
 /**

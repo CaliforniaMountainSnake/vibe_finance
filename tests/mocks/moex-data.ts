@@ -65,7 +65,9 @@ export const MOEX_MOCK_SHARES = JSON.stringify({
     data: [
       ['ENPG', 'TQBR', 'МКПАО ЭН+ ГРУП ао'],
       ['SBER', 'TQBR', 'Сбербанк ПАО ао'],
+      ['SBER', 'TQTF', 'БПИФ Сбербанк'],
       ['SILA', 'TQTF', 'БПИФ Сила Ликвидности'],
+      ['AKMC', 'TQTF', 'БПИФ Альфа Денежный рынок'],
       ['AKMC', 'TQTY', 'БПИФ Альфа Денежный рынок Юани'],
     ],
   },
@@ -74,7 +76,9 @@ export const MOEX_MOCK_SHARES = JSON.stringify({
     data: [
       ['ENPG', 'TQBR', 378.5],
       ['SBER', 'TQBR', 285.1],
+      ['SBER', 'TQTF', 290.5],
       ['SILA', 'TQTF', 108.03],
+      ['AKMC', 'TQTF', 14.12],
       ['AKMC', 'TQTY', 105.54],
     ],
   },

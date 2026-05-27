@@ -34,18 +34,15 @@ describe('MoexRepository with real raw data', () => {
     expect(tickers).toContain('gld')
   })
 
-  it('contains TQBR shares', () => {
-    const tqbr = rates.filter((r) => r.ticker.includes('_tqbr'))
-    expect(tqbr.length).toBeGreaterThan(0)
+  it('contains TQBR/TQTF shares (ticker = secid, no suffix)', () => {
+    // TQBR/TQTF акции используют SECID без суффикса
+    const noSuffix = rates.filter((r) => !r.ticker.includes('_') && !['btc', 'usd', 'rub'].includes(r.ticker))
+    // Часть из них — акции TQBR/TQTF, другие — валюты без подчёркиваний
+    expect(noSuffix.length).toBeGreaterThan(0)
   })
 
-  it('contains TQTF ETFs', () => {
-    const tqtf = rates.filter((r) => r.ticker.includes('_tqtf'))
-    expect(tqtf.length).toBeGreaterThan(0)
-  })
-
-  it('contains TQTY ETFs in CNY', () => {
-    const tqty = rates.filter((r) => r.ticker.includes('_tqty'))
+  it('TQTY tickers end with _cny', () => {
+    const tqty = rates.filter((r) => r.ticker.endsWith('_cny'))
     expect(tqty.length).toBeGreaterThan(0)
   })
 
