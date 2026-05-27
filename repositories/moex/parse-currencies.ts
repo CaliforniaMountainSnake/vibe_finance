@@ -9,9 +9,12 @@ const CURRENCY_UNITS: Record<string, string> = {
   CNY: '¥',
   KZT: '₸',
   TRY: '₺',
+  AMD: '֏',
   BTC: '₿',
   GLD: 'Au',
   SLV: 'Ag',
+  PLD: 'Pd',
+  PLT: 'Pt',
 }
 
 export { CURRENCY_UNITS }
