@@ -17,6 +17,7 @@ import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import { cn } from '@/lib/utils'
 import { ChevronUp, ChevronDown, EllipsisVertical, X, Eye, EyeOff, Pencil } from 'lucide-react'
+import { CardDesktopActions } from './card-desktop-actions'
 
 function SourceIconInline({ source }: { source: SourceName }) {
   return (
@@ -260,19 +261,32 @@ export function HoldingCardItem({
         <CardHeader>
           <CardAmountTitle holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />
           <CardAction className="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon-xs" aria-label="Редактировать" onClick={() => setEditOpen(true)}>
-              <Pencil aria-hidden="true" className="size-3" />
-            </Button>
-            <CardKebabMenu
+            <CardDesktopActions
               holdingId={holding.id}
               isFirst={isFirst}
               isLast={isLast}
               disabled={disabled}
+              onEditClick={() => setEditOpen(true)}
               onRemoveClick={() => setRemoveOpen(true)}
               onMoveUp={onMoveUp}
               onMoveDown={onMoveDown}
               onToggleEnabled={onToggleEnabled}
             />
+            <div className="md:hidden">
+              <Button variant="ghost" size="icon-xs" aria-label="Редактировать" onClick={() => setEditOpen(true)}>
+                <Pencil aria-hidden="true" className="size-3" />
+              </Button>
+              <CardKebabMenu
+                holdingId={holding.id}
+                isFirst={isFirst}
+                isLast={isLast}
+                disabled={disabled}
+                onRemoveClick={() => setRemoveOpen(true)}
+                onMoveUp={onMoveUp}
+                onMoveDown={onMoveDown}
+                onToggleEnabled={onToggleEnabled}
+              />
+            </div>
           </CardAction>
         </CardHeader>
         <CardContent>
