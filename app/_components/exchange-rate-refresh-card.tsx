@@ -50,12 +50,24 @@ function StatusCell({ status }: { status: SourceStatus }) {
   return 'ещё не обновлялось'
 }
 
+const dateTimeFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
+function formatDate(ts: number): string {
+  return dateTimeFormatter.format(new Date(ts * MS_PER_SEC))
+}
+
 function DateCell({ status }: { status: SourceStatus }) {
   if (status.error !== null) {
     return <span className="text-destructive">{status.error}</span>
   }
   if (status.updatedAt !== null) {
-    return new Date(status.updatedAt * MS_PER_SEC).toLocaleString('ru-RU')
+    return formatDate(status.updatedAt)
   }
   return '—'
 }
