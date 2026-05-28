@@ -18,16 +18,11 @@ import type { Ticker } from '@/entities/Ticker'
 import { cn } from '@/lib/utils'
 import { ChevronUp, ChevronDown, EllipsisVertical, X, Eye, EyeOff, Pencil } from 'lucide-react'
 
-function SourceIconWithTooltip({ source }: { source: SourceName }) {
+function SourceIconInline({ source }: { source: SourceName }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex">
-          <SourceIcon source={source} className="size-3 shrink-0 text-muted-foreground" />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{sourceDisplayName(source)}</TooltipContent>
-    </Tooltip>
+    <span className="inline-flex">
+      <SourceIcon source={source} className="size-3 shrink-0 text-muted-foreground" />
+    </span>
   )
 }
 
@@ -80,6 +75,7 @@ function HoldingTooltipContent({
   const same = isSameCurrency(holding.ticker, totalTicker)
   return (
     <TooltipContent side="top" className="flex flex-col items-start">
+      <span className="text-xs">{sourceDisplayName(holding.ticker.source)}</span>
       {holding.ticker.name ? <span className="font-medium">{holding.ticker.name}</span> : null}
       {totalTicker !== null ? (
         <TooltipRateLine unit={unit} rate={conversionRate} totalUnit={totalUnit} same={same} />
@@ -183,7 +179,7 @@ function CardAmountTitle({
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex items-center gap-1.5 text-sm">
-            <SourceIconWithTooltip source={holding.ticker.source} />
+            <SourceIconInline source={holding.ticker.source} />
             <span className="tabular-nums font-medium">{formatAmount(holding.amount)}</span>
             <span className="text-muted-foreground">{unitOrTicker}</span>
           </span>
