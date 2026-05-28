@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+// Card components replaced with plain divs
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -176,7 +176,7 @@ function CardAmountTitle({
 }) {
   const unitOrTicker = holding.ticker.unit ?? holding.ticker.ticker.toUpperCase()
   return (
-    <CardTitle>
+    <div className="font-heading text-sm leading-snug font-medium">
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex items-center gap-1.5 text-sm">
@@ -187,7 +187,7 @@ function CardAmountTitle({
         </TooltipTrigger>
         <HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />
       </Tooltip>
-    </CardTitle>
+    </div>
   )
 }
 
@@ -257,10 +257,10 @@ export function HoldingCardItem({
 
   return (
     <>
-      <Card size="sm" className={disabled ? 'opacity-40' : ''}>
-        <CardHeader>
+      <div className={cn('border-b px-4 py-2 hover:bg-muted/50', disabled && 'opacity-40')}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-between">
           <CardAmountTitle holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />
-          <CardAction className="flex items-center gap-0.5">
+          <div className="flex-shrink-0 flex items-center gap-0.5">
             <CardDesktopActions
               holdingId={holding.id}
               isFirst={isFirst}
@@ -287,17 +287,17 @@ export function HoldingCardItem({
                 onToggleEnabled={onToggleEnabled}
               />
             </div>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
+          </div>
+        </div>
+        <div>
           <CardConvertedLine
             sameCurrency={isSameCurrency(holding.ticker, totalTicker)}
             converted={computeConverted(holding.amount, conversionRate)}
             totalLabel={totalTicker ? totalTicker.ticker.toUpperCase() : null}
           />
           <CardAccountLabel label={holding.label} tickerName={holding.ticker.name} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <HoldingRemoveDialog
         open={removeOpen}

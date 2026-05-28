@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
@@ -134,13 +134,13 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
             <AddHoldingDialog allRates={state.allRates} onAdded={() => void state.refreshHoldingsAndRates()} />
           </CardAction>
         </CardHeader>
-        <CardContent>
+        <CardFooter className="block p-0">
           {state.holdings.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               Нет сохранённых средств. Добавьте кнопкой справа вверху.
             </p>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div>
               {state.holdings.map((holding, index) => (
                 <HoldingCardItem
                   key={holding.id}
@@ -166,7 +166,7 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
               />
             </div>
           )}
-        </CardContent>
+        </CardFooter>
       </Card>
     </CurrencySearchProvider>
   )
