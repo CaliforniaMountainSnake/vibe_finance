@@ -101,7 +101,7 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
         </DialogHeader>
         <div className="flex flex-col min-h-0 flex-1">
           {selectedFrom && (
-            <p className="px-3 pt-2 text-[11px] text-muted-foreground">
+            <p className="px-3 pt-2 text-[0.6875rem] text-muted-foreground">
               Первая валюта: <span className="font-medium text-foreground">{tickerLabel(selectedFrom)}</span>
               {' — выберите вторую валюту'}
             </p>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Nunito, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { SettingsProvider } from './_components/settings-provider'
 import './globals.css'
 
 export const viewport: Viewport = {
@@ -36,7 +37,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <SettingsProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

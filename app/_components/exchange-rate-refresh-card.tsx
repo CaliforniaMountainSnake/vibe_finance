@@ -13,6 +13,7 @@ import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
 import { sourceDisplayName } from '@/lib/source-display-name'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RefreshCw } from 'lucide-react'
+import { SettingsDialog } from './settings-dialog'
 
 type SourceStatus = {
   updatedAt: number | null
@@ -110,6 +111,39 @@ type ExchangeRateRefreshCardProps = {
   onRefreshed?: () => void
 }
 
+function selectRepo(source: SourceName): CoinGeckoRepository | BinanceRepository | MoexRepository {
+  if (source === 'coingecko') return coinGeckoRepo
+  if (source === 'moex') return moexRepo
+  return binanceRepo
+}
+
+async function refreshSource(
+  source: SourceName,
+  setStatuses: React.Dispatch<React.SetStateAction<Record<SourceName, SourceStatus>>>
+): Promise<void> {
+  setStatuses((prev) => ({
+    ...prev,
+    [source]: { ...prev[source], loading: true, error: null },
+  }))
+
+  try {
+    const repo = selectRepo(source)
+    const rates = await repo.fetchRates()
+    await dbRepo.updateRatesForSource(source, rates)
+
+    setStatuses((prev) => ({
+      ...prev,
+      [source]: { updatedAt: maxUpdatedAt(rates), error: null, loading: false },
+    }))
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Неизвестная ошибка'
+    setStatuses((prev) => ({
+      ...prev,
+      [source]: { ...prev[source], error: message, loading: false },
+    }))
+  }
+}
+
 export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCardProps) {
   const [statuses, setStatuses] = useState<Record<SourceName, SourceStatus>>({
     binance: { ...DEFAULT_STATUS },
@@ -137,38 +171,11 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     return () => clearInterval(interval)
   }, [])
 
-  const refreshSource = useCallback(async (source: SourceName): Promise<void> => {
-    setStatuses((prev) => ({
-      ...prev,
-      [source]: { ...prev[source], loading: true, error: null },
-    }))
-
-    try {
-      let repo: CoinGeckoRepository | BinanceRepository | MoexRepository
-      if (source === 'coingecko') repo = coinGeckoRepo
-      else if (source === 'moex') repo = moexRepo
-      else repo = binanceRepo
-      const rates = await repo.fetchRates()
-      await dbRepo.updateRatesForSource(source, rates)
-
-      setStatuses((prev) => ({
-        ...prev,
-        [source]: { updatedAt: maxUpdatedAt(rates), error: null, loading: false },
-      }))
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Неизвестная ошибка'
-      setStatuses((prev) => ({
-        ...prev,
-        [source]: { ...prev[source], error: message, loading: false },
-      }))
-    }
-  }, [])
-
   const refreshAll = useCallback(() => {
-    void Promise.allSettled(SOURCES.map((source) => refreshSource(source))).then(() => {
+    void Promise.allSettled(SOURCES.map((source) => refreshSource(source, setStatuses))).then(() => {
       onRefreshed?.()
     })
-  }, [refreshSource, onRefreshed])
+  }, [onRefreshed])
 
   const isLoading = statuses.binance.loading || statuses.coingecko.loading
 
@@ -177,6 +184,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
       <CardHeader>
         <CardTitle>Данные API</CardTitle>
         <CardAction>
+          <SettingsDialog />
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

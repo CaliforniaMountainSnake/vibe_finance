@@ -19,4 +19,6 @@ export type AppSetting = {
 export type AppSettingsMap = {
   /** Валюта, в которой подсчитывается общая стоимость портфеля */
   totalBaseTicker: Ticker | null
+  /** Базовый размер шрифта в rem */
+  fontSize: number
 }

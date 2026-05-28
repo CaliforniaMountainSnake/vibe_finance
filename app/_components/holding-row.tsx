@@ -56,7 +56,7 @@ function AmountCell({
               <span className="text-muted-foreground text-sm">{unitOrTicker}</span>
             </div>
             {showConverted && converted !== undefined && totalLabel !== null && (
-              <div className="text-[11px] text-muted-foreground tabular-nums leading-tight pl-[22px]">
+              <div className="text-[0.6875rem] text-muted-foreground tabular-nums leading-tight pl-[1.375rem]">
                 ≈ {converted} {totalLabel}
               </div>
             )}
