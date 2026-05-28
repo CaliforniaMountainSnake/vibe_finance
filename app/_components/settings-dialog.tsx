@@ -14,13 +14,32 @@ import {
 import { Slider } from '@/components/ui/slider'
 import { Minus, Plus, Settings, X } from 'lucide-react'
 
+const FONT_SIZE_XSMALL = 0.8125
 const FONT_SIZE_SMALL = 0.875
-const FONT_SIZE_DEFAULT = 1
-const FONT_SIZE_COMFORTABLE = 1.0625
-const FONT_SIZE_LARGE = 1.125
+const FONT_SIZE_BELOW = 0.96875
+const FONT_SIZE_MEDIUM = 1.0625
+const FONT_SIZE_ABOVE = 1.15625
+const FONT_SIZE_LARGE = 1.1875
 const FONT_SIZE_XLARGE = 1.25
 
-const FONT_SIZE_STEPS = [FONT_SIZE_SMALL, FONT_SIZE_DEFAULT, FONT_SIZE_COMFORTABLE, FONT_SIZE_LARGE, FONT_SIZE_XLARGE]
+const FONT_SIZE_STEPS = [
+  FONT_SIZE_XSMALL,
+  FONT_SIZE_SMALL,
+  FONT_SIZE_BELOW,
+  FONT_SIZE_MEDIUM,
+  FONT_SIZE_ABOVE,
+  FONT_SIZE_LARGE,
+  FONT_SIZE_XLARGE,
+]
+const FONT_SIZE_LABELS = [
+  'Очень маленький',
+  'Маленький',
+  'Ниже среднего',
+  'Средний',
+  'Выше среднего',
+  'Большой',
+  'Очень большой',
+]
 
 function fontSizeToStep(value: number): number {
   let best = 0
@@ -34,8 +53,6 @@ function fontSizeToStep(value: number): number {
   }
   return best
 }
-
-const FONT_SIZE_LABELS = ['Очень маленький', 'Маленький', 'Средний', 'Большой', 'Очень большой'] as const
 
 function fontSizeLabel(step: number): string {
   return FONT_SIZE_LABELS[step] ?? 'Средний'
