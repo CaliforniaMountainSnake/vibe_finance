@@ -203,8 +203,8 @@ function CardConvertedLine({
 }) {
   if (sameCurrency || converted === undefined || totalLabel === null) return null
   return (
-    <div className="text-[0.6875rem] text-muted-foreground tabular-nums leading-tight">
-      ≈ {converted} {totalLabel}
+    <div className="text-sm tabular-nums leading-tight">
+      ≈ {converted} <span className="text-muted-foreground">{totalLabel}</span>
     </div>
   )
 }
