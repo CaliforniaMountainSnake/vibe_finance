@@ -4,17 +4,17 @@ const MAX_FRACTION_DIGITS_FOR_BIG = 2
 const MAGNITUDE_OFFSET = 3
 
 /**
- * Вычисляет опции форматирования на основе порядка (магнитуды) числа.
+ * Определяет опции локализованного форматирования в зависимости от величины числа.
  *
- * - rate < 1: 4 значащие цифры — защита от потери значимости
- *   для очень маленьких курсов (SHIB, сатоши, PEPE).
- * - rate ≥ 1: адаптивные десятичные знаки:
- *   1…100 → 2 знака, 100…1000 → 1 знак, > 1000 → целое.
+ * - Целые числа → без дробной части.
+ * - |amount| < 1 → до 4 значащих цифр (защита от потери значимости для очень маленьких курсов вроде SHIB, PEPE).
+ * - |amount| ≥ 1 → адаптивное число знаков после запятой:
+ *   1…99 → 2 знака, 100…999 → 1 знак, ≥ 1000 → без дробной части.
  */
-function decimalsFor(rate: number): Intl.NumberFormatOptions {
-  const abs = Math.abs(rate)
+function decimalsFor(amount: number): Intl.NumberFormatOptions {
+  const abs = Math.abs(amount)
 
-  if (abs === 0) {
+  if (abs === 0 || Number.isInteger(abs)) {
     return { maximumFractionDigits: 0 }
   }
 
@@ -39,6 +39,6 @@ function decimalsFor(rate: number): Intl.NumberFormatOptions {
 /**
  * Форматирует число (сумму или курс) в человеко-читаемую строку.
  */
-export function formatAmount(rate: number): string {
-  return rate.toLocaleString('ru-RU', decimalsFor(rate))
+export function formatAmount(amount: number): string {
+  return amount.toLocaleString('ru-RU', decimalsFor(amount))
 }
