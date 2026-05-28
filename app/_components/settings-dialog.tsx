@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Slider } from '@/components/ui/slider'
-import { X, Settings } from 'lucide-react'
+import { Minus, Plus, Settings, X } from 'lucide-react'
 
 const FONT_SIZE_SMALL = 0.875
 const FONT_SIZE_DEFAULT = 1
@@ -33,6 +33,12 @@ function fontSizeToStep(value: number): number {
     }
   }
   return best
+}
+
+const FONT_SIZE_LABELS = ['Очень маленький', 'Маленький', 'Средний', 'Большой', 'Очень большой'] as const
+
+function fontSizeLabel(step: number): string {
+  return FONT_SIZE_LABELS[step] ?? 'Средний'
 }
 
 export function SettingsDialog() {
@@ -63,8 +69,19 @@ export function SettingsDialog() {
         <div className="px-4 pb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Размер шрифта</span>
+            <span className="text-xs text-muted-foreground">{fontSizeLabel(currentStep)}</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 shrink-0"
+              aria-label="Уменьшить размер шрифта"
+              disabled={currentStep === 0}
+              onClick={() => setFontSize(FONT_SIZE_STEPS[currentStep - 1])}
+            >
+              <Minus className="size-3.5" />
+            </Button>
             <span className="text-xs text-muted-foreground shrink-0">А</span>
             <Slider
               value={[currentStep]}
@@ -75,6 +92,16 @@ export function SettingsDialog() {
               aria-label="Размер шрифта"
             />
             <span className="text-base text-muted-foreground shrink-0">А</span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 shrink-0"
+              aria-label="Увеличить размер шрифта"
+              disabled={currentStep === FONT_SIZE_STEPS.length - 1}
+              onClick={() => setFontSize(FONT_SIZE_STEPS[currentStep + 1])}
+            >
+              <Plus className="size-3.5" />
+            </Button>
           </div>
         </div>
       </DialogContent>

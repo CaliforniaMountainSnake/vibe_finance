@@ -183,7 +183,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     <Card>
       <CardHeader>
         <CardTitle>Данные API</CardTitle>
-        <CardAction>
+        <CardAction className="flex items-center gap-2">
           <SettingsDialog />
           <Tooltip>
             <TooltipTrigger asChild>
