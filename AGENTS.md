@@ -32,3 +32,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Не делай "улучшенные" абстракции поверх них.
 - Не изменяй имеющиеся компоненты без прямого указания.
 - В папках с компонентами должны лежать только ui-компоненты, код, который не относится к ui, выноси в хелперы/утилиты и т.п.
+
+## Agent skills
+
+### Issue tracker
+
+Issues хранятся как markdown-файлы в `.scratch/<feature>/`. См. `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Используются пять канонических меток: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. См. `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context репозиторий: один `CONTEXT.md` + `docs/adr/` в корне. См. `docs/agents/domain.md`.

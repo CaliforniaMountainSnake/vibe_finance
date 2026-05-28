@@ -1,15 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
 import { dbRepo } from '@/lib/db'
-import { HoldingsTable } from './holdings-table'
+import { computeTotalAmount } from '@/lib/compute-total'
 import { AddHoldingDialog } from './add-holding-dialog'
 import { CurrencySearchProvider } from './currency-search-provider'
+import { HoldingCardItem } from './holding-card-item'
+import { HoldingsTotalCard } from './holdings-total-card'
 
 async function computeRate(from: Ticker, to: Ticker): Promise<number | undefined> {
   const pair: TickerPair = { from, to }
@@ -132,26 +134,39 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
             <AddHoldingDialog allRates={state.allRates} onAdded={() => void state.refreshHoldingsAndRates()} />
           </CardAction>
         </CardHeader>
-        <CardFooter className="block p-0">
+        <CardContent>
           {state.holdings.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               Нет сохранённых средств. Добавьте кнопкой справа вверху.
             </p>
           ) : (
-            <HoldingsTable
-              holdings={state.holdings}
-              allRates={state.allRates}
-              conversionRates={state.conversionRates}
-              totalTicker={state.totalTicker}
-              onTotalTickerChange={state.changeTotal}
-              onMoveUp={(id) => void state.moveUp(id)}
-              onMoveDown={(id) => void state.moveDown(id)}
-              onToggleEnabled={(id) => void state.toggleEnabled(id)}
-              onRemove={(id) => void state.remove(id)}
-              onEdited={() => void state.refreshHoldingsAndRates()}
-            />
+            <div className="flex flex-col gap-2">
+              {state.holdings.map((holding, index) => (
+                <HoldingCardItem
+                  key={holding.id}
+                  holding={holding}
+                  isFirst={index === 0}
+                  isLast={index === state.holdings.length - 1}
+                  conversionRate={state.conversionRates[holding.id]}
+                  totalTicker={state.totalTicker}
+                  allRates={state.allRates}
+                  onMoveUp={(id) => void state.moveUp(id)}
+                  onMoveDown={(id) => void state.moveDown(id)}
+                  onToggleEnabled={(id) => void state.toggleEnabled(id)}
+                  onRemove={(id) => void state.remove(id)}
+                  onEdited={() => void state.refreshHoldingsAndRates()}
+                />
+              ))}
+              <HoldingsTotalCard
+                totalAmount={computeTotalAmount(state.holdings, state.conversionRates)}
+                totalTicker={state.totalTicker}
+                totalUnit={state.totalTicker?.unit ?? null}
+                allRates={state.allRates}
+                onTotalTickerChange={state.changeTotal}
+              />
+            </div>
           )}
-        </CardFooter>
+        </CardContent>
       </Card>
     </CurrencySearchProvider>
   )
