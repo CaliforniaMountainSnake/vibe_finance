@@ -56,6 +56,25 @@ function SourceIconWithTooltip({ source }: { source: SourceName }) {
   )
 }
 
+function rateTooltipContent(
+  rate: number | undefined,
+  suffix: string,
+  toName: string | undefined
+): React.ReactNode | null {
+  if (rate === undefined || isNaN(rate)) {
+    if (toName) return toName
+    return null
+  }
+  return (
+    <>
+      <div>
+        ≈ {rate.toString()} {suffix}
+      </div>
+      {toName && <div className="text-muted-foreground">{toName}</div>}
+    </>
+  )
+}
+
 function FormatRate({
   rate,
   unit,
@@ -69,20 +88,26 @@ function FormatRate({
   toName: string | undefined
   toSource: SourceName
 }) {
-  const displayRate = rate !== undefined && !isNaN(rate) ? formatAmount(rate) : '—'
+  const isValid = rate !== undefined && !isNaN(rate)
+  const displayRate = isValid ? formatAmount(rate) : '—'
   const suffix = unit ?? ticker.toUpperCase()
-  const suffixNode = <span className="text-muted-foreground text-sm">{suffix}</span>
+  const tooltip = rateTooltipContent(rate, suffix, toName)
+
+  const rateNode = <span className="text-sm tabular-nums">{displayRate}</span>
+
   return (
     <div className="flex items-center justify-end gap-1">
-      <span className="text-sm tabular-nums">{displayRate}</span>
-      {toName !== undefined ? (
+      {tooltip ? (
         <Tooltip>
-          <TooltipTrigger asChild>{suffixNode}</TooltipTrigger>
-          <TooltipContent side="top">{toName}</TooltipContent>
+          <TooltipTrigger asChild>{rateNode}</TooltipTrigger>
+          <TooltipContent side="top" className="flex-col items-start">
+            {tooltip}
+          </TooltipContent>
         </Tooltip>
       ) : (
-        suffixNode
+        rateNode
       )}
+      <span className="text-muted-foreground text-sm">{suffix}</span>
       <SourceIconWithTooltip source={toSource} />
     </div>
   )
