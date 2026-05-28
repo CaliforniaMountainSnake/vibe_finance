@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatAmount } from '@/lib/format-rate'
+import { formatAmount } from '@/lib/format-amount'
 
 describe('formatAmount', () => {
   describe('ноль', () => {

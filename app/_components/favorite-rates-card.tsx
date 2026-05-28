@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
-import { formatAmount } from '@/lib/format-rate'
+import { formatAmount } from '@/lib/format-amount'
 import { ConfirmRemoveButton } from './confirm-remove-button'
 import { AddFavoritesDialog } from './add-favorites-dropdown'
 import { FavoriteRowActionsDropdown } from './favorite-row-actions-dropdown'
