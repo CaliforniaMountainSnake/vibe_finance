@@ -221,21 +221,7 @@ export class DexieRepository implements DbRepositoryInterface {
   }
 
   private async swapHoldingWithNeighbor(id: string, direction: 'above' | 'below'): Promise<void> {
-    const current = await this.db.holdings.get(id)
-    if (!current) return
-
-    const collection =
-      direction === 'above'
-        ? this.db.holdings.where('order').below(current.order).reverse()
-        : this.db.holdings.where('order').above(current.order)
-
-    const neighbor = await collection.first()
-    if (!neighbor) return
-
-    const tmp = current.order
-    current.order = neighbor.order
-    neighbor.order = tmp
-    await this.db.holdings.bulkPut([current, neighbor])
+    await this.reorderInPlace(this.db.holdings, id, direction)
   }
 
   // ---------------------------------------------------------------------------
@@ -257,13 +243,25 @@ export class DexieRepository implements DbRepositoryInterface {
 
   private async swapWithNeighbor(pair: TickerPair, direction: 'above' | 'below'): Promise<void> {
     const id = pairId(pair.from, pair.to)
-    const current = await this.db.favoriteRates.get(id)
+    await this.reorderInPlace(this.db.favoriteRates, id, direction)
+  }
+
+  /**
+   * Общий алгоритм перестановки строк в упорядоченной таблице.
+   * Меняет поле `order` местами у записи с указанным id и её соседом.
+   */
+  private async reorderInPlace<T extends { id: string; order: number }>(
+    table: Table<T, string>,
+    id: string,
+    direction: 'above' | 'below'
+  ): Promise<void> {
+    const current = await table.get(id)
     if (!current) return
 
     const collection =
       direction === 'above'
-        ? this.db.favoriteRates.where('order').below(current.order).reverse()
-        : this.db.favoriteRates.where('order').above(current.order)
+        ? table.where('order').below(current.order).reverse()
+        : table.where('order').above(current.order)
 
     const neighbor = await collection.first()
     if (!neighbor) return
@@ -271,6 +269,6 @@ export class DexieRepository implements DbRepositoryInterface {
     const tmp = current.order
     current.order = neighbor.order
     neighbor.order = tmp
-    await this.db.favoriteRates.bulkPut([current, neighbor])
+    await table.bulkPut([current, neighbor])
   }
 }
