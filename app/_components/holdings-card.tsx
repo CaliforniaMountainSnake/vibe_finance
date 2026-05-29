@@ -7,37 +7,38 @@ import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import type { TickerPair } from '@/entities/TickerPair'
 import { dbRepo } from '@/lib/db'
-import { computeTotalAmount } from '@/lib/compute-total'
+import { convert, type ConvertedResult } from '@/lib/conversion'
 import { AddHoldingDialog } from './add-holding-dialog'
 import { CurrencySearchProvider } from './currency-search-provider'
 import { HoldingCardItem } from './holding-card-item'
 import { HoldingsTotalCard } from './holdings-total-card'
 
-async function computeRate(from: Ticker, to: Ticker): Promise<number | undefined> {
-  const pair: TickerPair = { from, to }
-  try {
-    return await dbRepo.getRate(pair)
-  } catch {
-    return undefined
-  }
+function computeTotalFromResults(holdings: Holding[], results: ConvertedResult[]): number {
+  const rateById = new Map(results.map((r) => [r.holdingId, r.rate]))
+  return holdings
+    .filter((h) => h.enabled)
+    .reduce((sum, h) => {
+      const rate = rateById.get(h.id)
+      if (rate === undefined || isNaN(rate)) return sum
+      return sum + h.amount * rate
+    }, 0)
 }
 
-async function computeConversionRates(
-  holdings: Holding[],
-  totalTicker: Ticker
-): Promise<Record<string, number | undefined>> {
-  const map: Record<string, number | undefined> = {}
-  for (const h of holdings) {
-    map[h.id] = await computeRate(h.ticker, totalTicker)
+function getRateAdapter(): (pair: TickerPair) => Promise<number | undefined> {
+  return async (pair: TickerPair) => {
+    try {
+      return await dbRepo.getRate(pair)
+    } catch {
+      return undefined
+    }
   }
-  return map
 }
 
 function useHoldingsState(refreshKey: number) {
   const [holdings, setHoldings] = useState<Holding[]>([])
   const [allRates, setAllRates] = useState<ExchangeRate[]>([])
   const [totalTicker, setTotalTicker] = useState<Ticker | null>(null)
-  const [conversionRates, setConversionRates] = useState<Record<string, number | undefined>>({})
+  const [convertedResults, setConvertedResults] = useState<ConvertedResult[]>([])
 
   useEffect(() => {
     void (async () => {
@@ -51,7 +52,7 @@ function useHoldingsState(refreshKey: number) {
       const tt = total ?? null
       setTotalTicker(tt)
       if (tt && hld.length > 0) {
-        computeConversionRates(hld, tt).then(setConversionRates)
+        convert(hld, getRateAdapter(), tt).then(setConvertedResults)
       }
     })()
   }, [refreshKey])
@@ -60,57 +61,59 @@ function useHoldingsState(refreshKey: number) {
     const [hld, rates] = await Promise.all([dbRepo.getHoldings(), dbRepo.getAllRates()])
     setHoldings(hld)
     setAllRates(rates)
-    updateConversionRates(hld, totalTicker)
+    updateConvertedResults(hld, totalTicker)
   }
 
-  function updateConversionRates(hld: Holding[], tt: Ticker | null) {
+  function updateConvertedResults(hld: Holding[], tt: Ticker | null) {
     if (!tt || hld.length === 0) {
-      setConversionRates({})
+      setConvertedResults([])
       return
     }
-    computeConversionRates(hld, tt).then(setConversionRates)
+    convert(hld, getRateAdapter(), tt).then(setConvertedResults)
+  }
+
+  async function afterMutation(dbAction: Promise<unknown>): Promise<void> {
+    await dbAction
+    const updated = await dbRepo.getHoldings()
+    setHoldings(updated)
+    updateConvertedResults(updated, totalTicker)
   }
 
   async function moveUp(id: string) {
-    await dbRepo.moveHoldingUp(id)
-    const updated = await dbRepo.getHoldings()
-    setHoldings(updated)
-    updateConversionRates(updated, totalTicker)
+    await afterMutation(dbRepo.moveHoldingUp(id))
   }
 
   async function moveDown(id: string) {
-    await dbRepo.moveHoldingDown(id)
-    const updated = await dbRepo.getHoldings()
-    setHoldings(updated)
-    updateConversionRates(updated, totalTicker)
+    await afterMutation(dbRepo.moveHoldingDown(id))
   }
 
   async function toggleEnabled(id: string) {
     const holding = holdings.find((h) => h.id === id)
     if (!holding) return
-    await dbRepo.updateHolding(id, { enabled: !holding.enabled })
-    const updated = await dbRepo.getHoldings()
-    setHoldings(updated)
-    updateConversionRates(updated, totalTicker)
+    await afterMutation(dbRepo.updateHolding(id, { enabled: !holding.enabled }))
   }
 
   async function remove(id: string) {
-    await dbRepo.removeHolding(id)
-    const updated = await dbRepo.getHoldings()
-    setHoldings(updated)
-    updateConversionRates(updated, totalTicker)
+    await afterMutation(dbRepo.removeHolding(id))
   }
 
   function changeTotal(ticker: Ticker | null) {
     setTotalTicker(ticker)
-    updateConversionRates(holdings, ticker)
+    updateConvertedResults(holdings, ticker)
   }
+
+  const conversionRates: Record<string, number | undefined> = Object.fromEntries(
+    convertedResults.map((r) => [r.holdingId, r.rate])
+  )
+  const convertedById = new Map(convertedResults.map((r) => [r.holdingId, r.converted]))
 
   return {
     holdings,
     allRates,
     totalTicker,
     conversionRates,
+    convertedById,
+    convertedResults,
     moveUp,
     moveDown,
     toggleEnabled,
@@ -148,6 +151,7 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
                   isFirst={index === 0}
                   isLast={index === state.holdings.length - 1}
                   conversionRate={state.conversionRates[holding.id]}
+                  converted={state.convertedById.get(holding.id)}
                   totalTicker={state.totalTicker}
                   allRates={state.allRates}
                   onMoveUp={(id) => void state.moveUp(id)}
@@ -158,7 +162,7 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
                 />
               ))}
               <HoldingsTotalCard
-                totalAmount={computeTotalAmount(state.holdings, state.conversionRates)}
+                totalAmount={computeTotalFromResults(state.holdings, state.convertedResults)}
                 totalTicker={state.totalTicker}
                 totalUnit={state.totalTicker?.unit ?? null}
                 allRates={state.allRates}

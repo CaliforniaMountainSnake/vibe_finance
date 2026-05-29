@@ -8,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { SourceIcon } from '@/components/icons/source-icon'
 import { sourceDisplayName } from '@/lib/source-display-name'
 import { formatAmount } from '@/lib/format-amount'
-import { computeConverted } from '@/lib/compute-converted'
 import { holdingUnit, isSameCurrency } from '@/lib/holding'
 import { EditHoldingDialog } from './edit-holding-dialog'
 import { HoldingRemoveDialog } from './holding-row-actions'
@@ -229,6 +228,7 @@ export type HoldingCardItemProps = {
   isFirst: boolean
   isLast: boolean
   conversionRate: number | undefined
+  converted: string | undefined
   totalTicker: Ticker | null
   allRates: ExchangeRate[]
   onMoveUp: (id: string) => void
@@ -243,6 +243,7 @@ export function HoldingCardItem({
   isFirst,
   isLast,
   conversionRate,
+  converted,
   totalTicker,
   allRates,
   onMoveUp,
@@ -292,7 +293,7 @@ export function HoldingCardItem({
         <div>
           <CardConvertedLine
             sameCurrency={isSameCurrency(holding.ticker, totalTicker)}
-            converted={computeConverted(holding.amount, conversionRate)}
+            converted={converted}
             totalLabel={totalTicker ? totalTicker.ticker.toUpperCase() : null}
           />
           <CardAccountLabel label={holding.label} tickerName={holding.ticker.name} />
