@@ -16,28 +16,9 @@ function tickerLabel(t: Ticker): string {
   return t.ticker.toUpperCase()
 }
 
-/* ── OriginalColumn ───────────────────── */
+/* ── ConvertedCell ─────────────────────── */
 
-function OriginalColumn({ amount, unitOrTicker }: { amount: string; unitOrTicker: string }) {
-  return (
-    <div className="flex items-center gap-1.5 text-right whitespace-nowrap">
-      <span className="text-sm tabular-nums font-medium">{amount}</span>
-      <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
-    </div>
-  )
-}
-
-/* ── LabelRow ──────────────────────────── */
-
-function LabelRow({ displayLabel, hasLabel }: { displayLabel: string; hasLabel: boolean }) {
-  return (
-    <div className={`col-span-2 text-sm leading-tight${hasLabel ? '' : ' text-muted-foreground'}`}>{displayLabel}</div>
-  )
-}
-
-/* ── LeftColumn ────────────────────────── */
-
-function LeftColumn({
+function ConvertedCell({
   same,
   showConverted,
   rateUnavailable,
@@ -57,8 +38,9 @@ function LeftColumn({
       <SourceIcon source={source} className="size-3 shrink-0 text-muted-foreground" />
       {rateUnavailable && <span className="text-destructive">Курс недоступен</span>}
       {same && totalLabel && (
-        <span className="font-medium">
-          {convertedAmount} <span className="text-muted-foreground">{totalLabel}</span>
+        <span>
+          <span className="font-medium">{convertedAmount}</span>{' '}
+          <span className="text-muted-foreground">{totalLabel}</span>
         </span>
       )}
       {showConverted && (
@@ -71,55 +53,79 @@ function LeftColumn({
   )
 }
 
-/* ── AmountCell ────────────────────────── */
+/* ── OriginalCell ──────────────────────── */
 
-function AmountCell({
-  holding,
-  leftAmount,
-  leftLabel,
-  rateTooltip,
-  displayLabel,
-  showConverted,
-  rateUnavailable,
-  hasLabel,
-  same,
+function OriginalCell({
+  amount,
+  unitOrTicker,
+  invisible,
 }: {
-  holding: Holding
-  leftAmount: string
-  leftLabel: string | null
-  rateTooltip: React.ReactNode
-  displayLabel: string | undefined
-  showConverted: boolean
-  rateUnavailable: boolean
-  hasLabel: boolean
-  same: boolean
+  amount: string
+  unitOrTicker: string
+  invisible: boolean
 }) {
-  const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
   return (
-    <TableCell className="w-full">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-block w-full">
-            <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5 items-baseline">
-              <div className="min-w-0">
-                <LeftColumn
-                  same={same}
-                  showConverted={showConverted}
-                  rateUnavailable={rateUnavailable}
-                  convertedAmount={leftAmount}
-                  totalLabel={leftLabel}
-                  source={holding.ticker.source}
-                />
-              </div>
-              {!same && <OriginalColumn amount={formatAmount(holding.amount)} unitOrTicker={unitOrTicker} />}
-              {displayLabel && <LabelRow displayLabel={displayLabel} hasLabel={hasLabel} />}
-            </div>
-          </span>
-        </TooltipTrigger>
-        {rateTooltip}
-      </Tooltip>
+    <div className={`flex items-center gap-1.5 whitespace-nowrap${invisible ? ' invisible' : ''}`}>
+      <span className="text-sm tabular-nums font-medium">{amount}</span>
+      <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
+    </div>
+  )
+}
+
+/* ── ActionsCell ───────────────────────── */
+
+function ActionsCell({
+  isFirst,
+  isLast,
+  disabled,
+  holdingId,
+  onMoveUp,
+  onMoveDown,
+  onToggleEnabled,
+  onEditClick,
+  onRemoveClick,
+}: {
+  isFirst: boolean
+  isLast: boolean
+  disabled: boolean
+  holdingId: string
+  onMoveUp: (id: string) => void
+  onMoveDown: (id: string) => void
+  onToggleEnabled: (id: string) => void
+  onEditClick: () => void
+  onRemoveClick: () => void
+}) {
+  return (
+    <TableCell className="w-px whitespace-nowrap" rowSpan={2}>
+      <HoldingMobileActions
+        isFirst={isFirst}
+        isLast={isLast}
+        disabled={disabled}
+        onMoveUp={() => onMoveUp(holdingId)}
+        onMoveDown={() => onMoveDown(holdingId)}
+        onToggleEnabled={() => onToggleEnabled(holdingId)}
+        onEditClick={onEditClick}
+        onRemoveClick={onRemoveClick}
+      />
+      <HoldingDesktopActions
+        isFirst={isFirst}
+        isLast={isLast}
+        disabled={disabled}
+        onMoveUp={() => onMoveUp(holdingId)}
+        onMoveDown={() => onMoveDown(holdingId)}
+        onToggleEnabled={() => onToggleEnabled(holdingId)}
+        onEditClick={onEditClick}
+        onRemoveClick={onRemoveClick}
+      />
     </TableCell>
   )
+}
+
+/* ── LabelCell ─────────────────────────── */
+
+function LabelCell({ label }: { label: string }) {
+  if (!label) return null
+  return <span className="text-sm leading-tight">{label}</span>
 }
 
 /* ── HoldingRow ────────────────────────── */
@@ -142,28 +148,8 @@ function isSameCurrency(ticker: Ticker, totalTicker: Ticker | null): boolean {
   return totalTicker !== null && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
 }
 
-function holdingDisplayLabel(holding: Holding): {
-  displayLabel: string | undefined
-  hasLabel: boolean
-} {
-  const displayLabel = holding.label || holding.ticker.name
-  const hasLabel = holding.label !== ''
-  return { displayLabel, hasLabel }
-}
-
-function holdingConversionFlags(
-  totalLabel: string | null,
-  same: boolean,
-  converted: string | undefined
-): { rateUnavailable: boolean; showConverted: boolean } {
-  if (totalLabel === null || same) return { rateUnavailable: false, showConverted: false }
-  if (converted === undefined) return { rateUnavailable: true, showConverted: false }
-  return { rateUnavailable: false, showConverted: true }
-}
-
-function computeConverted(amount: number, rate: number | undefined): string | undefined {
-  if (rate === undefined || isNaN(rate)) return undefined
-  return formatAmount(amount * rate)
+function holdingLabel(holding: Holding): string {
+  return holding.label || (holding.ticker.name ?? '')
 }
 
 function computeRowDisplay(holding: Holding, totalTicker: Ticker | null, conversionRate: number | undefined) {
@@ -177,14 +163,24 @@ function computeRowDisplay(holding: Holding, totalTicker: Ticker | null, convers
     converted,
     totalLabel,
   })
-  const { displayLabel, hasLabel } = holdingDisplayLabel(holding)
+  const label = holdingLabel(holding)
   const { rateUnavailable, showConverted } = holdingConversionFlags(totalLabel, same, converted)
-  return { same, leftAmount, leftLabel, displayLabel, hasLabel, rateUnavailable, showConverted }
+  return { same, leftAmount, leftLabel, label, rateUnavailable, showConverted }
 }
 
-function computeLeftConverted(rate: number | undefined, converted: string | undefined): string {
-  if (rate === undefined || isNaN(rate)) return ''
-  return converted ?? ''
+function computeConverted(amount: number, rate: number | undefined): string | undefined {
+  if (rate === undefined || isNaN(rate)) return undefined
+  return formatAmount(amount * rate)
+}
+
+function holdingConversionFlags(
+  totalLabel: string | null,
+  same: boolean,
+  converted: string | undefined
+): { rateUnavailable: boolean; showConverted: boolean } {
+  if (totalLabel === null || same) return { rateUnavailable: false, showConverted: false }
+  if (converted === undefined) return { rateUnavailable: true, showConverted: false }
+  return { rateUnavailable: false, showConverted: true }
 }
 
 function computeLeftSide(params: {
@@ -200,6 +196,49 @@ function computeLeftSide(params: {
     return { leftAmount: formatAmount(holding.amount), leftLabel: unitOrTicker }
   }
   return { leftAmount: computeLeftConverted(conversionRate, converted), leftLabel: totalLabel }
+}
+
+function computeLeftConverted(rate: number | undefined, converted: string | undefined): string {
+  if (rate === undefined || isNaN(rate)) return ''
+  return converted ?? ''
+}
+
+function HoldingDialogs({
+  removeOpen,
+  setRemoveOpen,
+  editOpen,
+  setEditOpen,
+  holding,
+  allRates,
+  onRemove,
+  onEdited,
+}: {
+  removeOpen: boolean
+  setRemoveOpen: (v: boolean) => void
+  editOpen: boolean
+  setEditOpen: (v: boolean) => void
+  holding: Holding
+  allRates: ExchangeRate[]
+  onRemove: (id: string) => void
+  onEdited: () => void
+}) {
+  return (
+    <>
+      <HoldingRemoveDialog
+        open={removeOpen}
+        onOpenChange={setRemoveOpen}
+        onConfirm={() => onRemove(holding.id)}
+        holding={holding}
+      />
+      <EditHoldingDialog
+        holding={holding}
+        allRates={allRates}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={onEdited}
+      />
+    </>
+  )
 }
 
 export function HoldingRow({
@@ -218,63 +257,70 @@ export function HoldingRow({
   const [removeOpen, setRemoveOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const disabled = !holding.enabled
+  const rowClass = disabled ? 'opacity-40 hover:opacity-60' : ''
 
-  const { same, leftAmount, leftLabel, displayLabel, hasLabel, rateUnavailable, showConverted } = computeRowDisplay(
+  const { same, leftAmount, leftLabel, label, rateUnavailable, showConverted } = computeRowDisplay(
     holding,
     totalTicker,
     conversionRate
   )
 
+  const tooltip = <HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />
+  const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
+
   return (
     <>
-      <TableRow className={disabled ? 'opacity-40 hover:opacity-60' : ''}>
-        <AmountCell
-          holding={holding}
-          leftAmount={leftAmount}
-          leftLabel={leftLabel}
-          rateTooltip={<HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />}
-          displayLabel={displayLabel}
-          showConverted={showConverted}
-          rateUnavailable={rateUnavailable}
-          hasLabel={hasLabel}
-          same={same}
+      {/* ── amounts row ── */}
+      <TableRow className={`border-b-0 ${rowClass}`}>
+        <TableCell className="w-full pb-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-block w-full">
+                <ConvertedCell
+                  same={same}
+                  showConverted={showConverted}
+                  rateUnavailable={rateUnavailable}
+                  convertedAmount={leftAmount}
+                  totalLabel={leftLabel}
+                  source={holding.ticker.source}
+                />
+              </span>
+            </TooltipTrigger>
+            {tooltip}
+          </Tooltip>
+        </TableCell>
+        <TableCell className="whitespace-nowrap pb-0">
+          <OriginalCell amount={formatAmount(holding.amount)} unitOrTicker={unitOrTicker} invisible={same} />
+        </TableCell>
+        <ActionsCell
+          isFirst={isFirst}
+          isLast={isLast}
+          disabled={disabled}
+          holdingId={holding.id}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          onToggleEnabled={onToggleEnabled}
+          onEditClick={() => setEditOpen(true)}
+          onRemoveClick={() => setRemoveOpen(true)}
         />
-        <TableCell className="w-px whitespace-nowrap">
-          <HoldingMobileActions
-            isFirst={isFirst}
-            isLast={isLast}
-            disabled={disabled}
-            onMoveUp={() => onMoveUp(holding.id)}
-            onMoveDown={() => onMoveDown(holding.id)}
-            onToggleEnabled={() => onToggleEnabled(holding.id)}
-            onEditClick={() => setEditOpen(true)}
-            onRemoveClick={() => setRemoveOpen(true)}
-          />
-          <HoldingDesktopActions
-            isFirst={isFirst}
-            isLast={isLast}
-            disabled={disabled}
-            onMoveUp={() => onMoveUp(holding.id)}
-            onMoveDown={() => onMoveDown(holding.id)}
-            onToggleEnabled={() => onToggleEnabled(holding.id)}
-            onEditClick={() => setEditOpen(true)}
-            onRemoveClick={() => setRemoveOpen(true)}
-          />
+      </TableRow>
+
+      {/* ── labels row ── */}
+      <TableRow className={`border-t-0 ${rowClass}`}>
+        <TableCell className="pt-0.5" colSpan={2}>
+          <LabelCell label={label} />
         </TableCell>
       </TableRow>
 
-      <HoldingRemoveDialog
-        open={removeOpen}
-        onOpenChange={setRemoveOpen}
-        onConfirm={() => onRemove(holding.id)}
-        holding={holding}
-      />
-      <EditHoldingDialog
+      <HoldingDialogs
+        removeOpen={removeOpen}
+        setRemoveOpen={setRemoveOpen}
+        editOpen={editOpen}
+        setEditOpen={setEditOpen}
         holding={holding}
         allRates={allRates}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        onSaved={onEdited}
+        onRemove={onRemove}
+        onEdited={onEdited}
       />
     </>
   )

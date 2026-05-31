@@ -57,7 +57,7 @@ function TotalRow({
 }) {
   return (
     <TableRow>
-      <TableCell colSpan={2}>
+      <TableCell colSpan={3}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="inline-flex size-3 shrink-0" />
@@ -103,6 +103,7 @@ export function HoldingsTable({
       <TableHeader>
         <TableRow>
           <TableHead>Сумма</TableHead>
+          <TableHead className="whitespace-nowrap">Источник</TableHead>
           <TableHead className="w-px" />
         </TableRow>
       </TableHeader>
