@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { TableCell, TableRow } from '@/components/ui/table'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import { EditHoldingDialog } from './edit-holding-dialog'
@@ -18,12 +18,11 @@ function tickerLabel(t: Ticker): string {
 
 /* ── OriginalColumn ───────────────────── */
 
-function OriginalColumn({ amount, unitOrTicker, holding }: { amount: string; unitOrTicker: string; holding: Holding }) {
+function OriginalColumn({ amount, unitOrTicker }: { amount: string; unitOrTicker: string }) {
   return (
     <div className="flex items-center gap-1.5 text-right whitespace-nowrap">
       <span className="text-sm tabular-nums font-medium">{amount}</span>
       <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
-      <SourceIcon source={holding.ticker.source} className="size-3 shrink-0 text-muted-foreground" />
     </div>
   )
 }
@@ -44,15 +43,18 @@ function LeftColumn({
   rateUnavailable,
   convertedAmount,
   totalLabel,
+  source,
 }: {
   same: boolean
   showConverted: boolean
   rateUnavailable: boolean
   convertedAmount: string
   totalLabel: string | null
+  source: SourceName
 }) {
   return (
-    <div className="text-sm tabular-nums whitespace-nowrap">
+    <div className="flex items-center gap-1.5 text-sm tabular-nums whitespace-nowrap">
+      <SourceIcon source={source} className="size-3 shrink-0 text-muted-foreground" />
       {rateUnavailable && <span className="text-destructive">Курс недоступен</span>}
       {same && totalLabel && (
         <span className="font-medium">
@@ -106,11 +108,10 @@ function AmountCell({
                   rateUnavailable={rateUnavailable}
                   convertedAmount={leftAmount}
                   totalLabel={leftLabel}
+                  source={holding.ticker.source}
                 />
               </div>
-              {!same && (
-                <OriginalColumn amount={formatAmount(holding.amount)} unitOrTicker={unitOrTicker} holding={holding} />
-              )}
+              {!same && <OriginalColumn amount={formatAmount(holding.amount)} unitOrTicker={unitOrTicker} />}
               {displayLabel && <LabelRow displayLabel={displayLabel} hasLabel={hasLabel} />}
             </div>
           </span>
