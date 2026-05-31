@@ -65,6 +65,55 @@ describe('MoexRepository with real raw data', () => {
     expect(tmon?.btcPrice).toBeGreaterThan(0)
   })
 
+  it('divides KZT price by FACEVALUE=100', () => {
+    // KZT WAPRICE=15.3548 с FACEVALUE=100 → priceInRub=0.153548
+    // BTC/RUB ≈ 71.3693 * 77271.151 ≈ 5,514,000
+    // btcPrice ≈ 5,514,000 / 0.153548 ≈ 35,910,000
+    const kzt = rates.find((r) => r.ticker === 'kzt')
+    expect(kzt).toBeDefined()
+    expect(kzt?.btcPrice).toBeGreaterThan(0)
+    // Verify it's much larger than CNY (since KZT per unit is tiny after FACEVALUE division)
+    const cny = rates.find((r) => r.ticker === 'cny')
+    expect(cny).toBeDefined()
+    if (kzt && cny) {
+      expect(cny.btcPrice).toBeLessThan(kzt.btcPrice)
+    }
+  })
+
+  it('divides AMD price by FACEVALUE=100', () => {
+    const amd = rates.find((r) => r.ticker === 'amd')
+    expect(amd).toBeDefined()
+    expect(amd?.btcPrice).toBeGreaterThan(0)
+  })
+
+  it('divides KGS price by FACEVALUE=100', () => {
+    const kgs = rates.find((r) => r.ticker === 'kgs')
+    expect(kgs).toBeDefined()
+    expect(kgs?.btcPrice).toBeGreaterThan(0)
+  })
+
+  it('falls back to PREVPRICE when WAPRICE is null for currencies (JPY, TJS, UZS)', () => {
+    // JPY: WAPRICE=null, PREVPRICE=44, FACEVALUE=100 → priceInRub=0.44
+    const jpy = rates.find((r) => r.ticker === 'jpy')
+    expect(jpy).toBeDefined()
+    expect(jpy?.btcPrice).toBeGreaterThan(0)
+    // TJS: WAPRICE=null, PREVPRICE=84.3, FACEVALUE=10 → priceInRub=8.43
+    const tjs = rates.find((r) => r.ticker === 'tjs')
+    expect(tjs).toBeDefined()
+    expect(tjs?.btcPrice).toBeGreaterThan(0)
+    // UZS: WAPRICE=null, PREVPRICE=61, FACEVALUE=10000 → priceInRub=0.0061
+    const uzs = rates.find((r) => r.ticker === 'uzs')
+    expect(uzs).toBeDefined()
+    expect(uzs?.btcPrice).toBeGreaterThan(0)
+  })
+
+  it('currencies with FACEVALUE=1 price unchanged', () => {
+    // USD: WAPRICE=71.3693, FACEVALUE=1 → priceInRub=71.3693
+    const usd = rates.find((r) => r.ticker === 'usd')
+    expect(usd).toBeDefined()
+    expect(usd?.btcPrice).toBeGreaterThan(0)
+  })
+
   it('no duplicate tickers', () => {
     const tickers = rates.map((r) => r.ticker)
     expect(new Set(tickers).size).toBe(tickers.length)

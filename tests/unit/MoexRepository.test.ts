@@ -40,6 +40,44 @@ describe('MoexRepository', () => {
     expect(tickers).toContain('try')
   })
 
+  it('divides price by FACEVALUE (KZT has FACEVALUE=100)', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const kzt = rates.find((r) => r.ticker === 'kzt')
+    expect(kzt).toBeDefined()
+    // KZTRUB_TOM WAPRICE=15.7556, FACEVALUE=100 → 15.7556/100 = 0.157556
+    expect(kzt?.btcPrice).toBeGreaterThan(0)
+    expect(kzt?.btcPrice).toBeLessThan(100_000_000)
+  })
+
+  it('FACEVALUE=1 currencies are not divided (CNY spot-check)', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const cny = rates.find((r) => r.ticker === 'cny')
+    expect(cny).toBeDefined()
+    expect(cny?.btcPrice).toBeGreaterThan(0)
+    // CNY should be much less than KZT btcPrice since KZT per-unit is tiny after division
+    const kzt = rates.find((r) => r.ticker === 'kzt')
+    expect(kzt).toBeDefined()
+    if (cny && kzt) {
+      expect(cny.btcPrice).toBeLessThan(kzt.btcPrice)
+    }
+  })
+
+  it('falls back to PREVPRICE when WAPRICE is null', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const entry = rates.find((r) => r.ticker === 'prevfall')
+    expect(entry).toBeDefined()
+    // PREVFALLRUB_TOM: WAPRICE=null, PREVPRICE=50, FACEVALUE=1
+    expect(entry?.btcPrice).toBeGreaterThan(0)
+  })
+
+  it('treats FACEVALUE=0 as 1 (no division)', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const entry = rates.find((r) => r.ticker === 'facezero')
+    expect(entry).toBeDefined()
+    // FACEZERORUB_TOM: WAPRICE=42, FACEVALUE=0 → treated as 1, priceInRub=42
+    expect(entry?.btcPrice).toBeGreaterThan(0)
+  })
+
   it('includes index entries', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)

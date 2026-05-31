@@ -11,7 +11,7 @@ import { buildCurrencyToRubMap, convertToBtcPrice } from './moex/price-converter
 /** URL API MOEX ISS для валют (CETS, WAPRICE). */
 const CURRENCY_URL =
   'https://iss.moex.com/iss/engines/currency/markets/selt/boards/CETS/securities.json' +
-  '?iss.meta=off&marketdata.columns=SECID,WAPRICE&securities.columns=SECID,SECNAME'
+  '?iss.meta=off&securities.columns=SECID,SECNAME,FACEVALUE,PREVPRICE&marketdata.columns=SECID,WAPRICE'
 
 /** URL API MOEX ISS для индексов (CURRENTVALUE). */
 const INDEX_URL =

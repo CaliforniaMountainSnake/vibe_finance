@@ -38,7 +38,7 @@ export function parseCurrencyRates(currencyJson: MoexResponse): {
   const securitiesMap = buildRowMap(currencyJson.securities)
   const marketdataMap = buildRowMap(currencyJson.marketdata)
 
-  const usdRub = extractUsdRub(marketdataMap)
+  const usdRub = extractUsdRub(marketdataMap, securitiesMap)
 
   const rates: CurrencyRateInfo[] = [
     { ticker: 'usd', priceInRub: usdRub, unit: CURRENCY_UNITS['USD'] ?? 'USD' },
@@ -54,10 +54,45 @@ export function parseCurrencyRates(currencyJson: MoexResponse): {
   return { usdRub, rates }
 }
 
+/**
+ * Извлекает цену валюты: пробует WAPRICE из marketdata,
+ * при отсутствии — PREVPRICE из securities, затем делит на FACEVALUE.
+ */
+function getCurrencyPrice(
+  md: Record<string, string | number | null> | undefined,
+  sec: Record<string, string | number | null> | undefined
+): number | null {
+  const waprice = md ? getNumericField(md, 'WAPRICE') : null
+  if (waprice !== null) return adjustForFaceValue(waprice, sec)
+
+  const prevPrice = sec ? getNumericField(sec, 'PREVPRICE') : null
+  if (prevPrice !== null) return adjustForFaceValue(prevPrice, sec)
+
+  return null
+}
+
+/** Делит цену на FACEVALUE. Возвращает цену за 1 единицу валюты. */
+function adjustForFaceValue(price: number, sec: Record<string, string | number | null> | undefined): number {
+  const faceValue = getFaceValue(sec)
+  return price / faceValue
+}
+
+/**
+ * Извлекает FACEVALUE из записи securities.
+ * Возвращает 1, если поле отсутствует, null, 0 или отрицательное.
+ */
+function getFaceValue(sec: Record<string, string | number | null> | undefined): number {
+  if (!sec) return 1
+  const num = Number(sec['FACEVALUE'])
+  return Number.isFinite(num) && num > 0 ? num : 1
+}
+
 /** Извлекает обязательный курс USD/RUB. Бросает ошибку, если цена отсутствует. */
-function extractUsdRub(marketdataMap: SecMap): number {
-  const md = marketdataMap.get('USD000UTSTOM')
-  const price = md ? getNumericField(md, 'WAPRICE') : null
+function extractUsdRub(marketdataMap: SecMap, securitiesMap: SecMap): number {
+  const secId = 'USD000UTSTOM'
+  const md = marketdataMap.get(secId)
+  const sec = securitiesMap.get(secId)
+  const price = getCurrencyPrice(md, sec)
   if (price === null) {
     throw new Error('MOEX: required USD/RUB price (USD000UTSTOM) is missing or zero')
   }
@@ -77,12 +112,11 @@ type CurrencyParams = {
 function tryAddCurrency(params: CurrencyParams): void {
   const { marketdataMap, securitiesMap, secId, ticker, rates } = params
   const md = marketdataMap.get(secId)
-  if (!md) return
+  const sec = securitiesMap.get(secId)
 
-  const price = getNumericField(md, 'WAPRICE')
+  const price = getCurrencyPrice(md, sec)
   if (price === null) return
 
-  const sec = securitiesMap.get(secId)
   const name = sec ? getStringField(sec, 'SECNAME') : undefined
   const unit = CURRENCY_UNITS[ticker.toUpperCase()] ?? ticker.toUpperCase()
 
@@ -119,9 +153,8 @@ type BuildEntryParams = {
 function tryBuildCurrencyEntry(params: BuildEntryParams): CurrencyRateInfo | null {
   const { marketdataMap, secId, sec, ticker } = params
   const md = marketdataMap.get(secId)
-  if (!md) return null
 
-  const price = getNumericField(md, 'WAPRICE')
+  const price = getCurrencyPrice(md, sec)
   if (price === null) return null
 
   const name = getStringField(sec, 'SECNAME')
