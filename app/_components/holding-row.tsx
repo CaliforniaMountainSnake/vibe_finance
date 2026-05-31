@@ -38,6 +38,7 @@ function AmountCell({
   rateTooltip,
   displayLabel,
   showConverted,
+  rateUnavailable,
   hasLabel,
 }: {
   holding: Holding
@@ -46,6 +47,7 @@ function AmountCell({
   rateTooltip: React.ReactNode
   displayLabel: string | undefined
   showConverted: boolean
+  rateUnavailable: boolean
   hasLabel: boolean
 }) {
   const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
@@ -59,6 +61,9 @@ function AmountCell({
               <span className="text-sm tabular-nums font-medium">{formatAmount(holding.amount)}</span>
               <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
             </div>
+            {rateUnavailable && (
+              <div className="text-sm leading-tight pl-[1.375rem] text-destructive">Курс недоступен</div>
+            )}
             {showConverted && (
               <div className="text-sm tabular-nums leading-tight pl-[1.375rem]">
                 <span className="text-muted-foreground">≈</span> {convertedAmount}{' '}
@@ -103,15 +108,23 @@ function isSameCurrency(ticker: Ticker, totalTicker: Ticker | null): boolean {
   return totalTicker !== null && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
 }
 
-function holdingDisplayInfo(
-  holding: Holding,
-  totalTicker: Ticker | null
-): { totalLabel: string | null; sameCurrency: boolean; displayLabel: string | undefined; hasLabel: boolean } {
-  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
-  const sameCurrency = isSameCurrency(holding.ticker, totalTicker)
+function holdingDisplayLabel(holding: Holding): {
+  displayLabel: string | undefined
+  hasLabel: boolean
+} {
   const displayLabel = holding.label || holding.ticker.name
   const hasLabel = holding.label !== ''
-  return { totalLabel, sameCurrency, displayLabel, hasLabel }
+  return { displayLabel, hasLabel }
+}
+
+function holdingConversionFlags(
+  totalLabel: string | null,
+  same: boolean,
+  converted: string | undefined
+): { rateUnavailable: boolean; showConverted: boolean } {
+  if (totalLabel === null || same) return { rateUnavailable: false, showConverted: false }
+  if (converted === undefined) return { rateUnavailable: true, showConverted: false }
+  return { rateUnavailable: false, showConverted: true }
 }
 
 function HoldingTooltipRateOrFallback({
@@ -200,8 +213,13 @@ export function HoldingRow({
   const disabled = !holding.enabled
 
   const converted = computeConverted(holding.amount, conversionRate)
-  const { totalLabel, sameCurrency, displayLabel, hasLabel } = holdingDisplayInfo(holding, totalTicker)
-  const showConverted = !sameCurrency && converted !== undefined && totalLabel !== null
+  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
+  const { displayLabel, hasLabel } = holdingDisplayLabel(holding)
+  const { rateUnavailable, showConverted } = holdingConversionFlags(
+    totalLabel,
+    isSameCurrency(holding.ticker, totalTicker),
+    converted
+  )
 
   return (
     <>
@@ -213,6 +231,7 @@ export function HoldingRow({
           rateTooltip={<HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />}
           displayLabel={displayLabel}
           showConverted={showConverted}
+          rateUnavailable={rateUnavailable}
           hasLabel={hasLabel}
         />
         <TableCell className="w-px whitespace-nowrap">

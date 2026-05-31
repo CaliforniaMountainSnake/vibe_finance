@@ -5,31 +5,11 @@ import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/component
 import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
-import type { TickerPair } from '@/entities/TickerPair'
 import { dbRepo } from '@/lib/db'
+import { computeConversionRates } from '@/lib/compute-conversion-rates'
 import { HoldingsTable } from './holdings-table'
 import { AddHoldingDialog } from './add-holding-dialog'
 import { CurrencySearchProvider } from './currency-search-provider'
-
-async function computeRate(from: Ticker, to: Ticker): Promise<number | undefined> {
-  const pair: TickerPair = { from, to }
-  try {
-    return await dbRepo.getRate(pair)
-  } catch {
-    return undefined
-  }
-}
-
-async function computeConversionRates(
-  holdings: Holding[],
-  totalTicker: Ticker
-): Promise<Record<string, number | undefined>> {
-  const map: Record<string, number | undefined> = {}
-  for (const h of holdings) {
-    map[h.id] = await computeRate(h.ticker, totalTicker)
-  }
-  return map
-}
 
 function useHoldingsState(refreshKey: number) {
   const [holdings, setHoldings] = useState<Holding[]>([])
@@ -49,7 +29,7 @@ function useHoldingsState(refreshKey: number) {
       const tt = total ?? null
       setTotalTicker(tt)
       if (tt && hld.length > 0) {
-        computeConversionRates(hld, tt).then(setConversionRates)
+        computeConversionRates(dbRepo, hld, tt).then(setConversionRates)
       }
     })()
   }, [refreshKey])
@@ -66,7 +46,7 @@ function useHoldingsState(refreshKey: number) {
       setConversionRates({})
       return
     }
-    computeConversionRates(hld, tt).then(setConversionRates)
+    computeConversionRates(dbRepo, hld, tt).then(setConversionRates)
   }
 
   async function moveUp(id: string) {

@@ -6,26 +6,50 @@ import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import { HoldingRow } from './holding-row'
 import { formatAmount } from '@/lib/format-amount'
+import { computeHoldingsTotal } from '@/lib/compute-holdings-total'
 import { TotalCurrencyPicker } from './total-currency-picker'
 
-function computeTotalAmount(holdings: Holding[], conversionRates: Record<string, number | undefined>): number {
-  return holdings
-    .filter((h) => h.enabled)
-    .reduce((sum, h) => {
-      const rate = conversionRates[h.id]
-      if (rate === undefined || isNaN(rate)) return sum
-      return sum + h.amount * rate
-    }, 0)
+function TotalUnitLabel({ unit }: { unit: string | null }) {
+  if (!unit) return null
+  return <span className="text-muted-foreground text-sm"> {unit}</span>
+}
+
+function TotalAmountDisplay({
+  total,
+  totalTicker,
+  totalUnit,
+}: {
+  total: ReturnType<typeof computeHoldingsTotal>
+  totalTicker: Ticker | null
+  totalUnit: string | null
+}) {
+  if (totalTicker === null) {
+    return <span className="text-sm tabular-nums font-semibold">—</span>
+  }
+  if (total.contributedCount === 0 && total.skippedCount > 0) {
+    return (
+      <span>
+        <span className="text-sm tabular-nums font-semibold text-destructive">Курс недоступен</span>
+        <TotalUnitLabel unit={totalUnit} />
+      </span>
+    )
+  }
+  return (
+    <span>
+      <span className="text-sm tabular-nums font-semibold">{formatAmount(total.totalAmount)}</span>
+      <TotalUnitLabel unit={totalUnit} />
+    </span>
+  )
 }
 
 function TotalRow({
-  totalAmount,
+  total,
   totalTicker,
   totalUnit,
   allRates,
   onTotalTickerChange,
 }: {
-  totalAmount: number
+  total: ReturnType<typeof computeHoldingsTotal>
   totalTicker: Ticker | null
   totalUnit: string | null
   allRates: ExchangeRate[]
@@ -37,8 +61,7 @@ function TotalRow({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="inline-flex size-3 shrink-0" />
-            <span className="text-sm tabular-nums font-semibold">{totalTicker ? formatAmount(totalAmount) : '—'}</span>
-            {totalUnit && <span className="text-muted-foreground text-sm">{totalUnit}</span>}
+            <TotalAmountDisplay total={total} totalTicker={totalTicker} totalUnit={totalUnit} />
           </div>
           <TotalCurrencyPicker allRates={allRates} value={totalTicker} onChange={onTotalTickerChange} />
         </div>
@@ -72,7 +95,7 @@ export function HoldingsTable({
   onRemove,
   onEdited,
 }: HoldingsTableProps) {
-  const totalAmount = computeTotalAmount(holdings, conversionRates)
+  const total = computeHoldingsTotal(holdings, conversionRates)
   const totalUnit = totalTicker?.unit ?? null
 
   return (
@@ -103,7 +126,7 @@ export function HoldingsTable({
       </TableBody>
       <TableFooter>
         <TotalRow
-          totalAmount={totalAmount}
+          total={total}
           totalTicker={totalTicker}
           totalUnit={totalUnit}
           allRates={allRates}
