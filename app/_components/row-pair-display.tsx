@@ -127,10 +127,13 @@ function ActionsCell({
 
 /* ── LabelCell ─────────────────────────── */
 
-function LabelCell({ label }: { label: string }) {
+function LabelCell({ label, hasLabel }: { label: string; hasLabel: boolean }) {
   if (!label) return null
-  return <span className="text-sm leading-tight">{label}</span>
+  const cls = hasLabel ? 'text-sm leading-tight' : 'text-sm leading-tight text-muted-foreground'
+  return <span className={cls}>{label}</span>
 }
+
+
 
 /* ── RowPairDisplay ────────────────────── */
 
@@ -143,6 +146,7 @@ export type RowPairDisplayProps = {
   source: SourceName
   amount: string
   unitOrTicker: string
+  hasLabel: boolean
   label: string
   isFirst: boolean
   isLast: boolean
@@ -166,6 +170,7 @@ export function RowPairDisplay({
   source,
   amount,
   unitOrTicker,
+  hasLabel,
   label,
   isFirst,
   isLast,
@@ -183,6 +188,7 @@ export function RowPairDisplay({
   const bg = hovered ? 'bg-muted/50' : ''
   const opacity = disabled ? 'opacity-40' : ''
   const rowClass = `${opacity} ${hovered && disabled ? 'opacity-60' : ''}`
+
   const handlers = {
     onMouseEnter: () => setHovered(true),
     onMouseLeave: () => setHovered(false),
@@ -222,7 +228,7 @@ export function RowPairDisplay({
       {/* ── labels row ── */}
       <TableRow className={`border-t-0 ${bg} ${rowClass}`} {...handlers}>
         <TableCell className="pt-0.5" colSpan={2}>
-          <LabelCell label={label} />
+          <LabelCell label={label} hasLabel={hasLabel} />
         </TableCell>
       </TableRow>
 

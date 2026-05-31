@@ -167,6 +167,7 @@ export function HoldingRow({
       amount={formatAmount(holding.amount)}
       unitOrTicker={unitOrTicker}
       label={label}
+      hasLabel={!!holding.label}
       isFirst={isFirst}
       isLast={isLast}
       disabled={disabled}
