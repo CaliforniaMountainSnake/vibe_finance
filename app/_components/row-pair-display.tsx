@@ -133,8 +133,6 @@ function LabelCell({ label, hasLabel }: { label: string; hasLabel: boolean }) {
   return <span className={cls}>{label}</span>
 }
 
-
-
 /* ── RowPairDisplay ────────────────────── */
 
 export type RowPairDisplayProps = {

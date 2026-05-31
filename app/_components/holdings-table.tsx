@@ -103,7 +103,7 @@ export function HoldingsTable({
       <TableHeader>
         <TableRow>
           <TableHead>Сумма</TableHead>
-          <TableHead className="whitespace-nowrap">Источник</TableHead>
+          <TableHead />
           <TableHead className="w-px" />
         </TableRow>
       </TableHeader>
