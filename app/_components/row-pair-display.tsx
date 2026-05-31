@@ -16,6 +16,7 @@ function ConvertedCell({
   convertedAmount,
   totalLabel,
   source,
+  tooltip,
 }: {
   same: boolean
   showConverted: boolean
@@ -23,6 +24,7 @@ function ConvertedCell({
   convertedAmount: string
   totalLabel: string | null
   source: SourceName
+  tooltip: ReactNode
 }) {
   return (
     <div className="flex items-center gap-1.5 text-sm tabular-nums whitespace-nowrap">
@@ -30,13 +32,24 @@ function ConvertedCell({
       {rateUnavailable && <span className="text-destructive">Курс недоступен</span>}
       {same && totalLabel && (
         <span>
-          <span className="font-medium">{convertedAmount}</span>{' '}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="font-medium">{convertedAmount}</span>
+            </TooltipTrigger>
+            {tooltip}
+          </Tooltip>{' '}
           <span className="text-muted-foreground">{totalLabel}</span>
         </span>
       )}
       {showConverted && (
         <>
-          <span className="text-muted-foreground">≈</span> <span className="font-medium">{convertedAmount}</span>{' '}
+          <span className="text-muted-foreground">≈</span>{' '}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="font-medium">{convertedAmount}</span>
+            </TooltipTrigger>
+            {tooltip}
+          </Tooltip>{' '}
           <span className="text-muted-foreground">{totalLabel}</span>
         </>
       )}
@@ -180,21 +193,15 @@ export function RowPairDisplay({
       {/* ── amounts row ── */}
       <TableRow className={`border-b-0 ${bg} ${rowClass}`} {...handlers}>
         <TableCell className="w-full pb-0">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-block w-full">
-                <ConvertedCell
-                  same={same}
-                  showConverted={showConverted}
-                  rateUnavailable={rateUnavailable}
-                  convertedAmount={leftAmount}
-                  totalLabel={leftLabel}
-                  source={source}
-                />
-              </span>
-            </TooltipTrigger>
-            {tooltip}
-          </Tooltip>
+          <ConvertedCell
+            same={same}
+            showConverted={showConverted}
+            rateUnavailable={rateUnavailable}
+            convertedAmount={leftAmount}
+            totalLabel={leftLabel}
+            source={source}
+            tooltip={tooltip}
+          />
         </TableCell>
         <TableCell className="whitespace-nowrap pb-0">
           <OriginalCell amount={amount} unitOrTicker={unitOrTicker} invisible={same} />

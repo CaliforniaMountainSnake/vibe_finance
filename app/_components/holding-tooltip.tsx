@@ -50,7 +50,7 @@ function TooltipContentInner({
   same: boolean
 }) {
   return (
-    <TooltipContent side="left" className="flex flex-col items-start">
+    <TooltipContent side="top" className="flex flex-col items-start">
       <span>{sourceDisplayName(holding.ticker.source)}</span>
       {holding.ticker.name && <span className="font-medium">{holding.ticker.name}</span>}
       <TooltipRateOrFallback unit={unit} conversionRate={conversionRate} totalUnit={totalUnit} same={same} />
