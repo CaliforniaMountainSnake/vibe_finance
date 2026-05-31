@@ -11,10 +11,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { HoldingForm } from './holding-form'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
-import { dbRepo } from '@/lib/db'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
+import { databaseRepo } from '@/lib/database'
 import { X } from 'lucide-react'
 
 /* ── EditHoldingDialogContent ──────────── */
@@ -26,8 +26,8 @@ function EditHoldingDialogContent({
   onLabelChange,
   selectedTicker,
   onTickerSelect,
-  inputRef,
-  labelRef,
+  inputReference,
+  labelReference,
   allRates,
   canSave,
   onSave,
@@ -36,10 +36,10 @@ function EditHoldingDialogContent({
   onAmountChange: (v: string) => void
   label: string
   onLabelChange: (v: string) => void
-  selectedTicker: Ticker | null
+  selectedTicker: Ticker | undefined
   onTickerSelect: (t: Ticker) => void
-  inputRef: React.RefObject<HTMLInputElement | null>
-  labelRef: React.RefObject<HTMLTextAreaElement | null>
+  inputReference: React.RefObject<HTMLInputElement | null>
+  labelReference: React.RefObject<HTMLTextAreaElement | null>
   allRates: ExchangeRate[]
   canSave: boolean
   onSave: () => void
@@ -64,8 +64,8 @@ function EditHoldingDialogContent({
           allRates={allRates}
           selectedTicker={selectedTicker}
           onTickerSelect={onTickerSelect}
-          inputRef={inputRef}
-          labelRef={labelRef}
+          inputRef={inputReference}
+          labelRef={labelReference}
         />
         <Button onClick={onSave} disabled={!canSave} className="w-full mt-3">
           Сохранить
@@ -77,7 +77,7 @@ function EditHoldingDialogContent({
 
 /* ── EditHoldingDialog ─────────────────── */
 
-type EditHoldingDialogProps = {
+type EditHoldingDialogProperties = {
   holding: Holding
   allRates: ExchangeRate[]
   open: boolean
@@ -85,22 +85,22 @@ type EditHoldingDialogProps = {
   onSaved: () => void
 }
 
-export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSaved }: EditHoldingDialogProps) {
+export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSaved }: EditHoldingDialogProperties) {
   const [amount, setAmount] = useState('')
   const [label, setLabel] = useState('')
-  const [selectedTicker, setSelectedTicker] = useState<Ticker | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const labelRef = useRef<HTMLTextAreaElement>(null)
+  const [selectedTicker, setSelectedTicker] = useState<Ticker>()
+  const inputReference = useRef<HTMLInputElement>(null)
+  const labelReference = useRef<HTMLTextAreaElement>(null)
 
   const handleTickerSelect = useCallback((ticker: Ticker) => {
     setSelectedTicker(ticker)
-    setTimeout(() => labelRef.current?.focus(), 0)
+    setTimeout(() => labelReference.current?.focus(), 0)
   }, [])
 
   const reset = useCallback(() => {
     setAmount('')
     setLabel('')
-    setSelectedTicker(null)
+    setSelectedTicker(undefined)
   }, [])
 
   // Заполняем поля из пропсов при каждом открытии диалога родителем.
@@ -111,7 +111,7 @@ export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSav
       setAmount(holding.amount.toString())
       setLabel(holding.label)
       setSelectedTicker(holding.ticker)
-      setTimeout(() => inputRef.current?.focus(), 0)
+      setTimeout(() => inputReference.current?.focus(), 0)
     }
   }, [open, holding])
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -125,9 +125,9 @@ export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSav
   )
 
   const handleSave = useCallback(async () => {
-    const parsed = parseFloat(amount.replace(',', '.'))
-    if (isNaN(parsed) || !selectedTicker) return
-    await dbRepo.updateHolding(holding.id, {
+    const parsed = Number.parseFloat(amount.replace(',', '.'))
+    if (Number.isNaN(parsed) || !selectedTicker) return
+    await databaseRepo.updateHolding(holding.id, {
       ticker: selectedTicker,
       amount: parsed,
       label: label.trim(),
@@ -137,7 +137,8 @@ export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSav
     onSaved()
   }, [amount, selectedTicker, label, holding.id, reset, onOpenChange, onSaved])
 
-  const canSave = selectedTicker !== null && amount.trim() !== '' && !isNaN(parseFloat(amount.replace(',', '.')))
+  const canSave =
+    selectedTicker !== undefined && amount.trim() !== '' && !Number.isNaN(Number.parseFloat(amount.replace(',', '.')))
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -149,8 +150,8 @@ export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSav
           onLabelChange={setLabel}
           selectedTicker={selectedTicker}
           onTickerSelect={handleTickerSelect}
-          inputRef={inputRef}
-          labelRef={labelRef}
+          inputReference={inputReference}
+          labelReference={labelReference}
           allRates={allRates}
           canSave={canSave}
           onSave={handleSave}

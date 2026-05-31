@@ -1,4 +1,4 @@
-import type { Holding } from '@/entities/Holding'
+import type { Holding } from '@/entities/holding'
 
 export type HoldingsTotal = {
   /** Сумма холдингов в пересчёте на целевую валюту (только те, у которых курс доступен) */
@@ -29,7 +29,7 @@ export function computeHoldingsTotal(
   for (const h of holdings) {
     if (!h.enabled) continue
     const rate = conversionRates[h.id]
-    if (rate === undefined || isNaN(rate)) {
+    if (rate === undefined || Number.isNaN(rate)) {
       skippedCount++
       continue
     }

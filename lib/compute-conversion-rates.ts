@@ -1,13 +1,13 @@
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
-import type { TickerPair } from '@/entities/TickerPair'
-import type { DbRepositoryInterface } from '@/repositories/DbRepositoryInterface'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
+import type { TickerPair } from '@/entities/ticker-pair'
+import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 
 /**
  * Вычисляет курс конвертации между двумя тикерами.
  * Если тикер не найден в БД или btcPrice некорректен — возвращает undefined.
  */
-async function computeRate(repo: DbRepositoryInterface, from: Ticker, to: Ticker): Promise<number | undefined> {
+async function computeRate(repo: DatabaseRepositoryInterface, from: Ticker, to: Ticker): Promise<number | undefined> {
   const pair: TickerPair = { from, to }
   try {
     return await repo.getRate(pair)
@@ -26,7 +26,7 @@ async function computeRate(repo: DbRepositoryInterface, from: Ticker, to: Ticker
  * @returns Record<holdingId, курс | undefined>
  */
 export async function computeConversionRates(
-  repo: DbRepositoryInterface,
+  repo: DatabaseRepositoryInterface,
   holdings: Holding[],
   totalTicker: Ticker
 ): Promise<Record<string, number | undefined>> {

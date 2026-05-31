@@ -1,8 +1,8 @@
 import type { SVGProps } from 'react'
 
-export function BinanceIcon(props: SVGProps<SVGSVGElement>) {
+export function BinanceIcon(properties: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126.611 126.611" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126.611 126.611" {...properties}>
       <polygon
         fill="currentColor"
         points="38.171,53.203 62.759,28.616 87.36,53.216 101.667,38.909 62.759,0 23.864,38.896"

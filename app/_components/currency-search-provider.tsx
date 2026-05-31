@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useMemo } from 'react'
 import Fuse from 'fuse.js'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
+import type { ExchangeRate } from '@/entities/exchange-rate'
 
-const CurrencySearchCtx = createContext<Fuse<ExchangeRate> | null>(null)
+const CurrencySearchContext = createContext<Fuse<ExchangeRate> | undefined>(undefined)
 
 export function CurrencySearchProvider({
   allRates,
@@ -26,9 +26,9 @@ export function CurrencySearchProvider({
       }),
     [allRates]
   )
-  return <CurrencySearchCtx.Provider value={fuse}>{children}</CurrencySearchCtx.Provider>
+  return <CurrencySearchContext.Provider value={fuse}>{children}</CurrencySearchContext.Provider>
 }
 
-export function useCurrencySearch(): Fuse<ExchangeRate> | null {
-  return useContext(CurrencySearchCtx)
+export function useCurrencySearch(): Fuse<ExchangeRate> | undefined {
+  return useContext(CurrencySearchContext)
 }

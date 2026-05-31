@@ -16,9 +16,9 @@ import { Minus, Plus, Settings, X } from 'lucide-react'
 
 const FONT_SIZE_XSMALL = 0.8125
 const FONT_SIZE_SMALL = 0.875
-const FONT_SIZE_BELOW = 0.96875
+const FONT_SIZE_BELOW = 0.968_75
 const FONT_SIZE_MEDIUM = 1.0625
-const FONT_SIZE_ABOVE = 1.15625
+const FONT_SIZE_ABOVE = 1.156_25
 const FONT_SIZE_LARGE = 1.1875
 const FONT_SIZE_XLARGE = 1.25
 
@@ -43,12 +43,12 @@ const FONT_SIZE_LABELS = [
 
 function fontSizeToStep(value: number): number {
   let best = 0
-  let bestDist = Infinity
-  for (let i = 0; i < FONT_SIZE_STEPS.length; i++) {
-    const dist = Math.abs(FONT_SIZE_STEPS[i] - value)
-    if (dist < bestDist) {
-      bestDist = dist
-      best = i
+  let bestDistribution = Infinity
+  for (const [index, step] of FONT_SIZE_STEPS.entries()) {
+    const distribution = Math.abs(step - value)
+    if (distribution < bestDistribution) {
+      bestDistribution = distribution
+      best = index
     }
   }
   return best

@@ -9,17 +9,17 @@ export const MOEX_MOCK_CURRENCIES = JSON.stringify({
   securities: {
     columns: ['SECID', 'SECNAME', 'FACEVALUE', 'PREVPRICE'],
     data: [
-      ['BYNRUB_TOM', 'BYN/RUB_TOM - BYN/РУБ', 1, null],
-      ['CNYRUB_TOM', 'CNY/RUB_TOM - CNY/РУБ', 1, null],
-      ['GLDRUB_TOM', 'GLD/RUB_TOM - GLD/РУБ', 1, null],
-      ['KZTRUB_TOM', 'KZT/RUB_TOM - KZT/РУБ', 100, null],
-      ['SLVRUB_TOM', 'SLV/RUB_TOM - SLV/РУБ', 1, null],
-      ['TRYRUB_TOM', 'TRY/RUB_TOM - TRY/РУБ', 1, null],
-      ['USD000UTSTOM', 'USDRUB_TOM - USD/РУБ', 1, null],
+      ['BYNRUB_TOM', 'BYN/RUB_TOM - BYN/РУБ', 1, undefined],
+      ['CNYRUB_TOM', 'CNY/RUB_TOM - CNY/РУБ', 1, undefined],
+      ['GLDRUB_TOM', 'GLD/RUB_TOM - GLD/РУБ', 1, undefined],
+      ['KZTRUB_TOM', 'KZT/RUB_TOM - KZT/РУБ', 100, undefined],
+      ['SLVRUB_TOM', 'SLV/RUB_TOM - SLV/РУБ', 1, undefined],
+      ['TRYRUB_TOM', 'TRY/RUB_TOM - TRY/РУБ', 1, undefined],
+      ['USD000UTSTOM', 'USDRUB_TOM - USD/РУБ', 1, undefined],
       // PREVPRICE fallback: WAPRICE=null, uses PREVPRICE=50
       ['PREVFALLRUB_TOM', 'WAPNULL/RUB_TOM', 1, 50],
       // FACEVALUE=0 protection: treated as 1, price=42
-      ['FACEZERORUB_TOM', 'FACEZ/RUB_TOM', 0, null],
+      ['FACEZERORUB_TOM', 'FACEZ/RUB_TOM', 0, undefined],
     ],
   },
   marketdata: {
@@ -27,12 +27,12 @@ export const MOEX_MOCK_CURRENCIES = JSON.stringify({
     data: [
       ['BYNRUB_TOM', 25.9567],
       ['CNYRUB_TOM', 10.5508],
-      ['GLDRUB_TOM', 10345.06],
+      ['GLDRUB_TOM', 10_345.06],
       ['KZTRUB_TOM', 15.7556],
       ['SLVRUB_TOM', 175.36],
       ['TRYRUB_TOM', 1.5999],
       ['USD000UTSTOM', 71.8605],
-      ['PREVFALLRUB_TOM', null],
+      ['PREVFALLRUB_TOM', undefined],
       ['FACEZERORUB_TOM', 42],
     ],
   },
@@ -59,7 +59,7 @@ export const MOEX_MOCK_INDEXES = JSON.stringify({
       ['BCSGA', 12.1876],
       ['OPNEO', 0.937],
       ['AKEUBI', 68.09],
-      ['MOEXBTC', 77217.59],
+      ['MOEXBTC', 77_217.59],
       ['RTSI', 1140.61],
       ['RUCNYCP', 96.45],
       ['IMOEX', 2590.48],
@@ -86,16 +86,16 @@ export const MOEX_MOCK_SHARES = JSON.stringify({
   marketdata: {
     columns: ['SECID', 'BOARDID', 'WAPRICE', 'MARKETPRICE'],
     data: [
-      ['ENPG', 'TQBR', 378.5, null],
+      ['ENPG', 'TQBR', 378.5, undefined],
       ['SBER', 'TQBR', 285.1, 284.9],
       ['SBER', 'TQTF', 290.5, 290.1],
-      ['SILA', 'TQTF', 108.03, null],
-      ['AKMC', 'TQTF', 14.12, null],
-      ['AKMC', 'TQTY', 105.54, null],
+      ['SILA', 'TQTF', 108.03, undefined],
+      ['AKMC', 'TQTF', 14.12, undefined],
+      ['AKMC', 'TQTY', 105.54, undefined],
       // WAPRICE=0 → фоллбек на MARKETPRICE
-      ['FALLBACK_OK', 'TQBR', 0, 500.0],
+      ['FALLBACK_OK', 'TQBR', 0, 500],
       // WAPRICE=null → фоллбек на MARKETPRICE
-      ['FALLBACK_NULL', 'TQBR', null, 600.0],
+      ['FALLBACK_NULL', 'TQBR', undefined, 600],
       // Оба поля отсутствуют/нулевые → акция пропускается
       ['MISSING_BOTH', 'TQBR', 0, 0],
     ],

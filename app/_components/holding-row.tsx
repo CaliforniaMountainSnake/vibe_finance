@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
 import { EditHoldingDialog } from './edit-holding-dialog'
 import { HoldingRemoveDialog } from './holding-row-actions'
 import { formatAmount } from '@/lib/format-amount'
@@ -16,8 +16,8 @@ function tickerLabel(t: Ticker): string {
   return t.ticker.toUpperCase()
 }
 
-function isSameCurrency(ticker: Ticker, totalTicker: Ticker | null): boolean {
-  return totalTicker !== null && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
+function isSameCurrency(ticker: Ticker, totalTicker: Ticker | undefined): boolean {
+  return totalTicker !== undefined && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
 }
 
 function holdingLabel(holding: Holding): string {
@@ -25,33 +25,33 @@ function holdingLabel(holding: Holding): string {
 }
 
 function computeConverted(amount: number, rate: number | undefined): string | undefined {
-  if (rate === undefined || isNaN(rate)) return undefined
+  if (rate === undefined || Number.isNaN(rate)) return undefined
   return formatAmount(amount * rate)
 }
 
 function holdingConversionFlags(
-  totalLabel: string | null,
+  totalLabel: string | undefined,
   same: boolean,
   converted: string | undefined
 ): { rateUnavailable: boolean; showConverted: boolean } {
-  if (totalLabel === null || same) return { rateUnavailable: false, showConverted: false }
+  if (totalLabel === undefined || same) return { rateUnavailable: false, showConverted: false }
   if (converted === undefined) return { rateUnavailable: true, showConverted: false }
   return { rateUnavailable: false, showConverted: true }
 }
 
 function computeLeftConverted(rate: number | undefined, converted: string | undefined): string {
-  if (rate === undefined || isNaN(rate)) return ''
+  if (rate === undefined || Number.isNaN(rate)) return ''
   return converted ?? ''
 }
 
-function computeLeftSide(params: {
+function computeLeftSide(parameters: {
   holding: Holding
   same: boolean
   conversionRate: number | undefined
   converted: string | undefined
-  totalLabel: string | null
+  totalLabel: string | undefined
 }) {
-  const { holding, same, conversionRate, converted, totalLabel } = params
+  const { holding, same, conversionRate, converted, totalLabel } = parameters
   if (same) {
     const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
     return { leftAmount: formatAmount(holding.amount), leftLabel: unitOrTicker }
@@ -59,10 +59,10 @@ function computeLeftSide(params: {
   return { leftAmount: computeLeftConverted(conversionRate, converted), leftLabel: totalLabel }
 }
 
-function computeRowDisplay(holding: Holding, totalTicker: Ticker | null, conversionRate: number | undefined) {
+function computeRowDisplay(holding: Holding, totalTicker: Ticker | undefined, conversionRate: number | undefined) {
   const converted = computeConverted(holding.amount, conversionRate)
   const same = isSameCurrency(holding.ticker, totalTicker)
-  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
+  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : undefined
   const { leftAmount, leftLabel } = computeLeftSide({
     holding,
     same,
@@ -117,12 +117,12 @@ function HoldingDialogs({
 
 /* ── HoldingRow ────────────────────────────── */
 
-type HoldingRowProps = {
+type HoldingRowProperties = {
   holding: Holding
   isFirst: boolean
   isLast: boolean
   conversionRate: number | undefined
-  totalTicker: Ticker | null
+  totalTicker: Ticker | undefined
   allRates: ExchangeRate[]
   onMoveUp: (id: string) => void
   onMoveDown: (id: string) => void
@@ -143,7 +143,7 @@ export function HoldingRow({
   onToggleEnabled,
   onRemove,
   onEdited,
-}: HoldingRowProps) {
+}: HoldingRowProperties) {
   const [removeOpen, setRemoveOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const disabled = !holding.enabled

@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { dbRepo } from '@/lib/db'
+import { databaseRepo } from '@/lib/database'
 
 const DEFAULT_FONT_SIZE = 1.0625
 
@@ -10,14 +10,14 @@ type SettingsContextValue = {
   setFontSize: (value: number) => void
 }
 
-const SettingsContext = createContext<SettingsContextValue | null>(null)
+const SettingsContext = createContext<SettingsContextValue | undefined>(undefined)
 
 export function useSettings(): SettingsContextValue {
-  const ctx = useContext(SettingsContext)
-  if (ctx === null) {
+  const context = useContext(SettingsContext)
+  if (context === undefined) {
     throw new Error('useSettings must be used within a SettingsProvider')
   }
-  return ctx
+  return context
 }
 
 function applyFontSize(value: number): void {
@@ -28,7 +28,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontSize, setFontSizeState] = useState(DEFAULT_FONT_SIZE)
 
   useEffect(() => {
-    void dbRepo.getSetting('fontSize').then((stored) => {
+    void databaseRepo.getSetting('fontSize').then((stored) => {
       const value = stored ?? DEFAULT_FONT_SIZE
       setFontSizeState(value)
       applyFontSize(value)
@@ -38,7 +38,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const setFontSize = useCallback((value: number) => {
     setFontSizeState(value)
     applyFontSize(value)
-    void dbRepo.setSetting('fontSize', value)
+    void databaseRepo.setSetting('fontSize', value)
   }, [])
 
   return <SettingsContext.Provider value={{ fontSize, setFontSize }}>{children}</SettingsContext.Provider>

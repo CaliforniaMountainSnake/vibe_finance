@@ -12,8 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
 import { formatAmount } from '@/lib/format-amount'
 import { ChevronUp, ChevronDown, EllipsisVertical, X, Eye, EyeOff, Pencil } from 'lucide-react'
 
@@ -145,14 +145,14 @@ export function HoldingDesktopActions({
   onEditClick: () => void
   onRemoveClick: () => void
 }) {
-  const reorderBtnClasses =
+  const reorderButtonClasses =
     'inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30'
 
   return (
     <div className="hidden md:flex items-center gap-0.5">
       <button
         type="button"
-        className={reorderBtnClasses}
+        className={reorderButtonClasses}
         disabled={isFirst}
         aria-label="Переместить вверх"
         onClick={onMoveUp}
@@ -161,7 +161,7 @@ export function HoldingDesktopActions({
       </button>
       <button
         type="button"
-        className={reorderBtnClasses}
+        className={reorderButtonClasses}
         disabled={isLast}
         aria-label="Переместить вниз"
         onClick={onMoveDown}

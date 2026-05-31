@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HoldingForm } from './holding-form'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
-import { dbRepo } from '@/lib/db'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Ticker } from '@/entities/ticker'
+import { databaseRepo } from '@/lib/database'
 import { Plus, X } from 'lucide-react'
 
 /* ── AddHoldingDialogContent ───────────── */
@@ -37,7 +37,7 @@ function AddHoldingDialogContent({
   onAmountChange: (v: string) => void
   label: string
   onLabelChange: (v: string) => void
-  selectedTicker: Ticker | null
+  selectedTicker: Ticker | undefined
   onTickerSelect: (t: Ticker) => void
   inputRef: React.RefObject<HTMLInputElement | null>
   labelRef: React.RefObject<HTMLTextAreaElement | null>
@@ -78,34 +78,34 @@ function AddHoldingDialogContent({
 
 /* ── AddHoldingDialog ─────────────────── */
 
-type AddHoldingDialogProps = {
+type AddHoldingDialogProperties = {
   allRates: ExchangeRate[]
   onAdded: () => void
 }
 
-export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
+export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProperties) {
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [label, setLabel] = useState('')
-  const [selectedTicker, setSelectedTicker] = useState<Ticker | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const labelRef = useRef<HTMLTextAreaElement>(null)
+  const [selectedTicker, setSelectedTicker] = useState<Ticker>()
+  const inputReference = useRef<HTMLInputElement>(null)
+  const labelReference = useRef<HTMLTextAreaElement>(null)
 
   const handleTickerSelect = useCallback((ticker: Ticker) => {
     setSelectedTicker(ticker)
-    setTimeout(() => labelRef.current?.focus(), 0)
+    setTimeout(() => labelReference.current?.focus(), 0)
   }, [])
 
   const reset = useCallback(() => {
     setAmount('')
     setLabel('')
-    setSelectedTicker(null)
+    setSelectedTicker(undefined)
   }, [])
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     if (open) {
-      timer = setTimeout(() => inputRef.current?.focus(), 0)
+      timer = setTimeout(() => inputReference.current?.focus(), 0)
     }
     return () => {
       if (timer !== undefined) clearTimeout(timer)
@@ -113,9 +113,9 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
   }, [open])
 
   const handleAdd = useCallback(async () => {
-    const parsed = parseFloat(amount.replace(',', '.'))
-    if (isNaN(parsed) || !selectedTicker) return
-    await dbRepo.addHolding(selectedTicker, parsed, label.trim())
+    const parsed = Number.parseFloat(amount.replace(',', '.'))
+    if (Number.isNaN(parsed) || !selectedTicker) return
+    await databaseRepo.addHolding(selectedTicker, parsed, label.trim())
     reset()
     setOpen(false)
     onAdded()
@@ -129,7 +129,8 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
     [reset]
   )
 
-  const canAdd = selectedTicker !== null && amount.trim() !== '' && !isNaN(parseFloat(amount.replace(',', '.')))
+  const canAdd =
+    selectedTicker !== undefined && amount.trim() !== '' && !Number.isNaN(Number.parseFloat(amount.replace(',', '.')))
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -151,8 +152,8 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProps) {
           onLabelChange={setLabel}
           selectedTicker={selectedTicker}
           onTickerSelect={handleTickerSelect}
-          inputRef={inputRef}
-          labelRef={labelRef}
+          inputRef={inputReference}
+          labelRef={labelReference}
           allRates={allRates}
           canAdd={canAdd}
           onAdd={handleAdd}

@@ -1,9 +1,9 @@
 const MS_PER_SEC = 1000
 const SEC_PER_MINUTE = 60
 const SEC_PER_HOUR = 3600
-const SEC_PER_DAY = 86400
-const SEC_PER_MONTH = 2592000
-const SEC_PER_YEAR = 31536000
+const SEC_PER_DAY = 86_400
+const SEC_PER_MONTH = 2_592_000
+const SEC_PER_YEAR = 31_536_000
 
 function relativeTime(ts: number): string {
   const now = Math.floor(Date.now() / MS_PER_SEC)

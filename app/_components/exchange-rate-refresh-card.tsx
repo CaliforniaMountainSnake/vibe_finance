@@ -3,11 +3,11 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { BinanceRepository } from '@/repositories/BinanceRepository'
-import { CoinGeckoRepository } from '@/repositories/CoinGeckoRepository'
-import { MoexRepository } from '@/repositories/MoexRepository'
-import { DexieRepository } from '@/repositories/DexieRepository'
-import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
+import { BinanceRepository } from '@/repositories/binance-repository'
+import { CoinGeckoRepository } from '@/repositories/coin-gecko-repository'
+import { MoexRepository } from '@/repositories/moex-repository'
+import { DexieRepository } from '@/repositories/dexie-repository'
+import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
 import { sourceDisplayName } from '@/lib/source-display-name'
@@ -17,8 +17,8 @@ import { RefreshCw } from 'lucide-react'
 import { SettingsDialog } from './settings-dialog'
 
 type SourceStatus = {
-  updatedAt: number | null
-  error: string | null
+  updatedAt: number | undefined
+  error: string | undefined
   loading: boolean
 }
 
@@ -34,19 +34,19 @@ const SOURCES: SourceName[] = ['coingecko', 'binance', 'moex']
 const coinGeckoRepo = new CoinGeckoRepository()
 const binanceRepo = new BinanceRepository()
 const moexRepo = new MoexRepository()
-const dbRepo = new DexieRepository()
+const databaseRepo = new DexieRepository()
 
-const DEFAULT_STATUS: SourceStatus = { updatedAt: null, error: null, loading: false }
+const DEFAULT_STATUS: SourceStatus = { updatedAt: undefined, error: undefined, loading: false }
 const RELATIVE_TIME_UPDATE_INTERVAL_MS = 30_000
 
 function StatusCell({ status }: { status: SourceStatus }) {
-  if (status.error !== null) {
+  if (status.error !== undefined) {
     return <span className="text-destructive">ошибка</span>
   }
   if (status.loading) {
     return 'загрузка…'
   }
-  if (status.updatedAt !== null) {
+  if (status.updatedAt !== undefined) {
     return relativeTime(status.updatedAt)
   }
   return 'ещё не обновлялось'
@@ -65,10 +65,10 @@ function formatDate(ts: number): string {
 }
 
 function DateCell({ status }: { status: SourceStatus }) {
-  if (status.error !== null) {
+  if (status.error !== undefined) {
     return <span className="text-destructive">{status.error}</span>
   }
-  if (status.updatedAt !== null) {
+  if (status.updatedAt !== undefined) {
     return formatDate(status.updatedAt)
   }
   return '—'
@@ -108,7 +108,7 @@ function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceS
   )
 }
 
-type ExchangeRateRefreshCardProps = {
+type ExchangeRateRefreshCardProperties = {
   onRefreshed?: () => void
 }
 
@@ -122,30 +122,30 @@ async function refreshSource(
   source: SourceName,
   setStatuses: React.Dispatch<React.SetStateAction<Record<SourceName, SourceStatus>>>
 ): Promise<void> {
-  setStatuses((prev) => ({
-    ...prev,
-    [source]: { ...prev[source], loading: true, error: null },
+  setStatuses((previous) => ({
+    ...previous,
+    [source]: { ...previous[source], loading: true, error: undefined },
   }))
 
   try {
     const repo = selectRepo(source)
     const rates = await repo.fetchRates()
-    await dbRepo.updateRatesForSource(source, rates)
+    await databaseRepo.updateRatesForSource(source, rates)
 
-    setStatuses((prev) => ({
-      ...prev,
-      [source]: { updatedAt: maxUpdatedAt(rates), error: null, loading: false },
+    setStatuses((previous) => ({
+      ...previous,
+      [source]: { updatedAt: maxUpdatedAt(rates), error: undefined, loading: false },
     }))
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Неизвестная ошибка'
-    setStatuses((prev) => ({
-      ...prev,
-      [source]: { ...prev[source], error: message, loading: false },
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    setStatuses((previous) => ({
+      ...previous,
+      [source]: { ...previous[source], error: message, loading: false },
     }))
   }
 }
 
-export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCardProps) {
+export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCardProperties) {
   const [statuses, setStatuses] = useState<Record<SourceName, SourceStatus>>({
     binance: { ...DEFAULT_STATUS },
     coingecko: { ...DEFAULT_STATUS },
@@ -156,10 +156,10 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
 
   useEffect(() => {
     for (const source of SOURCES) {
-      void dbRepo.getUpdateTime(source).then((updatedAt) => {
-        setStatuses((prev) => ({
-          ...prev,
-          [source]: { ...prev[source], updatedAt },
+      void databaseRepo.getUpdateTime(source).then((updatedAt) => {
+        setStatuses((previous) => ({
+          ...previous,
+          [source]: { ...previous[source], updatedAt },
         }))
       })
     }

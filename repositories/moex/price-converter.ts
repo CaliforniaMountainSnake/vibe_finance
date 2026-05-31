@@ -12,7 +12,7 @@ export function buildCurrencyToRubMap(rates: CurrencyRateInfo[]): Map<string, nu
 }
 
 /** Параметры конвертации цены в формат «X per BTC». */
-type ConvertParams = {
+type ConvertParameters = {
   /** Цена инструмента в оригинальной валюте. */
   priceInCurrency: number
   /** Код валюты цены (RUB, USD, EUR, CNY). */
@@ -32,21 +32,21 @@ type ConvertParams = {
  *
  * @returns btcPrice или null, если курс валюты неизвестен.
  */
-export function convertToBtcPrice(params: ConvertParams): number | null {
-  const { priceInCurrency, currency, currencyToRub, btcRub } = params
-  const curUpper = currency.toUpperCase()
+export function convertToBtcPrice(parameters: ConvertParameters): number | undefined {
+  const { priceInCurrency, currency, currencyToRub, btcRub } = parameters
+  const currentUpper = currency.toUpperCase()
 
   // Если валюта — RUB, конвертим напрямую
-  if (curUpper === 'RUB') {
+  if (currentUpper === 'RUB') {
     return btcRub / priceInCurrency
   }
 
   // Иначе: переводим цену в RUB и делим btcRub на неё
-  const curRubRate = currencyToRub.get(curUpper)
-  if (curRubRate === undefined) return null
+  const currentRubRate = currencyToRub.get(currentUpper)
+  if (currentRubRate === undefined) return undefined
 
-  const priceInRub = priceInCurrency * curRubRate
-  if (priceInRub <= 0) return null
+  const priceInRub = priceInCurrency * currentRubRate
+  if (priceInRub <= 0) return undefined
 
   return btcRub / priceInRub
 }

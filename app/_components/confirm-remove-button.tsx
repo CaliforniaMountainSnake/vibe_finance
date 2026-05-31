@@ -12,8 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { Ticker } from '@/entities/Ticker'
-import type { TickerPair } from '@/entities/TickerPair'
+import type { Ticker } from '@/entities/ticker'
+import type { TickerPair } from '@/entities/ticker-pair'
 import { X } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {

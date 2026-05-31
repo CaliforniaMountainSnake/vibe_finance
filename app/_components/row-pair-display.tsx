@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { TableCell, TableRow } from '@/components/ui/table'
-import type { SourceName } from '@/entities/ExchangeRate'
+import type { SourceName } from '@/entities/exchange-rate'
 import { HoldingMobileActions, HoldingDesktopActions } from './holding-row-actions'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip'
@@ -22,7 +22,7 @@ function ConvertedCell({
   showConverted: boolean
   rateUnavailable: boolean
   convertedAmount: string
-  totalLabel: string | null
+  totalLabel: string | undefined
   source: SourceName
   tooltip: ReactNode
 }) {
@@ -128,19 +128,18 @@ function ActionsCell({
 /* ── LabelCell ─────────────────────────── */
 
 function LabelCell({ label, hasLabel }: { label: string; hasLabel: boolean }) {
-  if (!label) return null
   const cls = hasLabel ? 'text-sm leading-tight' : 'text-sm leading-tight text-muted-foreground'
-  return <span className={cls}>{label}</span>
+  return label && <span className={cls}>{label}</span>
 }
 
 /* ── RowPairDisplay ────────────────────── */
 
-export type RowPairDisplayProps = {
+export type RowPairDisplayProperties = {
   same: boolean
   showConverted: boolean
   rateUnavailable: boolean
   leftAmount: string
-  leftLabel: string | null
+  leftLabel: string | undefined
   source: SourceName
   amount: string
   unitOrTicker: string
@@ -181,7 +180,7 @@ export function RowPairDisplay({
   onEditClick,
   onRemoveClick,
   tooltip,
-}: RowPairDisplayProps) {
+}: RowPairDisplayProperties) {
   const [hovered, setHovered] = useState(false)
   const bg = hovered ? 'bg-muted/50' : ''
   const opacity = disabled ? 'opacity-40' : ''

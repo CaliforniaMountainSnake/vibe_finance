@@ -7,9 +7,9 @@ import type { MoexColumnarData } from './types'
  * Для акций и индексов (где SECID может повторяться на разных бордах)
  * используйте buildCompositeMap.
  */
-export function buildRowMap(columnar: MoexColumnarData): Map<string, Record<string, string | number | null>> {
+export function buildRowMap(columnar: MoexColumnarData): Map<string, Record<string, string | number | undefined>> {
   const { columns, data } = columnar
-  const map = new Map<string, Record<string, string | number | null>>()
+  const map = new Map<string, Record<string, string | number | undefined>>()
 
   for (const row of data) {
     const record = buildRecord(columns, row)
@@ -23,10 +23,10 @@ export function buildRowMap(columnar: MoexColumnarData): Map<string, Record<stri
 }
 
 /** Собирает объект-запись из массива имён колонок и массива значений. */
-function buildRecord(columns: string[], row: (string | number | null)[]): Record<string, string | number | null> {
-  const record: Record<string, string | number | null> = {}
-  for (let i = 0; i < columns.length; i++) {
-    record[columns[i]] = row[i] ?? null
+function buildRecord(columns: string[], row: (string | number | null)[]): Record<string, string | number | undefined> {
+  const record: Record<string, string | number | undefined> = {}
+  for (const [index, column] of columns.entries()) {
+    record[column] = row[index] ?? undefined
   }
   return record
 }
@@ -35,12 +35,15 @@ function buildRecord(columns: string[], row: (string | number | null)[]): Record
  * Извлекает числовое значение поля из записи.
  * Возвращает null, если поле отсутствует, равно null, 0 или не-числу.
  */
-export function getNumericField(record: Record<string, string | number | null>, field: string): number | null {
+export function getNumericField(
+  record: Record<string, string | number | undefined>,
+  field: string
+): number | undefined {
   const raw = record[field]
-  if (raw === null || raw === undefined) return null
-  const num = Number(raw)
-  if (!Number.isFinite(num) || num === 0) return null
-  return num
+  if (raw === null || raw === undefined) return undefined
+  const number_ = Number(raw)
+  if (!Number.isFinite(number_) || number_ === 0) return undefined
+  return number_
 }
 
 /**
@@ -49,9 +52,11 @@ export function getNumericField(record: Record<string, string | number | null>, 
  * Используется для акций и индексов, где один SECID может быть
  * на нескольких бордах (TQBR, TQTF, INAV, SNDX и т.д.).
  */
-export function buildCompositeMap(columnar: MoexColumnarData): Map<string, Record<string, string | number | null>> {
+export function buildCompositeMap(
+  columnar: MoexColumnarData
+): Map<string, Record<string, string | number | undefined>> {
   const { columns, data } = columnar
-  const map = new Map<string, Record<string, string | number | null>>()
+  const map = new Map<string, Record<string, string | number | undefined>>()
 
   for (const row of data) {
     const record = buildRecord(columns, row)
@@ -64,15 +69,15 @@ export function buildCompositeMap(columnar: MoexColumnarData): Map<string, Recor
   return map
 }
 
-/** Строит составной ключ SECID_BOARDID из записи. Возвращает null, если SECID или BOARDID отсутствуют. */
-function compositeKey(record: Record<string, string | number | null>): string | null {
+/** Строит составной ключ SECID_BOARDID из записи. Возвращает undefined, если SECID или BOARDID отсутствуют. */
+function compositeKey(record: Record<string, string | number | undefined>): string | undefined {
   const secId = String(record['SECID'] ?? '')
   const boardId = String(record['BOARDID'] ?? '')
-  if (!secId || !boardId) return null
+  if (!secId || !boardId) return undefined
   return `${secId}_${boardId}`
 }
 
 /** Извлекает строковое значение поля из записи, возвращает '' если отсутствует. */
-export function getStringField(record: Record<string, string | number | null>, field: string): string {
+export function getStringField(record: Record<string, string | number | undefined>, field: string): string {
   return String(record[field] ?? '')
 }

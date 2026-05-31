@@ -1,4 +1,4 @@
-import type { SourceName } from '@/entities/ExchangeRate'
+import type { SourceName } from '@/entities/exchange-rate'
 
 const DISPLAY: Record<SourceName, string> = {
   binance: 'Binance',

@@ -1,17 +1,16 @@
 'use client'
 
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
 import { HoldingRow } from './holding-row'
 import { formatAmount } from '@/lib/format-amount'
 import { computeHoldingsTotal } from '@/lib/compute-holdings-total'
 import { TotalCurrencyPicker } from './total-currency-picker'
 
-function TotalUnitLabel({ unit }: { unit: string | null }) {
-  if (!unit) return null
-  return <span className="text-muted-foreground text-sm"> {unit}</span>
+function TotalUnitLabel({ unit }: { unit: string | undefined }) {
+  return unit && <span className="text-muted-foreground text-sm"> {unit}</span>
 }
 
 function TotalAmountDisplay({
@@ -20,10 +19,10 @@ function TotalAmountDisplay({
   totalUnit,
 }: {
   total: ReturnType<typeof computeHoldingsTotal>
-  totalTicker: Ticker | null
-  totalUnit: string | null
+  totalTicker: Ticker | undefined
+  totalUnit: string | undefined
 }) {
-  if (totalTicker === null) {
+  if (!totalTicker) {
     return <span className="text-sm tabular-nums font-semibold">—</span>
   }
   if (total.contributedCount === 0 && total.skippedCount > 0) {
@@ -50,10 +49,10 @@ function TotalRow({
   onTotalTickerChange,
 }: {
   total: ReturnType<typeof computeHoldingsTotal>
-  totalTicker: Ticker | null
-  totalUnit: string | null
+  totalTicker: Ticker | undefined
+  totalUnit: string | undefined
   allRates: ExchangeRate[]
-  onTotalTickerChange: (ticker: Ticker | null) => void
+  onTotalTickerChange: (ticker: Ticker | undefined) => void
 }) {
   return (
     <TableRow>
@@ -70,12 +69,12 @@ function TotalRow({
   )
 }
 
-type HoldingsTableProps = {
+type HoldingsTableProperties = {
   holdings: Holding[]
   allRates: ExchangeRate[]
   conversionRates: Record<string, number | undefined>
-  totalTicker: Ticker | null
-  onTotalTickerChange: (ticker: Ticker | null) => void
+  totalTicker: Ticker | undefined
+  onTotalTickerChange: (ticker: Ticker | undefined) => void
   onMoveUp: (id: string) => void
   onMoveDown: (id: string) => void
   onToggleEnabled: (id: string) => void
@@ -94,9 +93,9 @@ export function HoldingsTable({
   onToggleEnabled,
   onRemove,
   onEdited,
-}: HoldingsTableProps) {
+}: HoldingsTableProperties) {
   const total = computeHoldingsTotal(holdings, conversionRates)
-  const totalUnit = totalTicker?.unit ?? null
+  const totalUnit = totalTicker?.unit
 
   return (
     <Table>

@@ -4,9 +4,9 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import type { SourceName } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
-import type { TickerPair } from '@/entities/TickerPair'
+import type { SourceName } from '@/entities/exchange-rate'
+import type { Ticker } from '@/entities/ticker'
+import type { TickerPair } from '@/entities/ticker-pair'
 import { formatAmount } from '@/lib/format-amount'
 import { sourceDisplayName } from '@/lib/source-display-name'
 import { ConfirmRemoveButton } from './confirm-remove-button'
@@ -52,7 +52,7 @@ function FormatRateTooltip({
   toName,
   sourceName,
 }: {
-  rateLine: string | null
+  rateLine: string | undefined
   toName: string | undefined
   sourceName: string
 }) {
@@ -78,11 +78,11 @@ function FormatRate({
   toName: string | undefined
   toSource: SourceName
 }) {
-  const isValid = rate !== undefined && !isNaN(rate)
+  const isValid = rate !== undefined && !Number.isNaN(rate)
   const displayRate = isValid ? formatAmount(rate) : '\u2014'
   const suffix = unit ?? ticker.toUpperCase()
   const sourceName = sourceDisplayName(toSource)
-  const rateLine = isValid ? `≈ ${rate.toString()} ${suffix}` : null
+  const rateLine = isValid ? `≈ ${rate.toString()} ${suffix}` : undefined
 
   return (
     <div className="flex items-center justify-end gap-1">
@@ -195,7 +195,7 @@ function FavoriteRow({
 
 /* ── Exported table component ─────────────────────────────────── */
 
-type FavoritesTableProps = {
+type FavoritesTableProperties = {
   favorites: TickerPair[]
   rates: Record<string, number>
   onRemove: (pair: TickerPair) => void
@@ -203,7 +203,7 @@ type FavoritesTableProps = {
   onMoveDown: (pair: TickerPair) => void
 }
 
-export function FavoritesTable({ favorites, rates, onRemove, onMoveUp, onMoveDown }: FavoritesTableProps) {
+export function FavoritesTable({ favorites, rates, onRemove, onMoveUp, onMoveDown }: FavoritesTableProperties) {
   return (
     <Table>
       <TableHeader>

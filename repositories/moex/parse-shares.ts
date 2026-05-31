@@ -56,22 +56,22 @@ export function parseShares(sharesJson: MoexResponse): ShareEntry[] {
 }
 
 /** Параметры для buildShareEntry. */
-type ShareBuildParams = {
-  mdMap: Map<string, Record<string, string | number | null>>
+type ShareBuildParameters = {
+  mdMap: Map<string, Record<string, string | number | undefined>>
   compositeKey: string
-  sec: Record<string, string | number | null>
+  sec: Record<string, string | number | undefined>
   boardId: string
 }
 
 /** Строит ShareEntry для одной акции. Возвращает null, если цены нет. */
-function buildShareEntry(params: ShareBuildParams): ShareEntry | null {
-  const { mdMap, compositeKey, sec, boardId } = params
+function buildShareEntry(parameters: ShareBuildParameters): ShareEntry | undefined {
+  const { mdMap, compositeKey, sec, boardId } = parameters
 
   const md = mdMap.get(compositeKey)
-  if (!md) return null
+  if (!md) return undefined
 
   const price = getSharePrice(md)
-  if (price === null) return null
+  if (price === undefined) return undefined
 
   const currency = BOARD_CURRENCY[boardId] ?? 'RUB'
   const name = getStringField(sec, 'SECNAME')
@@ -83,6 +83,6 @@ function buildShareEntry(params: ShareBuildParams): ShareEntry | null {
 }
 
 /** Извлекает цену акции: WAPRICE с фоллбеком на MARKETPRICE. */
-function getSharePrice(md: Record<string, string | number | null>): number | null {
+function getSharePrice(md: Record<string, string | number | undefined>): number | undefined {
   return getNumericField(md, 'WAPRICE') ?? getNumericField(md, 'MARKETPRICE')
 }

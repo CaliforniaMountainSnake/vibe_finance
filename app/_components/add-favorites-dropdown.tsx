@@ -12,10 +12,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Ticker } from '@/entities/ticker'
 import { TickerPicker } from './ticker-picker'
-import { dbRepo } from '@/lib/db'
+import { databaseRepo } from '@/lib/database'
 import { Plus, X } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {
@@ -35,21 +35,21 @@ function DialogCloseButton() {
   )
 }
 
-type AddFavoritesDialogProps = {
+type AddFavoritesDialogProperties = {
   allRates: ExchangeRate[]
   onAdded: () => void
 }
 
-export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProps) {
-  const [selectedFrom, setSelectedFrom] = useState<Ticker | null>(null)
+export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProperties) {
+  const [selectedFrom, setSelectedFrom] = useState<Ticker>()
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputReference = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     if (open) {
-      timer = setTimeout(() => inputRef.current?.focus(), 0)
+      timer = setTimeout(() => inputReference.current?.focus(), 0)
     }
     return () => {
       if (timer !== undefined) clearTimeout(timer)
@@ -61,15 +61,15 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
       if (!selectedFrom) {
         setSelectedFrom(ticker)
         setSearchQuery('')
-        inputRef.current?.focus()
+        inputReference.current?.focus()
         return
       }
       if (isTickerEqual(ticker, selectedFrom)) {
-        setSelectedFrom(null)
+        setSelectedFrom(undefined)
         return
       }
-      await dbRepo.addFavoriteRate({ from: selectedFrom, to: ticker })
-      setSelectedFrom(null)
+      await databaseRepo.addFavoriteRate({ from: selectedFrom, to: ticker })
+      setSelectedFrom(undefined)
       setOpen(false)
       onAdded()
     },
@@ -78,7 +78,7 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     setOpen(newOpen)
-    setSelectedFrom(null)
+    setSelectedFrom(undefined)
     setSearchQuery('')
   }, [])
 
@@ -110,7 +110,7 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
             allRates={allRates}
             selected={selectedFrom}
             onSelect={(t) => void handleSelect(t)}
-            inputRef={inputRef}
+            inputRef={inputReference}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder={selectedFrom ? `Вторая валюта для ${tickerLabel(selectedFrom)} → …` : 'Поиск валюты…'}

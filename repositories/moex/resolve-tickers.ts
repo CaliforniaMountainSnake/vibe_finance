@@ -27,8 +27,8 @@ export function resolveTickers<T extends ResolvableEntry>(entries: T[]): T[] {
   for (const [, group] of groups) {
     result.push(group[0])
 
-    for (let i = 1; i < group.length; i++) {
-      const entry = group[i]
+    for (let index = 1; index < group.length; index++) {
+      const entry = group[index]
       result.push({
         ...entry,
         ticker: `${entry.secId}_${entry.boardId}`.toLowerCase(),

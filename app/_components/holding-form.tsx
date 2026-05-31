@@ -4,8 +4,8 @@ import { useCallback, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TickerPicker } from './ticker-picker'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Ticker } from '@/entities/ticker'
 import { ChevronDown } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {
@@ -20,12 +20,12 @@ export function TickerSelect({
   onSelect,
 }: {
   allRates: ExchangeRate[]
-  selectedTicker: Ticker | null
+  selectedTicker: Ticker | undefined
   onSelect: (ticker: Ticker) => void
 }) {
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const pickerInputRef = useRef<HTMLInputElement>(null)
+  const pickerInputReference = useRef<HTMLInputElement>(null)
 
   const handleSelect = useCallback(
     (ticker: Ticker) => {
@@ -38,7 +38,7 @@ export function TickerSelect({
 
   const handleOpen = useCallback(() => {
     setOpen(true)
-    setTimeout(() => pickerInputRef.current?.focus(), 0)
+    setTimeout(() => pickerInputReference.current?.focus(), 0)
   }, [])
 
   if (!open) {
@@ -60,7 +60,7 @@ export function TickerSelect({
         allRates={allRates}
         selected={selectedTicker}
         onSelect={handleSelect}
-        inputRef={pickerInputRef}
+        inputRef={pickerInputReference}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder="Поиск валюты…"
@@ -71,14 +71,14 @@ export function TickerSelect({
 
 /* ── HoldingForm ── */
 
-type HoldingFormProps = {
+type HoldingFormProperties = {
   amount: string
   onAmountChange: (v: string) => void
   label: string
   onLabelChange: (v: string) => void
   labelRef: React.RefObject<HTMLTextAreaElement | null>
   allRates: ExchangeRate[]
-  selectedTicker: Ticker | null
+  selectedTicker: Ticker | undefined
   onTickerSelect: (t: Ticker) => void
   inputRef: React.RefObject<HTMLInputElement | null>
 }
@@ -93,7 +93,7 @@ export function HoldingForm({
   selectedTicker,
   onTickerSelect,
   inputRef,
-}: HoldingFormProps) {
+}: HoldingFormProperties) {
   return (
     <div className="flex flex-col gap-3">
       <div>
@@ -104,7 +104,7 @@ export function HoldingForm({
           step="any"
           placeholder="0"
           value={amount}
-          onChange={(e) => onAmountChange(e.target.value)}
+          onChange={(event_) => onAmountChange(event_.target.value)}
           className="h-9 text-base"
         />
       </div>
@@ -119,7 +119,7 @@ export function HoldingForm({
         <textarea
           ref={labelRef}
           value={label}
-          onChange={(e) => onLabelChange(e.target.value)}
+          onChange={(event_) => onLabelChange(event_.target.value)}
           placeholder="Название счёта…"
           rows={3}
           className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none md:text-sm dark:bg-input/30"

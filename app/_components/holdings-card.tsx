@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
-import { dbRepo } from '@/lib/db'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
+import { databaseRepo } from '@/lib/database'
 import { computeConversionRates } from '@/lib/compute-conversion-rates'
 import { HoldingsTable } from './holdings-table'
 import { AddHoldingDialog } from './add-holding-dialog'
@@ -14,51 +14,51 @@ import { CurrencySearchProvider } from './currency-search-provider'
 function useHoldingsState(refreshKey: number) {
   const [holdings, setHoldings] = useState<Holding[]>([])
   const [allRates, setAllRates] = useState<ExchangeRate[]>([])
-  const [totalTicker, setTotalTicker] = useState<Ticker | null>(null)
+  const [totalTicker, setTotalTicker] = useState<Ticker>()
   const [conversionRates, setConversionRates] = useState<Record<string, number | undefined>>({})
 
   useEffect(() => {
     void (async () => {
       const [hld, rates, total] = await Promise.all([
-        dbRepo.getHoldings(),
-        dbRepo.getAllRates(),
-        dbRepo.getSetting('totalBaseTicker'),
+        databaseRepo.getHoldings(),
+        databaseRepo.getAllRates(),
+        databaseRepo.getSetting('totalBaseTicker'),
       ])
       setHoldings(hld)
       setAllRates(rates)
-      const tt = total ?? null
+      const tt = total ?? undefined
       setTotalTicker(tt)
       if (tt && hld.length > 0) {
-        computeConversionRates(dbRepo, hld, tt).then(setConversionRates)
+        computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
       }
     })()
   }, [refreshKey])
 
   async function refreshHoldingsAndRates() {
-    const [hld, rates] = await Promise.all([dbRepo.getHoldings(), dbRepo.getAllRates()])
+    const [hld, rates] = await Promise.all([databaseRepo.getHoldings(), databaseRepo.getAllRates()])
     setHoldings(hld)
     setAllRates(rates)
     updateConversionRates(hld, totalTicker)
   }
 
-  function updateConversionRates(hld: Holding[], tt: Ticker | null) {
+  function updateConversionRates(hld: Holding[], tt: Ticker | undefined) {
     if (!tt || hld.length === 0) {
       setConversionRates({})
       return
     }
-    computeConversionRates(dbRepo, hld, tt).then(setConversionRates)
+    computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
   }
 
   async function moveUp(id: string) {
-    await dbRepo.moveHoldingUp(id)
-    const updated = await dbRepo.getHoldings()
+    await databaseRepo.moveHoldingUp(id)
+    const updated = await databaseRepo.getHoldings()
     setHoldings(updated)
     updateConversionRates(updated, totalTicker)
   }
 
   async function moveDown(id: string) {
-    await dbRepo.moveHoldingDown(id)
-    const updated = await dbRepo.getHoldings()
+    await databaseRepo.moveHoldingDown(id)
+    const updated = await databaseRepo.getHoldings()
     setHoldings(updated)
     updateConversionRates(updated, totalTicker)
   }
@@ -66,20 +66,20 @@ function useHoldingsState(refreshKey: number) {
   async function toggleEnabled(id: string) {
     const holding = holdings.find((h) => h.id === id)
     if (!holding) return
-    await dbRepo.updateHolding(id, { enabled: !holding.enabled })
-    const updated = await dbRepo.getHoldings()
+    await databaseRepo.updateHolding(id, { enabled: !holding.enabled })
+    const updated = await databaseRepo.getHoldings()
     setHoldings(updated)
     updateConversionRates(updated, totalTicker)
   }
 
   async function remove(id: string) {
-    await dbRepo.removeHolding(id)
-    const updated = await dbRepo.getHoldings()
+    await databaseRepo.removeHolding(id)
+    const updated = await databaseRepo.getHoldings()
     setHoldings(updated)
     updateConversionRates(updated, totalTicker)
   }
 
-  function changeTotal(ticker: Ticker | null) {
+  function changeTotal(ticker: Ticker | undefined) {
     setTotalTicker(ticker)
     updateConversionRates(holdings, ticker)
   }

@@ -19,7 +19,7 @@ export const COINGECKO_MOCK_JSON = JSON.stringify({
     btc: {
       name: 'Bitcoin',
       unit: 'BTC',
-      value: 1.0,
+      value: 1,
       type: 'crypto',
     },
     eth: {
@@ -31,19 +31,19 @@ export const COINGECKO_MOCK_JSON = JSON.stringify({
     usd: {
       name: 'US Dollar',
       unit: '$',
-      value: 76808.44,
+      value: 76_808.44,
       type: 'fiat',
     },
     eur: {
       name: 'Euro',
       unit: '€',
-      value: 70215.833,
+      value: 70_215.833,
       type: 'fiat',
     },
     gel: {
       name: 'Georgian Lari',
       unit: '₾',
-      value: 205015.665,
+      value: 205_015.665,
       type: 'fiat',
     },
     // Нулевая цена — должна быть пропущена

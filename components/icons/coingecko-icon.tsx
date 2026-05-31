@@ -1,8 +1,8 @@
 import type { SVGProps } from 'react'
 
-export function CoinGeckoIcon(props: SVGProps<SVGSVGElement>) {
+export function CoinGeckoIcon(properties: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1011" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1011" {...properties}>
       {/* Lizard silhouette */}
       <g>
         {/* Main body */}

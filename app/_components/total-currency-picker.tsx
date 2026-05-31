@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TickerPicker } from './ticker-picker'
-import { dbRepo } from '@/lib/db'
-import type { ExchangeRate } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
+import { databaseRepo } from '@/lib/database'
+import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { Ticker } from '@/entities/ticker'
 import { Calculator, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 
@@ -28,21 +28,21 @@ function DialogCloseButton() {
   )
 }
 
-type TotalCurrencyPickerProps = {
+type TotalCurrencyPickerProperties = {
   allRates: ExchangeRate[]
-  value: Ticker | null
-  onChange: (ticker: Ticker | null) => void
+  value: Ticker | undefined
+  onChange: (ticker: Ticker | undefined) => void
 }
 
-export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrencyPickerProps) {
+export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrencyPickerProperties) {
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputReference = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     if (open) {
-      timer = setTimeout(() => inputRef.current?.focus(), 0)
+      timer = setTimeout(() => inputReference.current?.focus(), 0)
     }
     return () => {
       if (timer !== undefined) clearTimeout(timer)
@@ -51,7 +51,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
 
   const handleSelect = useCallback(
     async (ticker: Ticker) => {
-      await dbRepo.setSetting('totalBaseTicker', ticker)
+      await databaseRepo.setSetting('totalBaseTicker', ticker)
       onChange(ticker)
       setOpen(false)
       setSearchQuery('')
@@ -65,7 +65,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
   }, [])
 
   const label = value ? `${value.ticker.toUpperCase()}` : '?'
-  const showIcon = value !== null
+  const showIcon = value !== undefined
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -94,7 +94,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
             allRates={allRates}
             selected={value}
             onSelect={handleSelect}
-            inputRef={inputRef}
+            inputRef={inputReference}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder="Валюта для подсчёта итога…"

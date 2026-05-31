@@ -42,7 +42,7 @@ export function parseIndexes(indexesJson: MoexResponse): IndexEntry[] {
     if (!md) continue
 
     const price = getNumericField(md, 'CURRENTVALUE')
-    if (price === null) continue
+    if (price === undefined) continue
 
     const boardId = getStringField(sec, 'BOARDID')
     const name = getStringField(sec, 'NAME')

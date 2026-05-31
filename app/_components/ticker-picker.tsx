@@ -2,8 +2,8 @@
 
 import { type ReactNode, useMemo, useRef } from 'react'
 import { Input } from '@/components/ui/input'
-import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
-import type { Ticker } from '@/entities/Ticker'
+import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
+import type { Ticker } from '@/entities/ticker'
 import { Search, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { useCurrencySearch } from './currency-search-provider'
@@ -71,7 +71,7 @@ function TickerPickerSearch({
           ref={inputRef}
           placeholder={placeholder ?? 'Поиск валюты…'}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event_) => onChange(event_.target.value)}
           className="pl-7 pr-7 h-7 text-sm"
         />
         {value && (
@@ -95,9 +95,9 @@ function TickerPickerSearch({
 
 /* ── TickerPicker ─────────────────────────────────────────────── */
 
-type TickerPickerProps = {
+type TickerPickerProperties = {
   allRates: ExchangeRate[]
-  selected: Ticker | null
+  selected: Ticker | undefined
   onSelect: (ticker: Ticker) => void
   inputRef?: React.RefObject<HTMLInputElement | null>
   searchQuery: string
@@ -117,9 +117,9 @@ export function TickerPicker({
   onSearchChange,
   searchPlaceholder,
   searchRightElement,
-}: TickerPickerProps) {
-  const fallbackRef = useRef<HTMLInputElement>(null)
-  const ref = inputRef ?? fallbackRef
+}: TickerPickerProperties) {
+  const fallbackReference = useRef<HTMLInputElement>(null)
+  const reference = inputRef ?? fallbackReference
 
   const fuse = useCurrencySearch()
 
@@ -146,7 +146,7 @@ export function TickerPicker({
         value={searchQuery}
         onChange={onSearchChange}
         placeholder={searchPlaceholder}
-        inputRef={ref}
+        inputRef={reference}
         rightElement={searchRightElement}
       />
       {matchCount > 0 && <p className="px-3 pb-0.5 text-xs text-muted-foreground">Найдено {matchCount}</p>}
@@ -164,7 +164,9 @@ export function TickerPicker({
                 <TickerPickerItem
                   key={`${rate.source}:${rate.ticker}`}
                   rate={rate}
-                  isSelected={selected !== null && selected.source === rate.source && selected.ticker === rate.ticker}
+                  isSelected={
+                    selected !== undefined && selected.source === rate.source && selected.ticker === rate.ticker
+                  }
                   onSelect={onSelect}
                 />
               ))}

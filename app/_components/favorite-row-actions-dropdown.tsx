@@ -13,15 +13,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { Ticker } from '@/entities/Ticker'
-import type { TickerPair } from '@/entities/TickerPair'
+import type { Ticker } from '@/entities/ticker'
+import type { TickerPair } from '@/entities/ticker-pair'
 import { ChevronUp, ChevronDown, EllipsisVertical, X } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {
   return `${t.source}:${t.ticker.toUpperCase()}`
 }
 
-type FavoriteRowActionsDropdownProps = {
+type FavoriteRowActionsDropdownProperties = {
   pair: TickerPair
   isFirst: boolean
   isLast: boolean
@@ -37,7 +37,7 @@ export function FavoriteRowActionsDropdown({
   onMoveUp,
   onMoveDown,
   onRemove,
-}: FavoriteRowActionsDropdownProps) {
+}: FavoriteRowActionsDropdownProperties) {
   const [removeOpen, setRemoveOpen] = useState(false)
 
   return (

@@ -1,7 +1,7 @@
 'use client'
 
-import type { Holding } from '@/entities/Holding'
-import type { Ticker } from '@/entities/Ticker'
+import type { Holding } from '@/entities/holding'
+import type { Ticker } from '@/entities/ticker'
 import { TooltipContent } from '@/components/ui/tooltip'
 import { sourceDisplayName } from '@/lib/source-display-name'
 import { formatAmount } from '@/lib/format-amount'
@@ -10,8 +10,8 @@ function holdingUnit(t: Ticker): string {
   return t.unit ?? t.ticker.toUpperCase()
 }
 
-function isSameCurrency(ticker: Ticker, totalTicker: Ticker | null): boolean {
-  return totalTicker !== null && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
+function isSameCurrency(ticker: Ticker, totalTicker: Ticker | undefined): boolean {
+  return totalTicker !== undefined && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
 }
 
 function TooltipRateOrFallback({
@@ -25,8 +25,10 @@ function TooltipRateOrFallback({
   totalUnit: string
   same: boolean
 }) {
-  if (same) return null
-  if (conversionRate === undefined || isNaN(conversionRate)) {
+  if (same) {
+    return false
+  }
+  if (conversionRate === undefined || Number.isNaN(conversionRate)) {
     return <span className="text-muted-foreground">Курс недоступен</span>
   }
   return (
@@ -65,7 +67,7 @@ export function HoldingTooltip({
 }: {
   holding: Holding
   conversionRate: number | undefined
-  totalTicker: Ticker | null
+  totalTicker: Ticker | undefined
 }) {
   const unit = holdingUnit(holding.ticker)
   const totalUnit = totalTicker ? holdingUnit(totalTicker) : ''
