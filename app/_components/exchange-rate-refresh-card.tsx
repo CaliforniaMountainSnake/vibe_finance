@@ -11,6 +11,7 @@ import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
 import { sourceDisplayName } from '@/lib/source-display-name'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RefreshCw } from 'lucide-react'
 import { SettingsDialog } from './settings-dialog'
@@ -75,35 +76,35 @@ function DateCell({ status }: { status: SourceStatus }) {
 
 function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceStatus> }) {
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="border-t bg-muted/30">
-          <th className="px-1.5 py-1.5 text-left text-foreground text-xs font-medium">Источник</th>
-          <th className="px-1.5 py-1.5 text-left text-foreground text-xs font-medium">Дата обновления</th>
-          <th className="px-1.5 py-1.5 text-left text-foreground text-xs font-medium">Статус</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Источник</TableHead>
+          <TableHead>Дата обновления</TableHead>
+          <TableHead>Статус</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {SOURCES.map((source) => (
           <Fragment key={source}>
-            <tr className="border-t">
-              <td className="px-1.5 py-1.5 capitalize font-medium">
+            <TableRow>
+              <TableCell className="capitalize font-medium">
                 <span className="inline-flex items-center gap-1.5">
                   <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
                   {sourceDisplayName(source)}
                 </span>
-              </td>
-              <td className="px-1.5 py-1.5">
+              </TableCell>
+              <TableCell>
                 <DateCell status={statuses[source]} />
-              </td>
-              <td className="px-1.5 py-1.5">
+              </TableCell>
+              <TableCell>
                 <StatusCell status={statuses[source]} />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           </Fragment>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   )
 }
 
