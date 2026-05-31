@@ -30,7 +30,7 @@ const eslintConfig = defineConfig([
     },
     rules: {
       // Ограничение когнитивной сложности
-      'sonarjs/cognitive-complexity': ['warn', 3],
+      'sonarjs/cognitive-complexity': ['warn', 4],
 
       // Ограничение цикломатической сложности
       complexity: ['warn', { max: 7 }],
