@@ -13,8 +13,8 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 function getSystemTheme(): Theme {
-  if (typeof window === 'undefined') return 'light'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  if (globalThis.window === undefined) return 'light'
+  return globalThis.window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 async function updateStatusBar(theme: Theme) {
@@ -39,10 +39,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getSystemTheme)
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const mq = globalThis.window.matchMedia('(prefers-color-scheme: dark)')
 
-    const handleChange = (e: MediaQueryListEvent) => {
-      setTheme(e.matches ? 'dark' : 'light')
+    const handleChange = (event_: MediaQueryListEvent) => {
+      setTheme(event_.matches ? 'dark' : 'light')
     }
 
     mq.addEventListener('change', handleChange)
@@ -52,11 +52,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Apply dark class to <html> (Tailwind uses this)
   useEffect(() => {
     const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
+    root.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
   // Sync Capacitor status bar
@@ -66,19 +62,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Fallback: listen for native theme-change events from Android onConfigurationChanged
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ theme: Theme }>).detail
+    const handler = (event_: Event) => {
+      const detail = (event_ as CustomEvent<{ theme: Theme }>).detail
       if (detail?.theme) setTheme(detail.theme)
     }
-    window.addEventListener('nativeThemeChange', handler)
-    return () => window.removeEventListener('nativeThemeChange', handler)
+    globalThis.window.addEventListener('nativeThemeChange', handler)
+    return () => globalThis.window.removeEventListener('nativeThemeChange', handler)
   }, [])
 
   return <ThemeContext.Provider value={{ theme }}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error('useTheme must be used within ThemeProvider')
-  return ctx
+  const context = useContext(ThemeContext)
+  if (!context) throw new Error('useTheme must be used within ThemeProvider')
+  return context
 }

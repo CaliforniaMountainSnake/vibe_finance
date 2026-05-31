@@ -46,6 +46,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-sonarjs": "^4.0.3",
+    "eslint-plugin-unicorn": "^64.0.0",
     "fake-indexeddb": "^6.2.5",
     "prettier": "^3.8.3",
     "tailwindcss": "^4",
