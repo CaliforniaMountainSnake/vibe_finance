@@ -9,22 +9,62 @@ import { EditHoldingDialog } from './edit-holding-dialog'
 import { HoldingRemoveDialog, HoldingMobileActions, HoldingDesktopActions } from './holding-row-actions'
 import { formatAmount } from '@/lib/format-amount'
 import { SourceIcon } from '@/components/icons/source-icon'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { sourceDisplayName } from '@/lib/source-display-name'
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip'
+import { HoldingTooltip } from './holding-tooltip'
 
 function tickerLabel(t: Ticker): string {
   return t.ticker.toUpperCase()
 }
 
-/* ── AmountCellLabel ───────────────────── */
+/* ── OriginalColumn ───────────────────── */
 
-function AmountCellLabel({ displayLabel, hasLabel }: { displayLabel: string | undefined; hasLabel: boolean }) {
-  if (!displayLabel) return null
+function OriginalColumn({ amount, unitOrTicker, holding }: { amount: string; unitOrTicker: string; holding: Holding }) {
   return (
-    <div
-      className={`text-sm tabular-nums leading-tight mt-0.5 pl-[1.375rem]${hasLabel ? '' : ' text-muted-foreground'}`}
-    >
-      {displayLabel}
+    <div className="flex items-center gap-1.5 text-right whitespace-nowrap">
+      <span className="text-sm tabular-nums font-medium">{amount}</span>
+      <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
+      <SourceIcon source={holding.ticker.source} className="size-3 shrink-0 text-muted-foreground" />
+    </div>
+  )
+}
+
+/* ── LabelRow ──────────────────────────── */
+
+function LabelRow({ displayLabel, hasLabel }: { displayLabel: string; hasLabel: boolean }) {
+  return (
+    <div className={`col-span-2 text-sm leading-tight${hasLabel ? '' : ' text-muted-foreground'}`}>{displayLabel}</div>
+  )
+}
+
+/* ── LeftColumn ────────────────────────── */
+
+function LeftColumn({
+  same,
+  showConverted,
+  rateUnavailable,
+  convertedAmount,
+  totalLabel,
+}: {
+  same: boolean
+  showConverted: boolean
+  rateUnavailable: boolean
+  convertedAmount: string
+  totalLabel: string | null
+}) {
+  return (
+    <div className="text-sm tabular-nums whitespace-nowrap">
+      {rateUnavailable && <span className="text-destructive">Курс недоступен</span>}
+      {same && totalLabel && (
+        <span className="font-medium">
+          {convertedAmount} <span className="text-muted-foreground">{totalLabel}</span>
+        </span>
+      )}
+      {showConverted && (
+        <>
+          <span className="text-muted-foreground">≈</span> <span className="font-medium">{convertedAmount}</span>{' '}
+          <span className="text-muted-foreground">{totalLabel}</span>
+        </>
+      )}
     </div>
   )
 }
@@ -33,44 +73,46 @@ function AmountCellLabel({ displayLabel, hasLabel }: { displayLabel: string | un
 
 function AmountCell({
   holding,
-  convertedAmount,
-  totalLabel,
+  leftAmount,
+  leftLabel,
   rateTooltip,
   displayLabel,
   showConverted,
   rateUnavailable,
   hasLabel,
+  same,
 }: {
   holding: Holding
-  convertedAmount: string | undefined
-  totalLabel: string | null
+  leftAmount: string
+  leftLabel: string | null
   rateTooltip: React.ReactNode
   displayLabel: string | undefined
   showConverted: boolean
   rateUnavailable: boolean
   hasLabel: boolean
+  same: boolean
 }) {
   const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
   return (
-    <TableCell>
+    <TableCell className="w-full">
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-block">
-            <div className="flex items-center gap-1.5">
-              <SourceIcon source={holding.ticker.source} className="size-3 shrink-0 text-muted-foreground" />
-              <span className="text-sm tabular-nums font-medium">{formatAmount(holding.amount)}</span>
-              <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
-            </div>
-            {rateUnavailable && (
-              <div className="text-sm leading-tight pl-[1.375rem] text-destructive">Курс недоступен</div>
-            )}
-            {showConverted && (
-              <div className="text-sm tabular-nums leading-tight pl-[1.375rem]">
-                <span className="text-muted-foreground">≈</span> {convertedAmount}{' '}
-                <span className="text-muted-foreground">{totalLabel}</span>
+          <span className="inline-block w-full">
+            <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5 items-baseline">
+              <div className="min-w-0">
+                <LeftColumn
+                  same={same}
+                  showConverted={showConverted}
+                  rateUnavailable={rateUnavailable}
+                  convertedAmount={leftAmount}
+                  totalLabel={leftLabel}
+                />
               </div>
-            )}
-            <AmountCellLabel displayLabel={displayLabel} hasLabel={hasLabel} />
+              {!same && (
+                <OriginalColumn amount={formatAmount(holding.amount)} unitOrTicker={unitOrTicker} holding={holding} />
+              )}
+              {displayLabel && <LabelRow displayLabel={displayLabel} hasLabel={hasLabel} />}
+            </div>
           </span>
         </TooltipTrigger>
         {rateTooltip}
@@ -93,15 +135,6 @@ type HoldingRowProps = {
   onToggleEnabled: (id: string) => void
   onRemove: (id: string) => void
   onEdited: () => void
-}
-
-function computeConverted(amount: number, rate: number | undefined): string | undefined {
-  if (rate === undefined || isNaN(rate)) return undefined
-  return formatAmount(amount * rate)
-}
-
-function holdingUnit(t: Ticker): string {
-  return t.unit ?? t.ticker.toUpperCase()
 }
 
 function isSameCurrency(ticker: Ticker, totalTicker: Ticker | null): boolean {
@@ -127,72 +160,45 @@ function holdingConversionFlags(
   return { rateUnavailable: false, showConverted: true }
 }
 
-function HoldingTooltipRateOrFallback({
-  unit,
-  conversionRate,
-  totalUnit,
-  same,
-}: {
-  unit: string
-  conversionRate: number | undefined
-  totalUnit: string
-  same: boolean
-}) {
-  if (same) return null
-  if (conversionRate === undefined || isNaN(conversionRate)) {
-    return <span className="text-muted-foreground">Курс недоступен</span>
-  }
-  return (
-    <span className="tabular-nums">
-      1 {unit} ≈ {formatAmount(conversionRate)} {totalUnit}
-    </span>
-  )
+function computeConverted(amount: number, rate: number | undefined): string | undefined {
+  if (rate === undefined || isNaN(rate)) return undefined
+  return formatAmount(amount * rate)
 }
 
-function HoldingTooltipContent({
-  holding,
-  unit,
-  conversionRate,
-  totalUnit,
-  same,
-}: {
-  holding: Holding
-  unit: string
-  conversionRate: number | undefined
-  totalUnit: string
-  same: boolean
-}) {
-  return (
-    <TooltipContent side="top" className="flex flex-col items-start">
-      <span>{sourceDisplayName(holding.ticker.source)}</span>
-      {holding.ticker.name && <span className="font-medium">{holding.ticker.name}</span>}
-      <HoldingTooltipRateOrFallback unit={unit} conversionRate={conversionRate} totalUnit={totalUnit} same={same} />
-    </TooltipContent>
-  )
-}
-
-function HoldingTooltip({
-  holding,
-  conversionRate,
-  totalTicker,
-}: {
-  holding: Holding
-  conversionRate: number | undefined
-  totalTicker: Ticker | null
-}) {
-  const unit = holdingUnit(holding.ticker)
-  const totalUnit = totalTicker ? holdingUnit(totalTicker) : ''
+function computeRowDisplay(holding: Holding, totalTicker: Ticker | null, conversionRate: number | undefined) {
+  const converted = computeConverted(holding.amount, conversionRate)
   const same = isSameCurrency(holding.ticker, totalTicker)
+  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
+  const { leftAmount, leftLabel } = computeLeftSide({
+    holding,
+    same,
+    conversionRate,
+    converted,
+    totalLabel,
+  })
+  const { displayLabel, hasLabel } = holdingDisplayLabel(holding)
+  const { rateUnavailable, showConverted } = holdingConversionFlags(totalLabel, same, converted)
+  return { same, leftAmount, leftLabel, displayLabel, hasLabel, rateUnavailable, showConverted }
+}
 
-  return (
-    <HoldingTooltipContent
-      holding={holding}
-      unit={unit}
-      conversionRate={conversionRate}
-      totalUnit={totalUnit}
-      same={same}
-    />
-  )
+function computeLeftConverted(rate: number | undefined, converted: string | undefined): string {
+  if (rate === undefined || isNaN(rate)) return ''
+  return converted ?? ''
+}
+
+function computeLeftSide(params: {
+  holding: Holding
+  same: boolean
+  conversionRate: number | undefined
+  converted: string | undefined
+  totalLabel: string | null
+}) {
+  const { holding, same, conversionRate, converted, totalLabel } = params
+  if (same) {
+    const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
+    return { leftAmount: formatAmount(holding.amount), leftLabel: unitOrTicker }
+  }
+  return { leftAmount: computeLeftConverted(conversionRate, converted), leftLabel: totalLabel }
 }
 
 export function HoldingRow({
@@ -212,13 +218,10 @@ export function HoldingRow({
   const [editOpen, setEditOpen] = useState(false)
   const disabled = !holding.enabled
 
-  const converted = computeConverted(holding.amount, conversionRate)
-  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
-  const { displayLabel, hasLabel } = holdingDisplayLabel(holding)
-  const { rateUnavailable, showConverted } = holdingConversionFlags(
-    totalLabel,
-    isSameCurrency(holding.ticker, totalTicker),
-    converted
+  const { same, leftAmount, leftLabel, displayLabel, hasLabel, rateUnavailable, showConverted } = computeRowDisplay(
+    holding,
+    totalTicker,
+    conversionRate
   )
 
   return (
@@ -226,13 +229,14 @@ export function HoldingRow({
       <TableRow className={disabled ? 'opacity-40 hover:opacity-60' : ''}>
         <AmountCell
           holding={holding}
-          convertedAmount={converted}
-          totalLabel={totalLabel}
+          leftAmount={leftAmount}
+          leftLabel={leftLabel}
           rateTooltip={<HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />}
           displayLabel={displayLabel}
           showConverted={showConverted}
           rateUnavailable={rateUnavailable}
           hasLabel={hasLabel}
+          same={same}
         />
         <TableCell className="w-px whitespace-nowrap">
           <HoldingMobileActions
