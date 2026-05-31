@@ -24,49 +24,43 @@ function pairId(from: Ticker, to: Ticker): string {
 
 /* ── Sub-components ──────────────────────────────────────────── */
 
-function TickerName({ ticker }: { ticker: Ticker }) {
+function TickerCell({ ticker }: { ticker: Ticker }) {
   const label = <span className="font-medium text-sm uppercase">{ticker.ticker}</span>
 
-  if (!ticker.name) {
-    return label
-  }
+  const tooltipContent = (
+    <>
+      <div>{sourceDisplayName(ticker.source)}</div>
+      {ticker.name && <div className="font-medium">{ticker.name}</div>}
+    </>
+  )
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>{label}</TooltipTrigger>
-      <TooltipContent side="top">{ticker.name}</TooltipContent>
-    </Tooltip>
+    <div className="flex items-center gap-1.5">
+      <SourceIcon source={ticker.source} className="size-3.5 shrink-0 text-muted-foreground" />
+      <Tooltip>
+        <TooltipTrigger asChild>{label}</TooltipTrigger>
+        <TooltipContent side="top" className="flex-col items-start">
+          {tooltipContent}
+        </TooltipContent>
+      </Tooltip>
+    </div>
   )
 }
 
-function SourceIconWithTooltip({ source }: { source: SourceName }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex">
-          <SourceIcon source={source} className="size-3.5 shrink-0 text-muted-foreground" />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{sourceDisplayName(source)}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-function rateTooltipContent(
-  rate: number | undefined,
-  suffix: string,
+function FormatRateTooltip({
+  rateLine,
+  toName,
+  sourceName,
+}: {
+  rateLine: string | null
   toName: string | undefined
-): React.ReactNode | null {
-  if (rate === undefined || isNaN(rate)) {
-    if (toName) return toName
-    return null
-  }
+  sourceName: string
+}) {
   return (
     <>
-      <div>
-        ≈ {rate.toString()} {suffix}
-      </div>
-      {toName && <div className="text-muted-foreground">{toName}</div>}
+      <div>{sourceName}</div>
+      {toName && <div>{toName}</div>}
+      {rateLine && <div>{rateLine}</div>}
     </>
   )
 }
@@ -87,24 +81,21 @@ function FormatRate({
   const isValid = rate !== undefined && !isNaN(rate)
   const displayRate = isValid ? formatAmount(rate) : '\u2014'
   const suffix = unit ?? ticker.toUpperCase()
-  const tooltip = rateTooltipContent(rate, suffix, toName)
-
-  const rateNode = <span className="text-sm tabular-nums">{displayRate}</span>
+  const sourceName = sourceDisplayName(toSource)
+  const rateLine = isValid ? `≈ ${rate.toString()} ${suffix}` : null
 
   return (
     <div className="flex items-center justify-end gap-1">
-      {tooltip ? (
-        <Tooltip>
-          <TooltipTrigger asChild>{rateNode}</TooltipTrigger>
-          <TooltipContent side="top" className="flex-col items-start">
-            {tooltip}
-          </TooltipContent>
-        </Tooltip>
-      ) : (
-        rateNode
-      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="text-sm tabular-nums">{displayRate}</span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="flex-col items-start">
+          <FormatRateTooltip rateLine={rateLine} toName={toName} sourceName={sourceName} />
+        </TooltipContent>
+      </Tooltip>
       <span className="text-muted-foreground text-sm">{suffix}</span>
-      <SourceIconWithTooltip source={toSource} />
+      <SourceIcon source={toSource} className="size-3.5 shrink-0 text-muted-foreground" />
     </div>
   )
 }
@@ -168,10 +159,7 @@ function FavoriteRow({
   return (
     <TableRow key={pairId(pair.from, pair.to)}>
       <TableCell>
-        <div className="flex items-center gap-1.5">
-          <SourceIconWithTooltip source={pair.from.source} />
-          <TickerName ticker={pair.from} />
-        </div>
+        <TickerCell ticker={pair.from} />
       </TableCell>
       <TableCell className="text-right">
         <FormatRate

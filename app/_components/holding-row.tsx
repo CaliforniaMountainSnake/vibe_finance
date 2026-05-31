@@ -61,7 +61,8 @@ function AmountCell({
             </div>
             {showConverted && (
               <div className="text-sm tabular-nums leading-tight pl-[1.375rem]">
-                ≈ {convertedAmount} <span className="text-muted-foreground">{totalLabel}</span>
+                <span className="text-muted-foreground">≈</span> {convertedAmount}{' '}
+                <span className="text-muted-foreground">{totalLabel}</span>
               </div>
             )}
             <AmountCellLabel displayLabel={displayLabel} hasLabel={hasLabel} />
