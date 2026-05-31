@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { TableCell, TableRow } from '@/components/ui/table'
-import type { ExchangeRate, SourceName } from '@/entities/ExchangeRate'
+import type { ExchangeRate } from '@/entities/ExchangeRate'
 import type { Holding } from '@/entities/Holding'
 import type { Ticker } from '@/entities/Ticker'
 import { EditHoldingDialog } from './edit-holding-dialog'
@@ -12,37 +12,41 @@ import { SourceIcon } from '@/components/icons/source-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { sourceDisplayName } from '@/lib/source-display-name'
 
-function SourceIconWithTooltip({ source }: { source: SourceName }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex">
-          <SourceIcon source={source} className="size-3 shrink-0 text-muted-foreground" />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{sourceDisplayName(source)}</TooltipContent>
-    </Tooltip>
-  )
-}
-
 function tickerLabel(t: Ticker): string {
   return t.ticker.toUpperCase()
+}
+
+/* ── AmountCellLabel ───────────────────── */
+
+function AmountCellLabel({ displayLabel, hasLabel }: { displayLabel: string | undefined; hasLabel: boolean }) {
+  if (!displayLabel) return null
+  return (
+    <div
+      className={`text-sm tabular-nums leading-tight mt-0.5 pl-[1.375rem]${hasLabel ? '' : ' text-muted-foreground'}`}
+    >
+      {displayLabel}
+    </div>
+  )
 }
 
 /* ── AmountCell ────────────────────────── */
 
 function AmountCell({
   holding,
-  converted,
+  convertedAmount,
   totalLabel,
-  showConverted,
   rateTooltip,
+  displayLabel,
+  showConverted,
+  hasLabel,
 }: {
   holding: Holding
-  converted: string | undefined
+  convertedAmount: string | undefined
   totalLabel: string | null
-  showConverted: boolean
   rateTooltip: React.ReactNode
+  displayLabel: string | undefined
+  showConverted: boolean
+  hasLabel: boolean
 }) {
   const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
   return (
@@ -51,42 +55,20 @@ function AmountCell({
         <TooltipTrigger asChild>
           <span className="inline-block">
             <div className="flex items-center gap-1.5">
-              <SourceIconWithTooltip source={holding.ticker.source} />
+              <SourceIcon source={holding.ticker.source} className="size-3 shrink-0 text-muted-foreground" />
               <span className="text-sm tabular-nums font-medium">{formatAmount(holding.amount)}</span>
-              <span className="text-muted-foreground text-sm">{unitOrTicker}</span>
+              <span className="text-muted-foreground text-sm tabular-nums">{unitOrTicker}</span>
             </div>
-            {showConverted && converted !== undefined && totalLabel !== null && (
-              <div className="text-[0.6875rem] text-muted-foreground tabular-nums leading-tight pl-[1.375rem]">
-                ≈ {converted} {totalLabel}
+            {showConverted && (
+              <div className="text-sm tabular-nums leading-tight pl-[1.375rem]">
+                ≈ {convertedAmount} <span className="text-muted-foreground">{totalLabel}</span>
               </div>
             )}
+            <AmountCellLabel displayLabel={displayLabel} hasLabel={hasLabel} />
           </span>
         </TooltipTrigger>
         {rateTooltip}
       </Tooltip>
-    </TableCell>
-  )
-}
-
-/* ── LabelCell ─────────────────────────── */
-
-function LabelCell({ label, tickerName }: { label: string; tickerName?: string }) {
-  const displayText = label || tickerName
-  const isFallback = !label
-
-  if (!displayText) {
-    return (
-      <TableCell>
-        <span className="text-sm whitespace-normal break-words">—</span>
-      </TableCell>
-    )
-  }
-
-  return (
-    <TableCell>
-      <span className={`text-sm whitespace-normal break-words${isFallback ? ' text-muted-foreground' : ''}`}>
-        {displayText}
-      </span>
     </TableCell>
   )
 }
@@ -120,60 +102,57 @@ function isSameCurrency(ticker: Ticker, totalTicker: Ticker | null): boolean {
   return totalTicker !== null && ticker.source === totalTicker.source && ticker.ticker === totalTicker.ticker
 }
 
-function HoldingTooltipRate({
+function holdingDisplayInfo(
+  holding: Holding,
+  totalTicker: Ticker | null
+): { totalLabel: string | null; sameCurrency: boolean; displayLabel: string | undefined; hasLabel: boolean } {
+  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
+  const sameCurrency = isSameCurrency(holding.ticker, totalTicker)
+  const displayLabel = holding.label || holding.ticker.name
+  const hasLabel = holding.label !== ''
+  return { totalLabel, sameCurrency, displayLabel, hasLabel }
+}
+
+function HoldingTooltipRateOrFallback({
   unit,
-  rate,
+  conversionRate,
   totalUnit,
   same,
 }: {
   unit: string
-  rate: number
+  conversionRate: number | undefined
   totalUnit: string
   same: boolean
 }) {
-  if (same) {
-    return (
-      <span className="tabular-nums">
-        1 {unit} = 1 {totalUnit}
-      </span>
-    )
+  if (same) return null
+  if (conversionRate === undefined || isNaN(conversionRate)) {
+    return <span className="text-muted-foreground">Курс недоступен</span>
   }
   return (
     <span className="tabular-nums">
-      1 {unit} ≈ {formatAmount(rate)} {totalUnit}
+      1 {unit} ≈ {formatAmount(conversionRate)} {totalUnit}
     </span>
   )
-}
-
-function HoldingTooltipName({ name }: { name: string }) {
-  return <span className="font-medium">{name}</span>
 }
 
 function HoldingTooltipContent({
   holding,
   unit,
-  hasName,
-  hasRate,
   conversionRate,
-  totalTicker,
   totalUnit,
   same,
 }: {
   holding: Holding
   unit: string
-  hasName: boolean
-  hasRate: boolean
-  conversionRate: number
-  totalTicker: Ticker | null
+  conversionRate: number | undefined
   totalUnit: string
   same: boolean
 }) {
   return (
     <TooltipContent side="top" className="flex flex-col items-start">
-      {hasName && holding.ticker.name ? <HoldingTooltipName name={holding.ticker.name} /> : null}
-      {hasRate && totalTicker !== null ? (
-        <HoldingTooltipRate unit={unit} rate={conversionRate} totalUnit={totalUnit} same={same} />
-      ) : null}
+      <span>{sourceDisplayName(holding.ticker.source)}</span>
+      {holding.ticker.name && <span className="font-medium">{holding.ticker.name}</span>}
+      <HoldingTooltipRateOrFallback unit={unit} conversionRate={conversionRate} totalUnit={totalUnit} same={same} />
     </TooltipContent>
   )
 }
@@ -188,27 +167,16 @@ function HoldingTooltip({
   totalTicker: Ticker | null
 }) {
   const unit = holdingUnit(holding.ticker)
-  const hasRate = conversionRate !== undefined && !isNaN(conversionRate)
-  const hasContent = holding.ticker.name !== undefined || hasRate
-
-  if (!hasContent) {
-    return (
-      <TooltipContent side="top">
-        <span className="text-muted-foreground">Курс недоступен</span>
-      </TooltipContent>
-    )
-  }
+  const totalUnit = totalTicker ? holdingUnit(totalTicker) : ''
+  const same = isSameCurrency(holding.ticker, totalTicker)
 
   return (
     <HoldingTooltipContent
       holding={holding}
       unit={unit}
-      hasName={holding.ticker.name !== undefined}
-      hasRate={hasRate}
-      conversionRate={conversionRate as number}
-      totalTicker={totalTicker}
-      totalUnit={totalTicker ? holdingUnit(totalTicker) : ''}
-      same={isSameCurrency(holding.ticker, totalTicker)}
+      conversionRate={conversionRate}
+      totalUnit={totalUnit}
+      same={same}
     />
   )
 }
@@ -231,21 +199,21 @@ export function HoldingRow({
   const disabled = !holding.enabled
 
   const converted = computeConverted(holding.amount, conversionRate)
-  const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : null
-  const sameCurrency =
-    totalTicker !== null && holding.ticker.source === totalTicker.source && holding.ticker.ticker === totalTicker.ticker
+  const { totalLabel, sameCurrency, displayLabel, hasLabel } = holdingDisplayInfo(holding, totalTicker)
+  const showConverted = !sameCurrency && converted !== undefined && totalLabel !== null
 
   return (
     <>
       <TableRow className={disabled ? 'opacity-40 hover:opacity-60' : ''}>
         <AmountCell
           holding={holding}
-          converted={converted}
+          convertedAmount={converted}
           totalLabel={totalLabel}
-          showConverted={!sameCurrency}
           rateTooltip={<HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />}
+          displayLabel={displayLabel}
+          showConverted={showConverted}
+          hasLabel={hasLabel}
         />
-        <LabelCell label={holding.label} tickerName={holding.ticker.name} />
         <TableCell className="w-px whitespace-nowrap">
           <HoldingMobileActions
             isFirst={isFirst}
