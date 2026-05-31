@@ -18,24 +18,25 @@ export type HoldingsTotal = {
  * @param holdings  Список холдингов
  * @param conversionRates  Карта holding.id → курс (или undefined, если курс недоступен)
  */
+function accumulateHolding(h: Holding, rate: number | undefined, accumulator: HoldingsTotal): void {
+  if (!h.enabled) return
+  if (rate === undefined || Number.isNaN(rate)) {
+    accumulator.skippedCount++
+    return
+  }
+  accumulator.totalAmount += h.amount * rate
+  accumulator.contributedCount++
+}
+
 export function computeHoldingsTotal(
   holdings: Holding[],
   conversionRates: Record<string, number | undefined>
 ): HoldingsTotal {
-  let totalAmount = 0
-  let contributedCount = 0
-  let skippedCount = 0
+  const accumulator: HoldingsTotal = { totalAmount: 0, contributedCount: 0, skippedCount: 0 }
 
   for (const h of holdings) {
-    if (!h.enabled) continue
-    const rate = conversionRates[h.id]
-    if (rate === undefined || Number.isNaN(rate)) {
-      skippedCount++
-      continue
-    }
-    totalAmount += h.amount * rate
-    contributedCount++
+    accumulateHolding(h, conversionRates[h.id], accumulator)
   }
 
-  return { totalAmount, contributedCount, skippedCount }
+  return accumulator
 }

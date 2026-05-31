@@ -11,6 +11,18 @@ type ResolvableEntry = ShareEntry | IndexEntry
  * первая сохраняет его, а остальные получают тикер вида SECID_BOARDID.
  */
 export function resolveTickers<T extends ResolvableEntry>(entries: T[]): T[] {
+  const groups = groupByTicker(entries)
+
+  const result: T[] = []
+  for (const [, group] of groups) {
+    result.push(...resolveGroupCollisions(group))
+  }
+
+  return result
+}
+
+/** Группирует entries по ticker (lowercase). */
+function groupByTicker<T extends ResolvableEntry>(entries: T[]): Map<string, T[]> {
   const groups = new Map<string, T[]>()
 
   for (const entry of entries) {
@@ -23,18 +35,20 @@ export function resolveTickers<T extends ResolvableEntry>(entries: T[]): T[] {
     }
   }
 
-  const result: T[] = []
-  for (const [, group] of groups) {
-    result.push(group[0])
+  return groups
+}
 
-    for (let index = 1; index < group.length; index++) {
-      const entry = group[index]
-      result.push({
-        ...entry,
-        ticker: `${entry.secId}_${entry.boardId}`.toLowerCase(),
-      })
-    }
+/** Разрешает коллизии внутри группы: первая сохраняет ticker, остальные — secId_boardId. */
+function resolveGroupCollisions<T extends ResolvableEntry>(group: T[]): T[] {
+  const resolved: T[] = [group[0]]
+
+  for (let index = 1; index < group.length; index++) {
+    const entry = group[index]
+    resolved.push({
+      ...entry,
+      ticker: `${entry.secId}_${entry.boardId}`.toLowerCase(),
+    })
   }
 
-  return result
+  return resolved
 }

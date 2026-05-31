@@ -34,29 +34,37 @@ export function parseIndexes(indexesJson: MoexResponse): IndexEntry[] {
   const entries: IndexEntry[] = []
 
   for (const [, sec] of secMap) {
-    const currency = getStringField(sec, 'CURRENCYID')
-    if (!VALID_CURRENCIES.has(currency)) continue
-
-    const secId = getStringField(sec, 'SECID')
-    const md = mdMap.get(secId)
-    if (!md) continue
-
-    const price = getNumericField(md, 'CURRENTVALUE')
-    if (price === undefined) continue
-
-    const boardId = getStringField(sec, 'BOARDID')
-    const name = getStringField(sec, 'NAME')
-    const ticker = secId.toLowerCase()
-
-    entries.push({
-      ticker,
-      secId: secId.toLowerCase(),
-      boardId: boardId.toLowerCase(),
-      priceInCurrency: price,
-      currency,
-      name,
-    })
+    const entry = buildIndexEntry(sec, mdMap)
+    if (entry) entries.push(entry)
   }
 
   return entries
+}
+
+/** Строит IndexEntry из записи securities. Возвращает undefined если данные неполные. */
+function buildIndexEntry(
+  sec: Record<string, string | number | undefined>,
+  mdMap: Map<string, Record<string, string | number | undefined>>
+): IndexEntry | undefined {
+  const currency = getStringField(sec, 'CURRENCYID')
+  if (!VALID_CURRENCIES.has(currency)) return undefined
+
+  const secId = getStringField(sec, 'SECID')
+  const md = mdMap.get(secId)
+  if (!md) return undefined
+
+  const price = getNumericField(md, 'CURRENTVALUE')
+  if (price === undefined) return undefined
+
+  const boardId = getStringField(sec, 'BOARDID')
+  const name = getStringField(sec, 'NAME')
+
+  return {
+    ticker: secId.toLowerCase(),
+    secId: secId.toLowerCase(),
+    boardId: boardId.toLowerCase(),
+    priceInCurrency: price,
+    currency,
+    name,
+  }
 }

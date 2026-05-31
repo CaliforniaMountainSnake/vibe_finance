@@ -128,17 +128,29 @@ function addRubTomCurrencies(securitiesMap: SecMap, marketdataMap: SecMap, rates
   const known = new Set(rates.map((r) => r.ticker.toUpperCase()))
 
   for (const [secId, sec] of securitiesMap) {
-    if (!secId.endsWith('RUB_TOM')) continue
-
-    const ticker = secId.replace(/RUB_TOM$/, '').toLowerCase()
-    if (known.has(ticker.toUpperCase())) continue
-
-    const entry = tryBuildCurrencyEntry({ marketdataMap, secId, sec, ticker })
-    if (!entry) continue
-
-    known.add(ticker.toUpperCase())
-    rates.push(entry)
+    const entry = tryRubTom({ secId, sec, marketdataMap, known })
+    if (entry) {
+      known.add(entry.ticker.toUpperCase())
+      rates.push(entry)
+    }
   }
+}
+
+/** Пытается построить запись для RUB_TOM-валюты. Возвращает undefined если не подходит или нет цены. */
+function tryRubTom(parameters: {
+  secId: string
+  sec: Record<string, string | number | undefined>
+  marketdataMap: SecMap
+  known: Set<string>
+}): CurrencyRateInfo | undefined {
+  const { secId, sec, marketdataMap, known } = parameters
+
+  if (!secId.endsWith('RUB_TOM')) return undefined
+
+  const ticker = secId.replace(/RUB_TOM$/, '').toLowerCase()
+  if (known.has(ticker.toUpperCase())) return undefined
+
+  return tryBuildCurrencyEntry({ marketdataMap, secId, sec, ticker })
 }
 
 /** Параметры для tryBuildCurrencyEntry. */

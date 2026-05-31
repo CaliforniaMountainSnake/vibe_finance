@@ -142,27 +142,29 @@ type ConvertContext = {
 /** Конвертирует массив индексов в ExchangeRate и добавляет в результат. */
 function appendIndexEntries(result: ExchangeRate[], entries: IndexEntry[], context: ConvertContext): void {
   const deduped = resolveTickers(entries)
-
   for (const entry of deduped) {
-    // Пропускаем MOEXBTC — уже добавлен как базовый тикер 'btc'
-    if (entry.secId === 'moexbtc') continue
-
-    const btcPrice = convertToBtcPrice({
-      priceInCurrency: entry.priceInCurrency,
-      currency: entry.currency,
-      currencyToRub: context.currencyToRub,
-      btcRub: context.btcRub,
-    })
-    if (btcPrice === undefined) continue
-
-    result.push({
-      source: 'moex',
-      ticker: entry.ticker,
-      btcPrice,
-      name: entry.name,
-      updatedAt: context.updatedAt,
-    })
+    tryPushIndexEntry(result, entry, context)
   }
+}
+
+function tryPushIndexEntry(result: ExchangeRate[], entry: IndexEntry, context: ConvertContext): void {
+  if (entry.secId === 'moexbtc') return
+
+  const btcPrice = convertToBtcPrice({
+    priceInCurrency: entry.priceInCurrency,
+    currency: entry.currency,
+    currencyToRub: context.currencyToRub,
+    btcRub: context.btcRub,
+  })
+  if (btcPrice === undefined) return
+
+  result.push({
+    source: 'moex',
+    ticker: entry.ticker,
+    btcPrice,
+    name: entry.name,
+    updatedAt: context.updatedAt,
+  })
 }
 
 /** Параметры для appendCurrencyRates. */
@@ -179,46 +181,54 @@ function appendCurrencyRates(
   rates: ReturnType<typeof parseCurrencyRates>['rates'],
   context: CurrencyRateContext
 ): void {
+  for (const rate of rates) {
+    tryPushCurrencyRate(result, rate, context)
+  }
+}
+
+function tryPushCurrencyRate(
+  result: ExchangeRate[],
+  rate: ReturnType<typeof parseCurrencyRates>['rates'][number],
+  context: CurrencyRateContext
+): void {
   const { usdRub, btcRub, currencyToRub, updatedAt } = context
 
-  for (const rate of rates) {
-    if (rate.ticker === 'rub') {
-      result.push({
-        source: 'moex',
-        ticker: 'rub',
-        btcPrice: btcRub,
-        unit: rate.unit,
-        updatedAt,
-      })
-      continue
-    }
-    if (rate.ticker === 'usd') {
-      result.push({
-        source: 'moex',
-        ticker: 'usd',
-        btcPrice: btcRub / usdRub,
-        unit: rate.unit,
-        updatedAt,
-      })
-      continue
-    }
-
-    const btcPrice = convertToBtcPrice({
-      priceInCurrency: rate.priceInRub,
-      currency: 'RUB',
-      currencyToRub,
-      btcRub,
+  if (rate.ticker === 'rub') {
+    result.push({
+      source: 'moex',
+      ticker: 'rub',
+      btcPrice: btcRub,
+      unit: rate.unit,
+      updatedAt,
     })
-    if (btcPrice !== undefined) {
-      result.push({
-        source: 'moex',
-        ticker: rate.ticker,
-        btcPrice,
-        unit: rate.unit,
-        name: rate.name,
-        updatedAt,
-      })
-    }
+    return
+  }
+  if (rate.ticker === 'usd') {
+    result.push({
+      source: 'moex',
+      ticker: 'usd',
+      btcPrice: btcRub / usdRub,
+      unit: rate.unit,
+      updatedAt,
+    })
+    return
+  }
+
+  const btcPrice = convertToBtcPrice({
+    priceInCurrency: rate.priceInRub,
+    currency: 'RUB',
+    currencyToRub,
+    btcRub,
+  })
+  if (btcPrice !== undefined) {
+    result.push({
+      source: 'moex',
+      ticker: rate.ticker,
+      btcPrice,
+      unit: rate.unit,
+      name: rate.name,
+      updatedAt,
+    })
   }
 }
 

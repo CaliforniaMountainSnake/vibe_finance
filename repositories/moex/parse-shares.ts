@@ -45,10 +45,7 @@ export function parseShares(sharesJson: MoexResponse): ShareEntry[] {
   const entries: ShareEntry[] = []
 
   for (const [compositeKey, sec] of secMap) {
-    const boardId = getStringField(sec, 'BOARDID')
-    if (!ALLOWED_BOARDS.has(boardId)) continue
-
-    const entry = buildShareEntry({ mdMap, compositeKey, sec, boardId })
+    const entry = buildShareEntry({ mdMap, compositeKey, sec })
     if (entry) entries.push(entry)
   }
 
@@ -60,12 +57,14 @@ type ShareBuildParameters = {
   mdMap: Map<string, Record<string, string | number | undefined>>
   compositeKey: string
   sec: Record<string, string | number | undefined>
-  boardId: string
 }
 
-/** Строит ShareEntry для одной акции. Возвращает null, если цены нет. */
+/** Строит ShareEntry для одной акции. Возвращает undefined если борд не разрешён или цены нет. */
 function buildShareEntry(parameters: ShareBuildParameters): ShareEntry | undefined {
-  const { mdMap, compositeKey, sec, boardId } = parameters
+  const { mdMap, compositeKey, sec } = parameters
+
+  const boardId = getStringField(sec, 'BOARDID')
+  if (!ALLOWED_BOARDS.has(boardId)) return undefined
 
   const md = mdMap.get(compositeKey)
   if (!md) return undefined

@@ -40,48 +40,46 @@ export class BinanceRepository implements FinanceApiRepositoryInterface {
    */
   parseRates(raw: string): ExchangeRate[] {
     const data: BinanceTicker[] = JSON.parse(raw)
+    const usdtPriceMap = buildUsdtPriceMap(data)
 
-    // Keep only pairs to USDT
-    const usdtPairs = data.filter((t) => t.symbol.toLowerCase().endsWith('usdt'))
-
-    // Build a price map: ticker -> USDT price (base currency -> how many USDT per 1 unit)
-    const usdtPriceMap = new Map<string, number>()
-    for (const t of usdtPairs) {
-      const ticker = t.symbol.toLowerCase().replace(/usdt$/, '')
-      const price = Number.parseFloat(t.price)
-      if (price > 0) {
-        usdtPriceMap.set(ticker, price)
-      }
-    }
-
-    // Need BTCUSDT price to compute btcPrice for all tickers
     const btcUsdtPrice = usdtPriceMap.get('btc')
     if (btcUsdtPrice === undefined) {
       throw new Error('Binance API did not return BTCUSDT pair')
     }
 
-    const result: ExchangeRate[] = []
-    for (const [ticker, usdtPrice] of usdtPriceMap) {
-      // btcPrice = how much 1 BTC costs in this currency
-      // All prices are in USDT, so btcPrice = btcUsdtPrice / usdtPrice
-      const btcPrice = btcUsdtPrice / usdtPrice
-      result.push({
-        source: 'binance',
-        ticker,
-        btcPrice,
-        updatedAt: Math.floor(Date.now() / MS_PER_SEC),
-      })
-    }
-
-    // USDT is the quote currency in all pairs, so it doesn't appear as a base
-    // ticker in the API response. Add it explicitly: btcPrice = how many USDT per 1 BTC.
-    result.push({
-      source: 'binance',
-      ticker: 'usdt',
-      btcPrice: btcUsdtPrice,
-      updatedAt: Math.floor(Date.now() / MS_PER_SEC),
-    })
-
-    return result
+    return buildExchangeRates(usdtPriceMap, btcUsdtPrice)
   }
+}
+
+function buildUsdtPriceMap(data: BinanceTicker[]): Map<string, number> {
+  const usdtPairs = data.filter((t) => t.symbol.toLowerCase().endsWith('usdt'))
+  const map = new Map<string, number>()
+  for (const t of usdtPairs) {
+    const ticker = t.symbol.toLowerCase().replace(/usdt$/, '')
+    const price = Number.parseFloat(t.price)
+    if (price > 0) {
+      map.set(ticker, price)
+    }
+  }
+  return map
+}
+
+function buildExchangeRates(usdtPriceMap: Map<string, number>, btcUsdtPrice: number): ExchangeRate[] {
+  const now = Math.floor(Date.now() / MS_PER_SEC)
+  const result: ExchangeRate[] = []
+  for (const [ticker, usdtPrice] of usdtPriceMap) {
+    result.push({
+      source: 'binance' as const,
+      ticker,
+      btcPrice: btcUsdtPrice / usdtPrice,
+      updatedAt: now,
+    })
+  }
+  result.push({
+    source: 'binance' as const,
+    ticker: 'usdt',
+    btcPrice: btcUsdtPrice,
+    updatedAt: now,
+  })
+  return result
 }
