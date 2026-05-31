@@ -54,6 +54,17 @@ describe('MoexRepository with real raw data', () => {
     expect(tickers).toContain('bcsga')
   })
 
+  it('falls back to MARKETPRICE when WAPRICE is missing (EQMX, TMON)', () => {
+    // В реальных данных у EQMX и TMON WAPRICE = null, но есть MARKETPRICE
+    const tickers = new Set(rates.map((r) => r.ticker))
+    expect(tickers).toContain('eqmx')
+    expect(tickers).toContain('tmon')
+    const eqmx = rates.find((r) => r.ticker === 'eqmx')
+    const tmon = rates.find((r) => r.ticker === 'tmon')
+    expect(eqmx?.btcPrice).toBeGreaterThan(0)
+    expect(tmon?.btcPrice).toBeGreaterThan(0)
+  })
+
   it('no duplicate tickers', () => {
     const tickers = rates.map((r) => r.ticker)
     expect(new Set(tickers).size).toBe(tickers.length)

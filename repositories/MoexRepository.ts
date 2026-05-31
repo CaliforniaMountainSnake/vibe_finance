@@ -21,7 +21,7 @@ const INDEX_URL =
 /** URL API MOEX ISS для акций (WAPRICE по BOARDID). */
 const SHARES_URL =
   'https://iss.moex.com/iss/engines/stock/markets/shares/securities.json' +
-  '?iss.meta=off&securities.columns=SECID,BOARDID,SECNAME&marketdata.columns=SECID,BOARDID,WAPRICE'
+  '?iss.meta=off&securities.columns=SECID,BOARDID,SECNAME&marketdata.columns=SECID,BOARDID,WAPRICE,MARKETPRICE'
 
 /** Интервал между последовательными запросами к API (мс). */
 const FETCH_INTERVAL_MS = 100

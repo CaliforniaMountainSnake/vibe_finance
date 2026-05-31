@@ -70,7 +70,7 @@ function buildShareEntry(params: ShareBuildParams): ShareEntry | null {
   const md = mdMap.get(compositeKey)
   if (!md) return null
 
-  const price = getNumericField(md, 'WAPRICE')
+  const price = getSharePrice(md)
   if (price === null) return null
 
   const currency = BOARD_CURRENCY[boardId] ?? 'RUB'
@@ -80,4 +80,9 @@ function buildShareEntry(params: ShareBuildParams): ShareEntry | null {
   const ticker = boardId === 'TQTY' ? `${secId}_cny`.toLowerCase() : secId.toLowerCase()
 
   return { ticker, secId: secId.toLowerCase(), boardId: boardId.toLowerCase(), priceInCurrency: price, currency, name }
+}
+
+/** Извлекает цену акции: WAPRICE с фоллбеком на MARKETPRICE. */
+function getSharePrice(md: Record<string, string | number | null>): number | null {
+  return getNumericField(md, 'WAPRICE') ?? getNumericField(md, 'MARKETPRICE')
 }

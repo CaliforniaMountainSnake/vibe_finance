@@ -72,17 +72,26 @@ export const MOEX_MOCK_SHARES = JSON.stringify({
       ['SILA', 'TQTF', 'БПИФ Сила Ликвидности'],
       ['AKMC', 'TQTF', 'БПИФ Альфа Денежный рынок'],
       ['AKMC', 'TQTY', 'БПИФ Альфа Денежный рынок Юани'],
+      ['FALLBACK_OK', 'TQBR', 'Тестовая акция (WAPRICE=0, MARKETPRICE=500)'],
+      ['FALLBACK_NULL', 'TQBR', 'Тестовая акция (WAPRICE=null, MARKETPRICE=600)'],
+      ['MISSING_BOTH', 'TQBR', 'Тестовая акция (обе цены отсутствуют)'],
     ],
   },
   marketdata: {
-    columns: ['SECID', 'BOARDID', 'WAPRICE'],
+    columns: ['SECID', 'BOARDID', 'WAPRICE', 'MARKETPRICE'],
     data: [
-      ['ENPG', 'TQBR', 378.5],
-      ['SBER', 'TQBR', 285.1],
-      ['SBER', 'TQTF', 290.5],
-      ['SILA', 'TQTF', 108.03],
-      ['AKMC', 'TQTF', 14.12],
-      ['AKMC', 'TQTY', 105.54],
+      ['ENPG', 'TQBR', 378.5, null],
+      ['SBER', 'TQBR', 285.1, 284.9],
+      ['SBER', 'TQTF', 290.5, 290.1],
+      ['SILA', 'TQTF', 108.03, null],
+      ['AKMC', 'TQTF', 14.12, null],
+      ['AKMC', 'TQTY', 105.54, null],
+      // WAPRICE=0 → фоллбек на MARKETPRICE
+      ['FALLBACK_OK', 'TQBR', 0, 500.0],
+      // WAPRICE=null → фоллбек на MARKETPRICE
+      ['FALLBACK_NULL', 'TQBR', null, 600.0],
+      // Оба поля отсутствуют/нулевые → акция пропускается
+      ['MISSING_BOTH', 'TQBR', 0, 0],
     ],
   },
 })

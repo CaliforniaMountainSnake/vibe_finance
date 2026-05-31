@@ -95,6 +95,26 @@ describe('MoexRepository', () => {
     expect(() => repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, badIndexes, MOEX_MOCK_SHARES)).toThrow('MOEXBTC')
   })
 
+  it('falls back to MARKETPRICE when WAPRICE is zero', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const entry = rates.find((r) => r.ticker === 'fallback_ok')
+    expect(entry).toBeDefined()
+    expect(entry?.btcPrice).toBeGreaterThan(0)
+  })
+
+  it('falls back to MARKETPRICE when WAPRICE is null', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const entry = rates.find((r) => r.ticker === 'fallback_null')
+    expect(entry).toBeDefined()
+    expect(entry?.btcPrice).toBeGreaterThan(0)
+  })
+
+  it('skips share when both WAPRICE and MARKETPRICE are missing', () => {
+    const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
+    const tickers = rates.map((r) => r.ticker)
+    expect(tickers).not.toContain('missing_both')
+  })
+
   it('all currencies have correct units', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const unitMap: Record<string, string> = {
