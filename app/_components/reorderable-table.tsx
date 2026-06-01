@@ -49,7 +49,7 @@ export function ReorderableTable({ rows: initialRows }: ReorderableTableProperti
           </TableHeader>
           <TableBody>
             {rows.map((row, index) => (
-              <TableRow key={row.id} data-testid={`row-${row.id}`}>
+              <TableRow key={row.id} data-testid={`row-${String(row.id)}`}>
                 <TableCell className="font-medium">{row.name}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-0.5">
@@ -58,7 +58,9 @@ export function ReorderableTable({ rows: initialRows }: ReorderableTableProperti
                       variant="ghost"
                       aria-label={`Move ${row.name} up`}
                       disabled={index === 0}
-                      onClick={() => moveUp(index)}
+                      onClick={() => {
+                        moveUp(index)
+                      }}
                     >
                       <ArrowUp className="size-3.5" />
                     </Button>
@@ -67,7 +69,9 @@ export function ReorderableTable({ rows: initialRows }: ReorderableTableProperti
                       variant="ghost"
                       aria-label={`Move ${row.name} down`}
                       disabled={index === rows.length - 1}
-                      onClick={() => moveDown(index)}
+                      onClick={() => {
+                        moveDown(index)
+                      }}
                     >
                       <ArrowDown className="size-3.5" />
                     </Button>
