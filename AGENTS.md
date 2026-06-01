@@ -16,6 +16,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ### Действия после внесения изменений в кодовую базу
 
+- Проверить типы (`npm run type-check`).
 - Прогнать юнит-тесты (`npm run test`).
 - Собрать приложение (`npm run build`).
 - Удостовериться, что линтер (`npm run lint`) не выдает ошибок.
