@@ -16,7 +16,7 @@ describe('App', () => {
     await clearRepo(repo)
   })
 
-  it('renders three main cards', async () => {
+  it('отображает три основных карточки', async () => {
     repo = await createPopulatedRepo()
 
     render(

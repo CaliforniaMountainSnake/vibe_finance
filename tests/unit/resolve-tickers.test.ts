@@ -12,11 +12,11 @@ function makeIndex(overrides: Partial<IndexEntry>): IndexEntry {
 }
 
 describe('resolveTickers', () => {
-  it('returns empty array for empty input', () => {
+  it('возвращает пустой массив для пустого входа', () => {
     expect(resolveTickers([])).toEqual([])
   })
 
-  it('returns entries unchanged when no collisions', () => {
+  it('возвращает записи без изменений, когда нет коллизий', () => {
     const entries = [
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqbr' }),
       makeShare({ ticker: 'enpg', secId: 'enpg', boardId: 'tqbr' }),
@@ -27,7 +27,7 @@ describe('resolveTickers', () => {
     expect(result.map((r) => r.ticker)).toEqual(['sber', 'enpg', 'sila'])
   })
 
-  it('first entry wins, second gets secid_boardid fallback', () => {
+  it('первая запись выигрывает, вторая получает secid_boardid', () => {
     const entries = [
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqbr' }),
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqtf' }),
@@ -38,7 +38,7 @@ describe('resolveTickers', () => {
     expect(result[1].ticker).toBe('sber_tqtf')
   })
 
-  it('reverse order — second gets secid_boardid fallback', () => {
+  it('обратный порядок — вторая получает secid_boardid', () => {
     const entries = [
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqtf' }),
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqbr' }),
@@ -49,7 +49,7 @@ describe('resolveTickers', () => {
     expect(result[1].ticker).toBe('sber_tqbr')
   })
 
-  it('preserves entry fields besides ticker', () => {
+  it('сохраняет поля записи, кроме ticker', () => {
     const entries = [
       makeShare({
         ticker: 'sber',
@@ -85,7 +85,7 @@ describe('resolveTickers', () => {
   })
 
   // Shares
-  it('TQTY gets _cny suffix, no collision with TQTF secid', () => {
+  it('TQTY получает суффикс _cny, без коллизии с TQTF secid', () => {
     const entries = [
       makeShare({ ticker: 'akmc', secId: 'akmc', boardId: 'tqtf' }),
       makeShare({ ticker: 'akmc_cny', secId: 'akmc', boardId: 'tqty' }),
@@ -96,7 +96,7 @@ describe('resolveTickers', () => {
     expect(result[1].ticker).toBe('akmc_cny')
   })
 
-  it('TQTY vs TQTY _cny collision — identical primary tickers', () => {
+  it('TQTY vs TQTY _cny коллизия — одинаковые первичные тикеры', () => {
     const entries = [
       makeShare({ ticker: 'akmc_cny', secId: 'akmc', boardId: 'tqty' }),
       makeShare({ ticker: 'akmc_cny', secId: 'akmc_2', boardId: 'tqty' }),
@@ -108,7 +108,7 @@ describe('resolveTickers', () => {
   })
 
   // Indexes
-  it('no collisions — stays secid', () => {
+  it('без коллизий — остаётся secid', () => {
     const entries = [
       makeIndex({ ticker: 'imoex', secId: 'imoex', boardId: 'sndx' }),
       makeIndex({ ticker: 'rtsi', secId: 'rtsi', boardId: 'rtsi' }),
@@ -119,7 +119,7 @@ describe('resolveTickers', () => {
     expect(result[1].ticker).toBe('rtsi')
   })
 
-  it('index collision — second falls back to secid_boardid', () => {
+  it('коллизия индексов — вторая получает secid_boardid', () => {
     const entries = [
       makeIndex({ ticker: 'moexbtc', secId: 'moexbtc', boardId: 'rtsi' }),
       makeIndex({ ticker: 'moexbtc', secId: 'moexbtc', boardId: 'sndx' }),
@@ -131,7 +131,7 @@ describe('resolveTickers', () => {
   })
 
   // Mixed
-  it('no cross-type collision when tickers differ', () => {
+  it('нет кросс-тип коллизии, когда тикеры различаются', () => {
     const entries = [
       makeShare({ ticker: 'sber', secId: 'sber', boardId: 'tqbr' }),
       makeIndex({ ticker: 'imoex', secId: 'imoex', boardId: 'sndx' }),

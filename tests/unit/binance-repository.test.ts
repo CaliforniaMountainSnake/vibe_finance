@@ -8,7 +8,7 @@ describe('BinanceRepository', () => {
 
   assertFinanceApiRates(() => repo.parseRates(BINANCE_MOCK_JSON))
 
-  it('includes USDT in the result', () => {
+  it('включает USDT в результат', () => {
     const rates = repo.parseRates(BINANCE_MOCK_JSON)
     const usdt = rates.find((r) => r.ticker === 'usdt')
     expect(usdt).toBeDefined()

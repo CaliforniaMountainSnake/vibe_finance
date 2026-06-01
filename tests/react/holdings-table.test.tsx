@@ -31,7 +31,7 @@ describe('HoldingsCard with populated mock data', () => {
     )
   }
 
-  it('renders holding rows instead of empty state', async () => {
+  it('отображает строки холдингов вместо пустого состояния', async () => {
     await renderCard()
 
     await waitFor(() => {
@@ -39,7 +39,7 @@ describe('HoldingsCard with populated mock data', () => {
     })
   })
 
-  it('shows holding labels in the table', async () => {
+  it('показывает названия холдингов в таблице', async () => {
     await renderCard()
 
     await waitFor(() => {
@@ -50,7 +50,7 @@ describe('HoldingsCard with populated mock data', () => {
     })
   })
 
-  it('shows base currency ticker in the table', async () => {
+  it('показывает тикер базовой валюты в таблице', async () => {
     await renderCard()
 
     await waitFor(() => {
@@ -59,7 +59,7 @@ describe('HoldingsCard with populated mock data', () => {
     })
   })
 
-  it('shows 4 holding entries (8 table rows)', async () => {
+  it('показывает 4 записи холдингов (8 строк таблицы)', async () => {
     await renderCard()
 
     await waitFor(() => {

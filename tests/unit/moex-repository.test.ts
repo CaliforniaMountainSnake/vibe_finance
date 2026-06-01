@@ -8,28 +8,28 @@ describe('MoexRepository', () => {
 
   assertFinanceApiRates(() => repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES))
 
-  it('includes BTC with btcPrice = 1', () => {
+  it('включает BTC с btcPrice = 1', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const btc = rates.find((r) => r.ticker === 'btc')
     expect(btc).toBeDefined()
     expect(btc?.btcPrice).toBe(1)
   })
 
-  it('includes USD rate', () => {
+  it('включает курс USD', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const usd = rates.find((r) => r.ticker === 'usd')
     expect(usd).toBeDefined()
     expect(usd?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('includes RUB rate', () => {
+  it('включает курс RUB', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const rub = rates.find((r) => r.ticker === 'rub')
     expect(rub).toBeDefined()
     expect(rub?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('includes RUB_TOM currencies (CNY, KZT, GLD, SLV, etc)', () => {
+  it('включает валюты RUB_TOM (CNY, KZT, GLD, SLV и др)', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
     expect(tickers).toContain('cny')
@@ -40,7 +40,7 @@ describe('MoexRepository', () => {
     expect(tickers).toContain('try')
   })
 
-  it('divides price by FACEVALUE (KZT has FACEVALUE=100)', () => {
+  it('делит цену на FACEVALUE (у KZT FACEVALUE=100)', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const kzt = rates.find((r) => r.ticker === 'kzt')
     expect(kzt).toBeDefined()
@@ -49,7 +49,7 @@ describe('MoexRepository', () => {
     expect(kzt?.btcPrice).toBeLessThan(100_000_000)
   })
 
-  it('FACEVALUE=1 currencies are not divided (CNY spot-check)', () => {
+  it('валюты с FACEVALUE=1 не делятся (проверка CNY)', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const cny = rates.find((r) => r.ticker === 'cny')
     expect(cny).toBeDefined()
@@ -62,7 +62,7 @@ describe('MoexRepository', () => {
     }
   })
 
-  it('falls back to PREVPRICE when WAPRICE is null', () => {
+  it('использует PREVPRICE, когда WAPRICE равен null', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const entry = rates.find((r) => r.ticker === 'prevfall')
     expect(entry).toBeDefined()
@@ -70,7 +70,7 @@ describe('MoexRepository', () => {
     expect(entry?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('treats FACEVALUE=0 as 1 (no division)', () => {
+  it('считает FACEVALUE=0 как 1 (без деления)', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const entry = rates.find((r) => r.ticker === 'facezero')
     expect(entry).toBeDefined()
@@ -78,7 +78,7 @@ describe('MoexRepository', () => {
     expect(entry?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('includes index entries', () => {
+  it('включает индексные записи', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
     // BCSGA → bcsga
@@ -89,7 +89,7 @@ describe('MoexRepository', () => {
     expect(tickers).toContain('imoex')
   })
 
-  it('index collision — same SECID on different boards falls back to secid_boardid', () => {
+  it('коллизия индексов — одинаковый SECID на разных досках, fallback на secid_boardid', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
     // BCSGA на INAV выигрывает (первый), BCSGA на SNDX получает bcsga_sndx
@@ -97,7 +97,7 @@ describe('MoexRepository', () => {
     expect(tickers).toContain('bcsga_sndx')
   })
 
-  it('includes share entries with dedup tickers', () => {
+  it('включает записи акций с дедуплицированными тикерами', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
     // TQBR: ENPG → enpg (no collision)
@@ -114,7 +114,7 @@ describe('MoexRepository', () => {
     expect(tickers).toContain('akmc_cny')
   })
 
-  it('throws if USD/RUB is missing', () => {
+  it('выбрасывает ошибку, если USD/RUB отсутствует', () => {
     const badCurrencies = JSON.stringify({
       securities: { columns: ['SECID', 'SECNAME'], data: [] },
       marketdata: { columns: ['SECID', 'WAPRICE'], data: [] },
@@ -122,7 +122,7 @@ describe('MoexRepository', () => {
     expect(() => repo.parseRatesFromRaw(badCurrencies, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)).toThrow('USD/RUB')
   })
 
-  it('throws if BTC/USD (MOEXBTC) is missing from indexes', () => {
+  it('выбрасывает ошибку, если BTC/USD (MOEXBTC) отсутствует в индексах', () => {
     const badIndexes = JSON.stringify({
       securities: {
         columns: ['SECID', 'BOARDID', 'CURRENCYID', 'NAME'],
@@ -133,27 +133,27 @@ describe('MoexRepository', () => {
     expect(() => repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, badIndexes, MOEX_MOCK_SHARES)).toThrow('MOEXBTC')
   })
 
-  it('falls back to MARKETPRICE when WAPRICE is zero', () => {
+  it('использует MARKETPRICE, когда WAPRICE равен нулю', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const entry = rates.find((r) => r.ticker === 'fallback_ok')
     expect(entry).toBeDefined()
     expect(entry?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('falls back to MARKETPRICE when WAPRICE is null', () => {
+  it('использует MARKETPRICE, когда WAPRICE равен null', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const entry = rates.find((r) => r.ticker === 'fallback_null')
     expect(entry).toBeDefined()
     expect(entry?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('skips share when both WAPRICE and MARKETPRICE are missing', () => {
+  it('пропускает акцию, когда отсутствуют и WAPRICE, и MARKETPRICE', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const tickers = rates.map((r) => r.ticker)
     expect(tickers).not.toContain('missing_both')
   })
 
-  it('all currencies have correct units', () => {
+  it('все валюты имеют правильные единицы измерения', () => {
     const rates = repo.parseRatesFromRaw(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)
     const unitMap: Record<string, string> = {
       rub: '₽',

@@ -55,7 +55,7 @@ describe('FavoritesTable with populated mock data', () => {
     )
   }
 
-  it('renders favorite rows instead of empty state', async () => {
+  it('отображает строки избранного вместо пустого состояния', async () => {
     await renderCard()
 
     await waitFor(() => {
@@ -63,7 +63,7 @@ describe('FavoritesTable with populated mock data', () => {
     })
   })
 
-  it('shows from-tickers in the table (CSS uppercase, textContent is lowercase)', async () => {
+  it('показывает from-тикеры в таблице', async () => {
     await renderCard()
 
     await waitFor(() => {
@@ -76,13 +76,13 @@ describe('FavoritesTable with populated mock data', () => {
     })
   })
 
-  it('shows computed rates (non-dash) for favourite pairs', async () => {
+  it('показывает рассчитанные курсы для избранных пар', async () => {
     await renderCard()
 
     await waitFor(assertRatesAreComputed)
   })
 
-  it('displays source icons with correct aria-labels', async () => {
+  it('отображает иконки источников с правильными aria-labels', async () => {
     await renderCard()
 
     await waitFor(() => {
@@ -95,7 +95,7 @@ describe('FavoritesTable with populated mock data', () => {
     })
   })
 
-  it('shows 4 rows (one per favourite pair)', async () => {
+  it('показывает 4 строки (по одной на избранную пару)', async () => {
     await renderCard()
 
     await waitFor(() => {

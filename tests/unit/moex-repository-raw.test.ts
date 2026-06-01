@@ -16,17 +16,17 @@ describe('MoexRepository with real raw data', () => {
 
   const rates = repo.parseRatesFromRaw(currenciesRaw, indexesRaw, sharesRaw)
 
-  it('parses real data without errors', () => {
+  it('парсит реальные данные без ошибок', () => {
     expect(rates.length).toBeGreaterThan(0)
   })
 
-  it('BTC has btcPrice = 1', () => {
+  it('BTC имеет btcPrice = 1', () => {
     const btc = rates.find((r) => r.ticker === 'btc')
     expect(btc).toBeDefined()
     expect(btc?.btcPrice).toBe(1)
   })
 
-  it('contains key currencies', () => {
+  it('содержит ключевые валюты', () => {
     const tickers = new Set(rates.map((r) => r.ticker))
     expect(tickers).toContain('usd')
     expect(tickers).toContain('rub')
@@ -34,19 +34,19 @@ describe('MoexRepository with real raw data', () => {
     expect(tickers).toContain('gld')
   })
 
-  it('contains TQBR/TQTF shares (ticker = secid, no suffix)', () => {
+  it('содержит акции TQBR/TQTF (тикер = secid, без суффикса)', () => {
     // TQBR/TQTF акции используют SECID без суффикса
     const noSuffix = rates.filter((r) => !r.ticker.includes('_') && !['btc', 'usd', 'rub'].includes(r.ticker))
     // Часть из них — акции TQBR/TQTF, другие — валюты без подчёркиваний
     expect(noSuffix.length).toBeGreaterThan(0)
   })
 
-  it('TQTY tickers end with _cny', () => {
+  it('тикеры TQTY заканчиваются на _cny', () => {
     const tqty = rates.filter((r) => r.ticker.endsWith('_cny'))
     expect(tqty.length).toBeGreaterThan(0)
   })
 
-  it('contains index entries (ticker = secid, no currency suffix)', () => {
+  it('содержит индексные записи (тикер = secid, без суффикса валюты)', () => {
     // Индексы теперь: SECID, без CURRENCYID
     const tickers = new Set(rates.map((r) => r.ticker))
     expect(tickers).toContain('imoex')
@@ -54,7 +54,7 @@ describe('MoexRepository with real raw data', () => {
     expect(tickers).toContain('bcsga')
   })
 
-  it('falls back to MARKETPRICE when WAPRICE is missing (EQMX, TMON)', () => {
+  it('использует MARKETPRICE, когда WAPRICE отсутствует (EQMX, TMON)', () => {
     // В реальных данных у EQMX и TMON WAPRICE = null, но есть MARKETPRICE
     const tickers = new Set(rates.map((r) => r.ticker))
     expect(tickers).toContain('eqmx')
@@ -65,7 +65,7 @@ describe('MoexRepository with real raw data', () => {
     expect(tmon?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('divides KZT price by FACEVALUE=100', () => {
+  it('делит цену KZT на FACEVALUE=100', () => {
     // KZT WAPRICE=15.3548 с FACEVALUE=100 → priceInRub=0.153548
     // BTC/RUB ≈ 71.3693 * 77271.151 ≈ 5,514,000
     // btcPrice ≈ 5,514,000 / 0.153548 ≈ 35,910,000
@@ -80,19 +80,19 @@ describe('MoexRepository with real raw data', () => {
     }
   })
 
-  it('divides AMD price by FACEVALUE=100', () => {
+  it('делит цену AMD на FACEVALUE=100', () => {
     const amd = rates.find((r) => r.ticker === 'amd')
     expect(amd).toBeDefined()
     expect(amd?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('divides KGS price by FACEVALUE=100', () => {
+  it('делит цену KGS на FACEVALUE=100', () => {
     const kgs = rates.find((r) => r.ticker === 'kgs')
     expect(kgs).toBeDefined()
     expect(kgs?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('falls back to PREVPRICE when WAPRICE is null for currencies (JPY, TJS, UZS)', () => {
+  it('использует PREVPRICE, когда WAPRICE равен null для валют (JPY, TJS, UZS)', () => {
     // JPY: WAPRICE=null, PREVPRICE=44, FACEVALUE=100 → priceInRub=0.44
     const jpy = rates.find((r) => r.ticker === 'jpy')
     expect(jpy).toBeDefined()
@@ -107,14 +107,14 @@ describe('MoexRepository with real raw data', () => {
     expect(uzs?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('currencies with FACEVALUE=1 price unchanged', () => {
+  it('валюты с FACEVALUE=1 без изменения цены', () => {
     // USD: WAPRICE=71.3693, FACEVALUE=1 → priceInRub=71.3693
     const usd = rates.find((r) => r.ticker === 'usd')
     expect(usd).toBeDefined()
     expect(usd?.btcPrice).toBeGreaterThan(0)
   })
 
-  it('no duplicate tickers', () => {
+  it('нет дублирующихся тикеров', () => {
     const tickers = rates.map((r) => r.ticker)
     expect(new Set(tickers).size).toBe(tickers.length)
   })
