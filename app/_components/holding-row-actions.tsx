@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
+import { useLocale } from '@/app/providers/locale-provider'
 import { formatAmount } from '@/lib/format-amount'
 import { ChevronUp, ChevronDown, EllipsisVertical, X, Eye, EyeOff, Pencil } from 'lucide-react'
 
@@ -34,13 +35,15 @@ export function HoldingRemoveDialog({
   onConfirm: () => void
   holding: Holding
 }) {
+  const locale = useLocale()
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
           <AlertDialogTitle>Удалить сумму?</AlertDialogTitle>
           <AlertDialogDescription>
-            {holding.label || tickerLabel(holding.ticker)} — {formatAmount(holding.amount)}{' '}
+            {holding.label || tickerLabel(holding.ticker)} — {formatAmount(holding.amount, locale)}{' '}
             {tickerLabel(holding.ticker)}
           </AlertDialogDescription>
         </AlertDialogHeader>

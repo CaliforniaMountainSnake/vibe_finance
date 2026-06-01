@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import type { SourceName } from '@/entities/exchange-rate'
 import type { Ticker } from '@/entities/ticker'
 import type { TickerPair } from '@/entities/ticker-pair'
+import { useLocale } from '@/app/providers/locale-provider'
 import { formatAmount } from '@/lib/format-amount'
 import { sourceDisplayName } from '@/lib/source-display-name'
 import { ConfirmRemoveButton } from './confirm-remove-button'
@@ -78,8 +79,9 @@ function FormatRate({
   toName: string | undefined
   toSource: SourceName
 }) {
+  const locale = useLocale()
   const isValid = rate !== undefined && !Number.isNaN(rate)
-  const displayRate = isValid ? formatAmount(rate) : '\u2014'
+  const displayRate = isValid ? formatAmount(rate, locale) : '\u2014'
   const suffix = unit ?? ticker.toUpperCase()
   const sourceName = sourceDisplayName(toSource)
   const rateLine = isValid ? `≈ ${rate.toString()} ${suffix}` : undefined

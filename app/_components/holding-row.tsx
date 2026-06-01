@@ -6,6 +6,7 @@ import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
 import { EditHoldingDialog } from './edit-holding-dialog'
 import { HoldingRemoveDialog } from './holding-row-actions'
+import { useLocale } from '@/app/providers/locale-provider'
 import { formatAmount } from '@/lib/format-amount'
 import { RowPairDisplay } from './row-pair-display'
 import { HoldingTooltip } from './holding-tooltip'
@@ -24,9 +25,9 @@ function holdingLabel(holding: Holding): string {
   return holding.label || (holding.ticker.name ?? '')
 }
 
-function computeConverted(amount: number, rate: number | undefined): string | undefined {
+function computeConverted(amount: number, rate: number | undefined, locale: string): string | undefined {
   if (rate === undefined || Number.isNaN(rate)) return undefined
-  return formatAmount(amount * rate)
+  return formatAmount(amount * rate, locale)
 }
 
 function holdingConversionFlags(
@@ -50,17 +51,25 @@ function computeLeftSide(parameters: {
   conversionRate: number | undefined
   converted: string | undefined
   totalLabel: string | undefined
+  locale: string
 }) {
-  const { holding, same, conversionRate, converted, totalLabel } = parameters
+  const { holding, same, conversionRate, converted, totalLabel, locale } = parameters
   if (same) {
     const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
-    return { leftAmount: formatAmount(holding.amount), leftLabel: unitOrTicker }
+    return { leftAmount: formatAmount(holding.amount, locale), leftLabel: unitOrTicker }
   }
   return { leftAmount: computeLeftConverted(conversionRate, converted), leftLabel: totalLabel }
 }
 
-function computeRowDisplay(holding: Holding, totalTicker: Ticker | undefined, conversionRate: number | undefined) {
-  const converted = computeConverted(holding.amount, conversionRate)
+type RowDisplayParameters = {
+  holding: Holding
+  totalTicker: Ticker | undefined
+  conversionRate: number | undefined
+  locale: string
+}
+
+function computeRowDisplay({ holding, totalTicker, conversionRate, locale }: RowDisplayParameters) {
+  const converted = computeConverted(holding.amount, conversionRate, locale)
   const same = isSameCurrency(holding.ticker, totalTicker)
   const totalLabel = totalTicker ? totalTicker.ticker.toUpperCase() : undefined
   const { leftAmount, leftLabel } = computeLeftSide({
@@ -69,6 +78,7 @@ function computeRowDisplay(holding: Holding, totalTicker: Ticker | undefined, co
     conversionRate,
     converted,
     totalLabel,
+    locale,
   })
   const label = holdingLabel(holding)
   const { rateUnavailable, showConverted } = holdingConversionFlags(totalLabel, same, converted)
@@ -147,12 +157,14 @@ export function HoldingRow({
   const [removeOpen, setRemoveOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const disabled = !holding.enabled
+  const locale = useLocale()
 
-  const { same, leftAmount, leftLabel, label, rateUnavailable, showConverted } = computeRowDisplay(
+  const { same, leftAmount, leftLabel, label, rateUnavailable, showConverted } = computeRowDisplay({
     holding,
     totalTicker,
-    conversionRate
-  )
+    conversionRate,
+    locale,
+  })
 
   const unitOrTicker = holding.ticker.unit ?? tickerLabel(holding.ticker)
 
@@ -164,7 +176,7 @@ export function HoldingRow({
       leftAmount={leftAmount}
       leftLabel={leftLabel}
       source={holding.ticker.source}
-      amount={formatAmount(holding.amount)}
+      amount={formatAmount(holding.amount, locale)}
       unitOrTicker={unitOrTicker}
       label={label}
       hasLabel={!!holding.label}

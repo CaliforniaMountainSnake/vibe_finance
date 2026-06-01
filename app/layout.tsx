@@ -4,7 +4,10 @@ import { ThemeProvider } from '@/app/providers/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { SettingsProvider } from '@/app/providers/settings-provider'
 import { DatabaseProvider } from '@/app/providers/database-provider'
+import { LocaleProvider } from '@/app/providers/locale-provider'
 import './globals.css'
+
+const DEFAULT_LOCALE = 'ru-RU'
 
 export const viewport: Viewport = {
   viewportFit: 'cover',
@@ -40,7 +43,9 @@ export default function RootLayout({
         <ThemeProvider>
           <DatabaseProvider>
             <SettingsProvider>
-              <TooltipProvider>{children}</TooltipProvider>
+              <LocaleProvider locale={DEFAULT_LOCALE}>
+                <TooltipProvider>{children}</TooltipProvider>
+              </LocaleProvider>
             </SettingsProvider>
           </DatabaseProvider>
         </ThemeProvider>

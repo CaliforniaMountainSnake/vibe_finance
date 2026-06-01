@@ -5,6 +5,7 @@ import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
 import { HoldingRow } from './holding-row'
+import { useLocale } from '@/app/providers/locale-provider'
 import { formatAmount } from '@/lib/format-amount'
 import { computeHoldingsTotal } from '@/lib/compute-holdings-total'
 import { TotalCurrencyPicker } from './total-currency-picker'
@@ -22,6 +23,8 @@ function TotalAmountDisplay({
   totalTicker: Ticker | undefined
   totalUnit: string | undefined
 }) {
+  const locale = useLocale()
+
   if (!totalTicker) {
     return <span className="text-sm tabular-nums font-semibold">—</span>
   }
@@ -35,7 +38,7 @@ function TotalAmountDisplay({
   }
   return (
     <span>
-      <span className="text-sm tabular-nums font-semibold">{formatAmount(total.totalAmount)}</span>
+      <span className="text-sm tabular-nums font-semibold">{formatAmount(total.totalAmount, locale)}</span>
       <TotalUnitLabel unit={totalUnit} />
     </span>
   )

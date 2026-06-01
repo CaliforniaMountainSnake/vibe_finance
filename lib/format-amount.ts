@@ -38,7 +38,9 @@ function decimalsFor(amount: number): Intl.NumberFormatOptions {
 
 /**
  * Форматирует число (сумму или курс) в человеко-читаемую строку.
+ *
+ * @param locale — BCP 47 locale tag, обязательный параметр.
  */
-export function formatAmount(amount: number): string {
-  return amount.toLocaleString('ru-RU', decimalsFor(amount))
+export function formatAmount(amount: number, locale: string): string {
+  return amount.toLocaleString(locale, decimalsFor(amount))
 }

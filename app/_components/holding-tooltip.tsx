@@ -4,6 +4,7 @@ import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
 import { TooltipContent } from '@/components/ui/tooltip'
 import { sourceDisplayName } from '@/lib/source-display-name'
+import { useLocale } from '@/app/providers/locale-provider'
 import { formatAmount } from '@/lib/format-amount'
 
 function holdingUnit(t: Ticker): string {
@@ -19,11 +20,13 @@ function TooltipRateOrFallback({
   conversionRate,
   totalUnit,
   same,
+  locale,
 }: {
   unit: string
   conversionRate: number | undefined
   totalUnit: string
   same: boolean
+  locale: string
 }) {
   if (same) {
     return false
@@ -33,7 +36,7 @@ function TooltipRateOrFallback({
   }
   return (
     <span className="tabular-nums">
-      1 {unit} ≈ {formatAmount(conversionRate)} {totalUnit}
+      1 {unit} ≈ {formatAmount(conversionRate, locale)} {totalUnit}
     </span>
   )
 }
@@ -44,18 +47,26 @@ function TooltipContentInner({
   conversionRate,
   totalUnit,
   same,
+  locale,
 }: {
   holding: Holding
   unit: string
   conversionRate: number | undefined
   totalUnit: string
   same: boolean
+  locale: string
 }) {
   return (
     <TooltipContent side="top" className="flex flex-col items-start">
       <span>{sourceDisplayName(holding.ticker.source)}</span>
       {holding.ticker.name && <span className="font-medium">{holding.ticker.name}</span>}
-      <TooltipRateOrFallback unit={unit} conversionRate={conversionRate} totalUnit={totalUnit} same={same} />
+      <TooltipRateOrFallback
+        unit={unit}
+        conversionRate={conversionRate}
+        totalUnit={totalUnit}
+        same={same}
+        locale={locale}
+      />
     </TooltipContent>
   )
 }
@@ -72,6 +83,7 @@ export function HoldingTooltip({
   const unit = holdingUnit(holding.ticker)
   const totalUnit = totalTicker ? holdingUnit(totalTicker) : ''
   const same = isSameCurrency(holding.ticker, totalTicker)
+  const locale = useLocale()
 
   return (
     <TooltipContentInner
@@ -80,6 +92,7 @@ export function HoldingTooltip({
       conversionRate={conversionRate}
       totalUnit={totalUnit}
       same={same}
+      locale={locale}
     />
   )
 }

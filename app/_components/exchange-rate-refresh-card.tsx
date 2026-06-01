@@ -9,6 +9,7 @@ import { MoexRepository } from '@/repositories/moex-repository'
 import { useDatabase } from '@/app/providers/database-provider'
 import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
+import { useLocale } from '@/app/providers/locale-provider'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
 import { sourceDisplayName } from '@/lib/source-display-name'
@@ -52,29 +53,25 @@ function StatusCell({ status }: { status: SourceStatus }) {
   return 'ещё не обновлялось'
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat('ru-RU', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
-function formatDate(ts: number): string {
-  return dateTimeFormatter.format(new Date(ts * MS_PER_SEC))
-}
-
-function DateCell({ status }: { status: SourceStatus }) {
+function DateCell({ status, locale }: { status: SourceStatus; locale: string }) {
   if (status.error !== undefined) {
     return <span className="text-destructive">{status.error}</span>
   }
   if (status.updatedAt !== undefined) {
-    return formatDate(status.updatedAt)
+    const dateTimeFormatter = new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    return dateTimeFormatter.format(new Date(status.updatedAt * MS_PER_SEC))
   }
   return '—'
 }
 
 function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceStatus> }) {
+  const locale = useLocale()
   return (
     <Table>
       <TableHeader>
@@ -95,7 +92,7 @@ function SourcesStatusTable({ statuses }: { statuses: Record<SourceName, SourceS
                 </span>
               </TableCell>
               <TableCell>
-                <DateCell status={statuses[source]} />
+                <DateCell status={statuses[source]} locale={locale} />
               </TableCell>
               <TableCell>
                 <StatusCell status={statuses[source]} />
