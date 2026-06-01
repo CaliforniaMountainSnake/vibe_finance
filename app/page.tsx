@@ -7,6 +7,13 @@ import { TasksTable } from './_components/tasks-table'
 import { ProjectSettingsCard } from './_components/project-settings-card'
 import { QuickCreateCard } from './_components/quick-create-card'
 import { DashboardFooter } from './_components/dashboard-footer'
+import { ReorderableTable } from './_components/reorderable-table'
+
+const sampleRows = [
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 3, name: 'Carol' },
+]
 
 export default function Home() {
   return (
@@ -15,6 +22,7 @@ export default function Home() {
       <StatsCards />
       <SprintProgressCard />
       <TasksTable />
+      <ReorderableTable rows={sampleRows} />
       <ProjectSettingsCard />
       <QuickCreateCard />
       <DashboardFooter />
