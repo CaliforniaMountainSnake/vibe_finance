@@ -3,11 +3,14 @@ import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
 import prettier from 'eslint-config-prettier'
 import sonarjs from 'eslint-plugin-sonarjs'
+import tseslint from 'typescript-eslint'
 import unicorn from 'eslint-plugin-unicorn'
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Typed linting — всё что видит VS Code: await-thenable, no-unnecessary-*, strictNullChecks, etc.
+  ...tseslint.configs.strictTypeChecked,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -17,6 +20,7 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'android/**',
     'eslint.config.mjs',
+    'postcss.config.mjs',
     'components/ui/**',
   ]),
 
@@ -24,6 +28,11 @@ const eslintConfig = defineConfig([
   unicorn.configs['recommended'],
 
   {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+      },
+    },
     plugins: {
       sonarjs,
       unicorn,
@@ -46,12 +55,6 @@ const eslintConfig = defineConfig([
 
       // Запрет console.log и прочего мусора в продакшн-коде
       'no-console': 'warn',
-
-      // Неиспользованные переменные и импорты
-      'no-unused-vars': 'error',
-
-      // Запрет any — заставляет думать о типах
-      '@typescript-eslint/no-explicit-any': 'error',
 
       // Ограничение числа параметров — иначе объект или рефакторинг
       'max-params': ['warn', { max: 3 }],
@@ -80,9 +83,6 @@ const eslintConfig = defineConfig([
 
       // Типы — через import type, не через обычный import
       '@typescript-eslint/consistent-type-imports': 'warn',
-
-      // Запрет x! — нужна нормальная проверка, не assertion
-      '@typescript-eslint/no-non-null-assertion': 'error',
 
       // Переменная во вложенном скопе не должна затенять внешнюю
       '@typescript-eslint/no-shadow': 'warn',
@@ -130,9 +130,6 @@ const eslintConfig = defineConfig([
 
       // --- Потенциальные баги ---
 
-      // Код после return/throw — недостижим
-      'no-unreachable': 'error',
-
       // Сравнение с собой — опечатка при копипасте
       'no-self-compare': 'error',
 
@@ -141,9 +138,6 @@ const eslintConfig = defineConfig([
 
       // Пропущенные элементы в массиве [1,,3]
       'no-sparse-arrays': 'error',
-
-      // throw 'message' вместо throw new Error()
-      'no-throw-literal': 'error',
 
       // cond ? true : false — лишний тернарник
       'no-unneeded-ternary': 'error',
@@ -165,13 +159,7 @@ const eslintConfig = defineConfig([
       // Пустые функции — забыли реализовать
       'no-empty-function': 'error',
 
-      // Пустой constructor() {} — не нужен
-      'no-useless-constructor': 'error',
-
       // --- Асинхронщина ---
-
-      // async без await внутри — бессмысленно
-      'require-await': 'error',
 
       // new Promise(async ...) — антипаттерн
       'no-async-promise-executor': 'error',

@@ -13,7 +13,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 function getSystemTheme(): Theme {
-  if (globalThis.window === undefined) return 'light'
+  if ((globalThis as Record<string, unknown>).window === undefined) return 'light'
   return globalThis.window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
@@ -46,7 +46,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     mq.addEventListener('change', handleChange)
-    return () => mq.removeEventListener('change', handleChange)
+    return () => {
+      mq.removeEventListener('change', handleChange)
+    }
   }, [])
 
   // Apply dark class to <html> (Tailwind uses this)
@@ -57,17 +59,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Sync Capacitor status bar
   useEffect(() => {
-    updateStatusBar(theme)
+    void updateStatusBar(theme)
   }, [theme])
 
   // Fallback: listen for native theme-change events from Android onConfigurationChanged
   useEffect(() => {
     const handler = (event_: Event) => {
-      const detail = (event_ as CustomEvent<{ theme: Theme }>).detail
-      if (detail?.theme) setTheme(detail.theme)
+      const detail = (event_ as CustomEvent<{ theme: Theme } | undefined>).detail
+      if (detail) setTheme(detail.theme)
     }
     globalThis.window.addEventListener('nativeThemeChange', handler)
-    return () => globalThis.window.removeEventListener('nativeThemeChange', handler)
+    return () => {
+      globalThis.window.removeEventListener('nativeThemeChange', handler)
+    }
   }, [])
 
   return <ThemeContext.Provider value={{ theme }}>{children}</ThemeContext.Provider>
