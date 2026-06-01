@@ -6,7 +6,7 @@ import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
 import type { Ticker } from '@/entities/ticker'
 import { Search, X } from 'lucide-react'
 import { SourceIcon } from '@/components/icons/source-icon'
-import { useCurrencySearch } from './currency-search-provider'
+import { useCurrencySearch } from '@/app/providers/currency-search-provider'
 import { sourceDisplayName } from '@/lib/source-display-name'
 
 function SourceGroupLabel({ source }: { source: string }) {

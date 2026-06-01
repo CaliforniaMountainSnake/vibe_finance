@@ -14,7 +14,7 @@ import { HoldingForm } from './holding-form'
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
 import { X } from 'lucide-react'
 
 /* ── EditHoldingDialogContent ──────────── */
@@ -86,6 +86,7 @@ type EditHoldingDialogProperties = {
 }
 
 export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSaved }: EditHoldingDialogProperties) {
+  const databaseRepo = useDatabase()
   const [amount, setAmount] = useState('')
   const [label, setLabel] = useState('')
   const [selectedTicker, setSelectedTicker] = useState<Ticker>()
@@ -135,7 +136,7 @@ export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSav
     reset()
     onOpenChange(false)
     onSaved()
-  }, [amount, selectedTicker, label, holding.id, reset, onOpenChange, onSaved])
+  }, [amount, selectedTicker, label, holding.id, reset, onOpenChange, onSaved, databaseRepo])
 
   const canSave =
     selectedTicker !== undefined && amount.trim() !== '' && !Number.isNaN(Number.parseFloat(amount.replace(',', '.')))

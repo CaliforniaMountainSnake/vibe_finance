@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
 
 const DEFAULT_FONT_SIZE = 1.0625
 
@@ -27,19 +27,24 @@ function applyFontSize(value: number): void {
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontSize, setFontSizeState] = useState(DEFAULT_FONT_SIZE)
 
+  const databaseRepo = useDatabase()
+
   useEffect(() => {
     void databaseRepo.getSetting('fontSize').then((stored) => {
       const value = stored ?? DEFAULT_FONT_SIZE
       setFontSizeState(value)
       applyFontSize(value)
     })
-  }, [])
+  }, [databaseRepo])
 
-  const setFontSize = useCallback((value: number) => {
-    setFontSizeState(value)
-    applyFontSize(value)
-    void databaseRepo.setSetting('fontSize', value)
-  }, [])
+  const setFontSize = useCallback(
+    (value: number) => {
+      setFontSizeState(value)
+      applyFontSize(value)
+      void databaseRepo.setSetting('fontSize', value)
+    },
+    [databaseRepo]
+  )
 
   return <SettingsContext.Provider value={{ fontSize, setFontSize }}>{children}</SettingsContext.Provider>
 }

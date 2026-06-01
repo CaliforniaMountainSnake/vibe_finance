@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TickerPicker } from './ticker-picker'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Ticker } from '@/entities/ticker'
 import { Calculator, X } from 'lucide-react'
@@ -35,6 +35,7 @@ type TotalCurrencyPickerProperties = {
 }
 
 export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrencyPickerProperties) {
+  const databaseRepo = useDatabase()
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const inputReference = useRef<HTMLInputElement>(null)
@@ -56,7 +57,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
       setOpen(false)
       setSearchQuery('')
     },
-    [onChange]
+    [onChange, databaseRepo]
   )
 
   const handleOpenChange = useCallback((newOpen: boolean) => {

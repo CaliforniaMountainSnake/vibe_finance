@@ -5,13 +5,14 @@ import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/component
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
 import { computeConversionRates } from '@/lib/compute-conversion-rates'
 import { HoldingsTable } from './holdings-table'
 import { AddHoldingDialog } from './add-holding-dialog'
-import { CurrencySearchProvider } from './currency-search-provider'
+import { CurrencySearchProvider } from '@/app/providers/currency-search-provider'
+import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 
-function useHoldingsState(refreshKey: number) {
+function useHoldingsState(refreshKey: number, databaseRepo: DatabaseRepositoryInterface) {
   const [holdings, setHoldings] = useState<Holding[]>([])
   const [allRates, setAllRates] = useState<ExchangeRate[]>([])
   const [totalTicker, setTotalTicker] = useState<Ticker>()
@@ -32,7 +33,7 @@ function useHoldingsState(refreshKey: number) {
         computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
       }
     })()
-  }, [refreshKey])
+  }, [refreshKey, databaseRepo])
 
   async function refreshHoldingsAndRates() {
     const [hld, rates] = await Promise.all([databaseRepo.getHoldings(), databaseRepo.getAllRates()])
@@ -101,7 +102,8 @@ function useHoldingsState(refreshKey: number) {
 /* ── HoldingsCard ─────────────────── */
 
 export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
-  const state = useHoldingsState(refreshKey)
+  const databaseRepo = useDatabase()
+  const state = useHoldingsState(refreshKey, databaseRepo)
 
   return (
     <CurrencySearchProvider allRates={state.allRates}>

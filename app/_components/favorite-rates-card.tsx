@@ -5,17 +5,12 @@ import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/component
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { TickerPair } from '@/entities/ticker-pair'
 import { AddFavoritesDialog } from './add-favorites-dropdown'
-import { CurrencySearchProvider } from './currency-search-provider'
+import { CurrencySearchProvider } from '@/app/providers/currency-search-provider'
 import { FavoritesTable, pairId } from './favorite-rates-table'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
+import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 
-/* ── FavoriteRatesCard ────────────────────────────────────────── */
-
-type FavoriteRatesCardProperties = {
-  refreshKey?: number
-}
-
-export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
+function useFavoriteState(refreshKey: number | undefined, databaseRepo: DatabaseRepositoryInterface) {
   const [favorites, setFavorites] = useState<TickerPair[]>([])
   const [allRates, setAllRates] = useState<ExchangeRate[]>([])
   const [rates, setRates] = useState<Record<string, number>>({})
@@ -23,7 +18,7 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
   const loadFavorites = useCallback(async () => {
     const fav = await databaseRepo.getFavoriteRates()
     setFavorites(fav)
-  }, [])
+  }, [databaseRepo])
 
   useEffect(() => {
     void (async () => {
@@ -31,7 +26,7 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
       setFavorites(fav)
       setAllRates(all)
     })()
-  }, [refreshKey])
+  }, [refreshKey, databaseRepo])
 
   useEffect(() => {
     const compute = async () => {
@@ -47,25 +42,47 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
       setRates(map)
     }
     void compute()
-  }, [favorites])
+  }, [favorites, databaseRepo])
 
-  const handleRemove = useCallback(async (pair: TickerPair) => {
-    await databaseRepo.removeFavoriteRate(pair)
-    const fav = await databaseRepo.getFavoriteRates()
-    setFavorites(fav)
-  }, [])
+  const handleRemove = useCallback(
+    async (pair: TickerPair) => {
+      await databaseRepo.removeFavoriteRate(pair)
+      setFavorites(await databaseRepo.getFavoriteRates())
+    },
+    [databaseRepo]
+  )
 
-  const handleMoveUp = useCallback(async (pair: TickerPair) => {
-    await databaseRepo.moveFavoriteRateUp(pair)
-    const fav = await databaseRepo.getFavoriteRates()
-    setFavorites(fav)
-  }, [])
+  const handleMoveUp = useCallback(
+    async (pair: TickerPair) => {
+      await databaseRepo.moveFavoriteRateUp(pair)
+      setFavorites(await databaseRepo.getFavoriteRates())
+    },
+    [databaseRepo]
+  )
 
-  const handleMoveDown = useCallback(async (pair: TickerPair) => {
-    await databaseRepo.moveFavoriteRateDown(pair)
-    const fav = await databaseRepo.getFavoriteRates()
-    setFavorites(fav)
-  }, [])
+  const handleMoveDown = useCallback(
+    async (pair: TickerPair) => {
+      await databaseRepo.moveFavoriteRateDown(pair)
+      setFavorites(await databaseRepo.getFavoriteRates())
+    },
+    [databaseRepo]
+  )
+
+  return { favorites, allRates, rates, loadFavorites, handleRemove, handleMoveUp, handleMoveDown }
+}
+
+/* ── FavoriteRatesCard ────────────────────────────────────────── */
+
+type FavoriteRatesCardProperties = {
+  refreshKey?: number
+}
+
+export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
+  const databaseRepo = useDatabase()
+  const { favorites, allRates, rates, loadFavorites, handleRemove, handleMoveUp, handleMoveDown } = useFavoriteState(
+    refreshKey,
+    databaseRepo
+  )
 
   return (
     <Card>

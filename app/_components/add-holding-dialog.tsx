@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { HoldingForm } from './holding-form'
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Ticker } from '@/entities/ticker'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
 import { Plus, X } from 'lucide-react'
 
 /* ── AddHoldingDialogContent ───────────── */
@@ -84,6 +84,7 @@ type AddHoldingDialogProperties = {
 }
 
 export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProperties) {
+  const databaseRepo = useDatabase()
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [label, setLabel] = useState('')
@@ -119,7 +120,7 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProperti
     reset()
     setOpen(false)
     onAdded()
-  }, [amount, selectedTicker, label, reset, onAdded])
+  }, [amount, selectedTicker, label, reset, onAdded, databaseRepo])
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {

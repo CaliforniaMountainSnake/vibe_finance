@@ -6,7 +6,8 @@ import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/component
 import { BinanceRepository } from '@/repositories/binance-repository'
 import { CoinGeckoRepository } from '@/repositories/coin-gecko-repository'
 import { MoexRepository } from '@/repositories/moex-repository'
-import { DexieRepository } from '@/repositories/dexie-repository'
+import { useDatabase } from '@/app/providers/database-provider'
+import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
@@ -34,7 +35,6 @@ const SOURCES: SourceName[] = ['coingecko', 'binance', 'moex']
 const coinGeckoRepo = new CoinGeckoRepository()
 const binanceRepo = new BinanceRepository()
 const moexRepo = new MoexRepository()
-const databaseRepo = new DexieRepository()
 
 const DEFAULT_STATUS: SourceStatus = { updatedAt: undefined, error: undefined, loading: false }
 const RELATIVE_TIME_UPDATE_INTERVAL_MS = 30_000
@@ -120,7 +120,8 @@ function selectRepo(source: SourceName): CoinGeckoRepository | BinanceRepository
 
 async function refreshSource(
   source: SourceName,
-  setStatuses: React.Dispatch<React.SetStateAction<Record<SourceName, SourceStatus>>>
+  setStatuses: React.Dispatch<React.SetStateAction<Record<SourceName, SourceStatus>>>,
+  databaseRepo: DatabaseRepositoryInterface
 ): Promise<void> {
   setStatuses((previous) => ({
     ...previous,
@@ -146,6 +147,7 @@ async function refreshSource(
 }
 
 export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCardProperties) {
+  const databaseRepo = useDatabase()
   const [statuses, setStatuses] = useState<Record<SourceName, SourceStatus>>({
     binance: { ...DEFAULT_STATUS },
     coingecko: { ...DEFAULT_STATUS },
@@ -163,7 +165,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
         }))
       })
     }
-  }, [])
+  }, [databaseRepo])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -173,10 +175,10 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
   }, [])
 
   const refreshAll = useCallback(() => {
-    void Promise.allSettled(SOURCES.map((source) => refreshSource(source, setStatuses))).then(() => {
+    void Promise.allSettled(SOURCES.map((source) => refreshSource(source, setStatuses, databaseRepo))).then(() => {
       onRefreshed?.()
     })
-  }, [onRefreshed])
+  }, [onRefreshed, databaseRepo])
 
   const isLoading = statuses.binance.loading || statuses.coingecko.loading
 

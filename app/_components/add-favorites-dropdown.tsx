@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Ticker } from '@/entities/ticker'
 import { TickerPicker } from './ticker-picker'
-import { databaseRepo } from '@/lib/database'
+import { useDatabase } from '@/app/providers/database-provider'
 import { Plus, X } from 'lucide-react'
 
 function tickerLabel(t: Ticker): string {
@@ -41,6 +41,7 @@ type AddFavoritesDialogProperties = {
 }
 
 export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProperties) {
+  const databaseRepo = useDatabase()
   const [selectedFrom, setSelectedFrom] = useState<Ticker>()
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -73,7 +74,7 @@ export function AddFavoritesDialog({ allRates, onAdded }: AddFavoritesDialogProp
       setOpen(false)
       onAdded()
     },
-    [selectedFrom, onAdded]
+    [selectedFrom, onAdded, databaseRepo]
   )
 
   const handleOpenChange = useCallback((newOpen: boolean) => {

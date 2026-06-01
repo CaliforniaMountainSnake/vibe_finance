@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Nunito, Geist_Mono } from 'next/font/google'
-import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider } from '@/app/providers/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { SettingsProvider } from './_components/settings-provider'
+import { SettingsProvider } from '@/app/providers/settings-provider'
+import { DatabaseProvider } from '@/app/providers/database-provider'
 import './globals.css'
 
 export const viewport: Viewport = {
@@ -37,9 +38,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          <SettingsProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </SettingsProvider>
+          <DatabaseProvider>
+            <SettingsProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </SettingsProvider>
+          </DatabaseProvider>
         </ThemeProvider>
       </body>
     </html>

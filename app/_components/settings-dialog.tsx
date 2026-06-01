@@ -1,6 +1,6 @@
 'use client'
 
-import { useSettings } from './settings-provider'
+import { useSettings } from '@/app/providers/settings-provider'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
