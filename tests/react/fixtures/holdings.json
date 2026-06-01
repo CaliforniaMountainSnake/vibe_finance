@@ -18,5 +18,10 @@
     "ticker": { "source": "coingecko", "ticker": "gel", "name": "Georgian Lari", "unit": "₾" },
     "amount": 20000,
     "label": "Наличные"
+  },
+  {
+    "ticker": { "source": "moex", "ticker": "rub", "name": "Russian Ruble" },
+    "amount": 100000,
+    "label": "Копилка"
   }
 ]
