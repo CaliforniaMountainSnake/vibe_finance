@@ -1,17 +1,24 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import { DatabaseProvider } from '@/app/providers/database-provider'
 import { SettingsProvider } from '@/app/providers/settings-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { createMockDatabaseRepo } from './mocks/database-repository-mock'
+import { createPopulatedRepo, clearRepo } from './helpers/populate-mock-repo'
+import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 import App from '@/app/page'
 
+let repo: DatabaseRepositoryInterface
+
 describe('App', () => {
+  afterEach(async () => {
+    await clearRepo(repo)
+  })
+
   it('renders three main cards', async () => {
-    const mockRepo = createMockDatabaseRepo()
+    repo = await createPopulatedRepo()
 
     render(
-      <DatabaseProvider repo={mockRepo}>
+      <DatabaseProvider repo={repo}>
         <SettingsProvider>
           <TooltipProvider>
             <App />
@@ -20,8 +27,10 @@ describe('App', () => {
       </DatabaseProvider>
     )
 
-    expect(await screen.findByText('Данные API')).toBeInTheDocument()
-    expect(await screen.findByText('Избранные курсы')).toBeInTheDocument()
-    expect(await screen.findByText('Мои средства')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Данные API')).toBeInTheDocument()
+      expect(screen.getByText('Избранные курсы')).toBeInTheDocument()
+      expect(screen.getByText('Мои средства')).toBeInTheDocument()
+    })
   })
 })

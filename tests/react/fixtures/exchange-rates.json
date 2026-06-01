@@ -1,0 +1,46 @@
+[
+  {
+    "source": "binance",
+    "ticker": "btc",
+    "name": "Bitcoin",
+    "btcPrice": 1,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "binance",
+    "ticker": "usdt",
+    "name": "Tether",
+    "btcPrice": 77000,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "binance",
+    "ticker": "eth",
+    "name": "Ethereum",
+    "btcPrice": 35,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "coingecko",
+    "ticker": "gel",
+    "name": "Georgian Lari",
+    "unit": "₾",
+    "btcPrice": 205000,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "coingecko",
+    "ticker": "eur",
+    "name": "Euro",
+    "unit": "€",
+    "btcPrice": 70000,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "moex",
+    "ticker": "rub",
+    "name": "Russian Ruble",
+    "btcPrice": 5500000,
+    "updatedAt": 1717200000
+  }
+]

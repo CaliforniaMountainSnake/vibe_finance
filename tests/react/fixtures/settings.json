@@ -1,0 +1,8 @@
+{
+  "totalBaseTicker": {
+    "source": "binance",
+    "ticker": "usdt",
+    "name": "Tether"
+  },
+  "fontSize": 1
+}

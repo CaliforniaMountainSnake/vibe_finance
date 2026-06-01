@@ -1,0 +1,18 @@
+[
+  {
+    "from": { "source": "binance", "ticker": "btc", "name": "Bitcoin" },
+    "to": { "source": "binance", "ticker": "usdt", "name": "Tether" }
+  },
+  {
+    "from": { "source": "binance", "ticker": "eth", "name": "Ethereum" },
+    "to": { "source": "binance", "ticker": "usdt", "name": "Tether" }
+  },
+  {
+    "from": { "source": "binance", "ticker": "btc", "name": "Bitcoin" },
+    "to": { "source": "coingecko", "ticker": "gel", "name": "Georgian Lari", "unit": "₾" }
+  },
+  {
+    "from": { "source": "binance", "ticker": "usdt", "name": "Tether" },
+    "to": { "source": "coingecko", "ticker": "gel", "name": "Georgian Lari", "unit": "₾" }
+  }
+]

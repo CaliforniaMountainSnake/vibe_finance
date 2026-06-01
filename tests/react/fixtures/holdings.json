@@ -1,0 +1,22 @@
+[
+  {
+    "ticker": { "source": "binance", "ticker": "btc", "name": "Bitcoin" },
+    "amount": 1.5,
+    "label": "Холодный кошелёк"
+  },
+  {
+    "ticker": { "source": "binance", "ticker": "eth", "name": "Ethereum" },
+    "amount": 10,
+    "label": "Стейкинг"
+  },
+  {
+    "ticker": { "source": "coingecko", "ticker": "eur", "name": "Euro", "unit": "€" },
+    "amount": 5000,
+    "label": "Банковский счёт"
+  },
+  {
+    "ticker": { "source": "coingecko", "ticker": "gel", "name": "Georgian Lari", "unit": "₾" },
+    "amount": 20000,
+    "label": "Наличные"
+  }
+]
