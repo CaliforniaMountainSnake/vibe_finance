@@ -14,7 +14,8 @@ describe('MoexRepository with real raw data', () => {
   const indexesRaw = readFileSync(path.join(rawDirectory, 'indexes.json'), 'utf8')
   const sharesRaw = readFileSync(path.join(rawDirectory, 'shares.json'), 'utf8')
 
-  const rates = repo.parseRatesFromRaw(currenciesRaw, indexesRaw, sharesRaw)
+  const combined = MoexRepository.combineResponses(currenciesRaw, indexesRaw, sharesRaw)
+  const rates = repo.parseRates(combined)
 
   it('парсит реальные данные без ошибок', () => {
     expect(rates.length).toBeGreaterThan(0)

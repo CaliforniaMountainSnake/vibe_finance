@@ -9,6 +9,13 @@ import { resolveTickers } from './moex/resolve-tickers'
 import { buildCurrencyToRubMap, convertToBtcPrice } from './moex/price-converter'
 import type { MoexResponse } from './moex/types'
 
+/** Обёртка из трёх ответов MOEX API, склеенных combineResponses(). */
+type MoexCombinedResponse = {
+  currencies: MoexResponse
+  indexes: MoexResponse
+  shares: MoexResponse
+}
+
 /** URL API MOEX ISS для валют (CETS, WAPRICE). */
 const CURRENCY_URL =
   'https://iss.moex.com/iss/engines/currency/markets/selt/boards/CETS/securities.json' +
@@ -41,6 +48,19 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
   readonly sourceName = 'moex' as const
 
   /**
+   * Объединяет три сырых ответа MOEX API в одну JSON-строку-обёртку.
+   *
+   * Каждая часть парсится отдельно для валидации перед склеиванием —
+   * если любой из ответов невалидный JSON, статик выбросит ошибку сразу.
+   */
+  static combineResponses(currenciesJson: string, indexesJson: string, sharesJson: string): string {
+    const currencies = JSON.parse(currenciesJson) as unknown
+    const indexes = JSON.parse(indexesJson) as unknown
+    const shares = JSON.parse(sharesJson) as unknown
+    return JSON.stringify({ currencies, indexes, shares })
+  }
+
+  /**
    * Загружает курсы с MOEX ISS API (3 запроса с интервалом 100 мс).
    *
    * @throws Если любой из запросов завершился ошибкой
@@ -48,26 +68,20 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
    */
   async fetchRates(): Promise<ExchangeRate[]> {
     const [currencyRaw, indexRaw, sharesRaw] = await this.fetchAllResponses()
-    return this.parseRatesFromRaw(currencyRaw, indexRaw, sharesRaw)
+    const combined = MoexRepository.combineResponses(currencyRaw, indexRaw, sharesRaw)
+    return this.parseRates(combined)
   }
 
   /**
-   * Не поддерживается — MOEX требует 3 отдельных ответа.
-   * Используйте fetchRates или parseRatesFromRaw.
+   * Распарсить сырой ответ API в ExchangeRate[].
+   *
+   * Принимает JSON-обёртку с тремя ключами: currencies, indexes, shares.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  parseRates(_raw: string): ExchangeRate[] {
-    throw new Error('MoexRepository.parseRates is not supported. Use fetchRates or parseRatesFromRaw.')
-  }
-
-  /**
-   * Парсит три JSON-строки (валюты, индексы, акции) в ExchangeRate[].
-   */
-  parseRatesFromRaw(currencyRaw: string, indexRaw: string, sharesRaw: string): ExchangeRate[] {
-    const currencyJson = parseJsonOrThrow(currencyRaw, 'currencies')
-    const indexJson = parseJsonOrThrow(indexRaw, 'indexes')
-    const sharesJson = parseJsonOrThrow(sharesRaw, 'shares')
-
+  parseRates(raw: string): ExchangeRate[] {
+    const wrapper = JSON.parse(raw) as MoexCombinedResponse
+    const currencyJson = wrapper.currencies
+    const indexJson = wrapper.indexes
+    const sharesJson = wrapper.shares
     return this.buildExchangeRates(currencyJson, indexJson, sharesJson)
   }
 
@@ -92,9 +106,9 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
   }
 
   private buildExchangeRates(
-    currencyJson: ReturnType<typeof parseJsonOrThrow>,
-    indexJson: ReturnType<typeof parseJsonOrThrow>,
-    sharesJson: ReturnType<typeof parseJsonOrThrow>
+    currencyJson: MoexResponse,
+    indexJson: MoexResponse,
+    sharesJson: MoexResponse
   ): ExchangeRate[] {
     const { usdRub, rates: currencyRates } = parseCurrencyRates(currencyJson)
 
@@ -124,7 +138,7 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
 }
 
 /** Извлекает цену BTC/USD из ответа индексов. Бросает ошибку, если отсутствует. */
-function extractBtcPrice(indexJson: ReturnType<typeof parseJsonOrThrow>): number {
+function extractBtcPrice(indexJson: MoexResponse): number {
   const entries = parseIndexes(indexJson)
   const btcEntry = entries.find((entry) => entry.secId === 'moexbtc')
   if (!btcEntry || btcEntry.priceInCurrency <= 0) {
@@ -236,7 +250,7 @@ function tryPushCurrencyRate(
 /** Добавляет акции в result после дедупликации тикеров. */
 function appendShareEntries(
   result: ExchangeRate[],
-  sharesJson: ReturnType<typeof parseJsonOrThrow>,
+  sharesJson: MoexResponse,
   context: { btcRub: number; currencyToRub: Map<string, number>; updatedAt: number }
 ): void {
   const shareEntries = resolveTickers(parseShares(sharesJson))
@@ -257,15 +271,6 @@ function appendShareEntries(
       name: entry.name,
       updatedAt: context.updatedAt,
     })
-  }
-}
-
-/** Парсит JSON-строку, бросает ошибку с именем секции при неудаче. */
-function parseJsonOrThrow(raw: string, label: string): MoexResponse {
-  try {
-    return JSON.parse(raw) as MoexResponse
-  } catch {
-    throw new Error(`MOEX: failed to parse ${label} JSON`)
   }
 }
 
