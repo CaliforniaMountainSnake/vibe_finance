@@ -111,7 +111,9 @@ function HoldingDialogs({
       <HoldingRemoveDialog
         open={removeOpen}
         onOpenChange={setRemoveOpen}
-        onConfirm={() => onRemove(holding.id)}
+        onConfirm={() => {
+          onRemove(holding.id)
+        }}
         holding={holding}
       />
       <EditHoldingDialog
@@ -187,8 +189,12 @@ export function HoldingRow({
       onMoveUp={onMoveUp}
       onMoveDown={onMoveDown}
       onToggleEnabled={onToggleEnabled}
-      onEditClick={() => setEditOpen(true)}
-      onRemoveClick={() => setRemoveOpen(true)}
+      onEditClick={() => {
+        setEditOpen(true)
+      }}
+      onRemoveClick={() => {
+        setRemoveOpen(true)
+      }}
       tooltip={<HoldingTooltip holding={holding} conversionRate={conversionRate} totalTicker={totalTicker} />}
     >
       <HoldingDialogs

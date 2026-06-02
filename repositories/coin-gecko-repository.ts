@@ -26,7 +26,7 @@ export class CoinGeckoRepository implements FinanceApiRepositoryInterface {
   async fetchRates(): Promise<ExchangeRate[]> {
     const response = await fetch(this.baseUrl)
     if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`)
+      throw new Error(`CoinGecko API error: ${String(response.status)} ${response.statusText}`)
     }
 
     const text = await response.text()
@@ -57,7 +57,7 @@ export class CoinGeckoRepository implements FinanceApiRepositoryInterface {
    * ```
    */
   parseRates(raw: string): ExchangeRate[] {
-    const data: CoinGeckoResponse = JSON.parse(raw)
+    const data = JSON.parse(raw) as CoinGeckoResponse
     const result: ExchangeRate[] = []
 
     for (const [ticker, rate] of Object.entries(data.rates)) {

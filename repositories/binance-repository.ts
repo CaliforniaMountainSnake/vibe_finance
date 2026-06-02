@@ -18,7 +18,7 @@ export class BinanceRepository implements FinanceApiRepositoryInterface {
   async fetchRates(): Promise<ExchangeRate[]> {
     const response = await fetch(this.baseUrl)
     if (!response.ok) {
-      throw new Error(`Binance API error: ${response.status} ${response.statusText}`)
+      throw new Error(`Binance API error: ${String(response.status)} ${response.statusText}`)
     }
 
     const text = await response.text()
@@ -39,7 +39,7 @@ export class BinanceRepository implements FinanceApiRepositoryInterface {
    * ```
    */
   parseRates(raw: string): ExchangeRate[] {
-    const data: BinanceTicker[] = JSON.parse(raw)
+    const data = JSON.parse(raw) as BinanceTicker[]
     const usdtPriceMap = buildUsdtPriceMap(data)
 
     const btcUsdtPrice = usdtPriceMap.get('btc')

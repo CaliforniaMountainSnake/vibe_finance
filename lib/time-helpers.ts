@@ -27,7 +27,7 @@ function relativeTime(ts: number): string {
     unit = label
   }
 
-  return `${value} ${unit} назад`
+  return `${String(value)} ${unit} назад`
 }
 
 export { relativeTime, MS_PER_SEC, SEC_PER_MINUTE, SEC_PER_HOUR, SEC_PER_DAY, SEC_PER_MONTH, SEC_PER_YEAR }

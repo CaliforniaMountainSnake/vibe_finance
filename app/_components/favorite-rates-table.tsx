@@ -122,7 +122,9 @@ function ReorderButtons({
         className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
         disabled={isFirst}
         aria-label={`Переместить ${tickerLabel(pair.from)} \u2192 ${tickerLabel(pair.to)} вверх`}
-        onClick={() => onMoveUp(pair)}
+        onClick={() => {
+          onMoveUp(pair)
+        }}
       >
         <ChevronUp aria-hidden="true" className="size-3" />
       </button>
@@ -131,7 +133,9 @@ function ReorderButtons({
         className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
         disabled={isLast}
         aria-label={`Переместить ${tickerLabel(pair.from)} \u2192 ${tickerLabel(pair.to)} вниз`}
-        onClick={() => onMoveDown(pair)}
+        onClick={() => {
+          onMoveDown(pair)
+        }}
       >
         <ChevronDown aria-hidden="true" className="size-3" />
       </button>

@@ -63,7 +63,7 @@ class FinanceDatabase extends Dexie {
           return aTime - bTime
         })
         await tx.table('favoriteRates').clear()
-        const migrated = sorted.map((r, index) => ({ ...r, order: index }))
+        const migrated = sorted.map((r: Record<string, unknown>, index) => ({ ...r, order: index }))
         await tx.table('favoriteRates').bulkPut(migrated)
       })
 
@@ -122,7 +122,7 @@ export class DexieRepository implements DatabaseRepositoryInterface {
       throw new Error(`Unknown ticker: ${to.source}:${to.ticker}`)
     }
     if (fromRecord.btcPrice <= 0) {
-      throw new Error(`Invalid btcPrice for ticker ${from.source}:${from.ticker}: ${fromRecord.btcPrice}`)
+      throw new Error(`Invalid btcPrice for ticker ${from.source}:${from.ticker}: ${String(fromRecord.btcPrice)}`)
     }
 
     return toRecord.btcPrice / fromRecord.btcPrice

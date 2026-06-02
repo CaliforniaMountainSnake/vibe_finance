@@ -33,7 +33,9 @@ function TickerPickerItem({
   return (
     <button
       type="button"
-      onClick={() => onSelect(ticker)}
+      onClick={() => {
+        onSelect(ticker)
+      }}
       className={`w-full px-3 py-1.5 text-sm text-left hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-accent text-accent-foreground' : ''}`}
     >
       <div className="flex items-center gap-2">
@@ -71,7 +73,9 @@ function TickerPickerSearch({
           ref={inputRef}
           placeholder={placeholder ?? 'Поиск валюты…'}
           value={value}
-          onChange={(event_) => onChange(event_.target.value)}
+          onChange={(event_) => {
+            onChange(event_.target.value)
+          }}
           className="pl-7 pr-7 h-7 text-sm"
         />
         {value && (
@@ -134,8 +138,12 @@ export function TickerPicker({
   const grouped = useMemo(() => {
     const map: Record<string, ExchangeRate[]> = {}
     for (const rate of filtered) {
-      if (!map[rate.source]) map[rate.source] = []
-      map[rate.source].push(rate)
+      const source = rate.source
+      if (Object.hasOwn(map, source)) {
+        map[source].push(rate)
+      } else {
+        map[source] = [rate]
+      }
     }
     return map
   }, [filtered])

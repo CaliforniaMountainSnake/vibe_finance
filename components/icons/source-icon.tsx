@@ -17,5 +17,5 @@ type SourceIconProperties = SVGProps<SVGSVGElement> & {
 
 export function SourceIcon({ source, ...svgProperties }: SourceIconProperties) {
   const Icon = iconMap[source]
-  return Icon ? <Icon aria-label={sourceDisplayName(source)} {...svgProperties} /> : undefined
+  return <Icon aria-label={sourceDisplayName(source)} {...svgProperties} />
 }

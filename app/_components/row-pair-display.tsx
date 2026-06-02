@@ -105,9 +105,15 @@ function ActionsCell({
         isFirst={isFirst}
         isLast={isLast}
         disabled={disabled}
-        onMoveUp={() => onMoveUp(holdingId)}
-        onMoveDown={() => onMoveDown(holdingId)}
-        onToggleEnabled={() => onToggleEnabled(holdingId)}
+        onMoveUp={() => {
+          onMoveUp(holdingId)
+        }}
+        onMoveDown={() => {
+          onMoveDown(holdingId)
+        }}
+        onToggleEnabled={() => {
+          onToggleEnabled(holdingId)
+        }}
         onEditClick={onEditClick}
         onRemoveClick={onRemoveClick}
       />
@@ -115,9 +121,15 @@ function ActionsCell({
         isFirst={isFirst}
         isLast={isLast}
         disabled={disabled}
-        onMoveUp={() => onMoveUp(holdingId)}
-        onMoveDown={() => onMoveDown(holdingId)}
-        onToggleEnabled={() => onToggleEnabled(holdingId)}
+        onMoveUp={() => {
+          onMoveUp(holdingId)
+        }}
+        onMoveDown={() => {
+          onMoveDown(holdingId)
+        }}
+        onToggleEnabled={() => {
+          onToggleEnabled(holdingId)
+        }}
         onEditClick={onEditClick}
         onRemoveClick={onRemoveClick}
       />
@@ -187,8 +199,12 @@ export function RowPairDisplay({
   const rowClass = `${opacity} ${hovered && disabled ? 'opacity-60' : ''}`
 
   const handlers = {
-    onMouseEnter: () => setHovered(true),
-    onMouseLeave: () => setHovered(false),
+    onMouseEnter: () => {
+      setHovered(true)
+    },
+    onMouseLeave: () => {
+      setHovered(false)
+    },
   }
 
   return (

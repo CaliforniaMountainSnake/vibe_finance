@@ -104,7 +104,9 @@ export function HoldingForm({
           step="any"
           placeholder="0"
           value={amount}
-          onChange={(event_) => onAmountChange(event_.target.value)}
+          onChange={(event_) => {
+            onAmountChange(event_.target.value)
+          }}
           className="h-9 text-base"
         />
       </div>
@@ -119,7 +121,9 @@ export function HoldingForm({
         <textarea
           ref={labelRef}
           value={label}
-          onChange={(event_) => onLabelChange(event_.target.value)}
+          onChange={(event_) => {
+            onLabelChange(event_.target.value)
+          }}
           placeholder="Название счёта…"
           rows={3}
           className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none md:text-sm dark:bg-input/30"

@@ -65,7 +65,7 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
     if (!newOpen) setSearchQuery('')
   }, [])
 
-  const label = value ? `${value.ticker.toUpperCase()}` : '?'
+  const label = value ? value.ticker.toUpperCase() : '?'
   const showIcon = value !== undefined
 
   return (
@@ -94,7 +94,9 @@ export function TotalCurrencyPicker({ allRates, value, onChange }: TotalCurrency
           <TickerPicker
             allRates={allRates}
             selected={value}
-            onSelect={handleSelect}
+            onSelect={(ticker) => {
+              void handleSelect(ticker)
+            }}
             inputRef={inputReference}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}

@@ -155,7 +155,9 @@ export function EditHoldingDialog({ holding, allRates, open, onOpenChange, onSav
           labelReference={labelReference}
           allRates={allRates}
           canSave={canSave}
-          onSave={handleSave}
+          onSave={() => {
+            void handleSave()
+          }}
         />
       </DialogContent>
     </Dialog>

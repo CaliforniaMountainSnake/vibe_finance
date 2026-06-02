@@ -157,7 +157,9 @@ export function AddHoldingDialog({ allRates, onAdded }: AddHoldingDialogProperti
           labelRef={labelReference}
           allRates={allRates}
           canAdd={canAdd}
-          onAdd={handleAdd}
+          onAdd={() => {
+            void handleAdd()
+          }}
         />
       </DialogContent>
     </Dialog>

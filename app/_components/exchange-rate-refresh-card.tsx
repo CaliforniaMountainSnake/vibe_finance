@@ -168,7 +168,9 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     const interval = setInterval(() => {
       setTick((t) => t + 1)
     }, RELATIVE_TIME_UPDATE_INTERVAL_MS)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+    }
   }, [])
 
   const refreshAll = useCallback(() => {

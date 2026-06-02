@@ -28,7 +28,9 @@ export function ConfirmRemoveButton({ pair, onRemove }: { pair: TickerPair; onRe
       <Button
         variant="ghost"
         size="icon-xs"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true)
+        }}
         aria-label={`Удалить пару ${tickerLabel(pair.from)} → ${tickerLabel(pair.to)}`}
       >
         <X />
@@ -42,7 +44,12 @@ export function ConfirmRemoveButton({ pair, onRemove }: { pair: TickerPair; onRe
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={() => onRemove(pair)}>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => {
+              onRemove(pair)
+            }}
+          >
             Удалить
           </AlertDialogAction>
         </AlertDialogFooter>

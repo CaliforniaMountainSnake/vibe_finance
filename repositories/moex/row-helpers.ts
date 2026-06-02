@@ -40,7 +40,7 @@ export function getNumericField(
   field: string
 ): number | undefined {
   const raw = record[field]
-  if (raw === null || raw === undefined) return undefined
+  if (raw === undefined) return undefined
   const number_ = Number(raw)
   if (!Number.isFinite(number_) || number_ === 0) return undefined
   return number_

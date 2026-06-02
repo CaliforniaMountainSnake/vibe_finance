@@ -95,7 +95,9 @@ export function SettingsDialog() {
               className="size-8 shrink-0"
               aria-label="Уменьшить размер шрифта"
               disabled={currentStep === 0}
-              onClick={() => setFontSize(FONT_SIZE_STEPS[currentStep - 1])}
+              onClick={() => {
+                setFontSize(FONT_SIZE_STEPS[currentStep - 1])
+              }}
             >
               <Minus className="size-3.5" />
             </Button>
@@ -115,7 +117,9 @@ export function SettingsDialog() {
               className="size-8 shrink-0"
               aria-label="Увеличить размер шрифта"
               disabled={currentStep === FONT_SIZE_STEPS.length - 1}
-              onClick={() => setFontSize(FONT_SIZE_STEPS[currentStep + 1])}
+              onClick={() => {
+                setFontSize(FONT_SIZE_STEPS[currentStep + 1])
+              }}
             >
               <Plus className="size-3.5" />
             </Button>

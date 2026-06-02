@@ -30,7 +30,7 @@ function useHoldingsState(refreshKey: number, databaseRepo: DatabaseRepositoryIn
       const tt = total ?? undefined
       setTotalTicker(tt)
       if (tt && hld.length > 0) {
-        computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
+        void computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
       }
     })()
   }, [refreshKey, databaseRepo])
@@ -47,7 +47,7 @@ function useHoldingsState(refreshKey: number, databaseRepo: DatabaseRepositoryIn
       setConversionRates({})
       return
     }
-    computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
+    void computeConversionRates(databaseRepo, hld, tt).then(setConversionRates)
   }
 
   async function moveUp(id: string) {

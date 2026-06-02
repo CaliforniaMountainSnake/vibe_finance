@@ -53,15 +53,30 @@ export function FavoriteRowActionsDropdown({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled={isFirst} onClick={() => onMoveUp(pair)}>
+          <DropdownMenuItem
+            disabled={isFirst}
+            onClick={() => {
+              onMoveUp(pair)
+            }}
+          >
             <ChevronUp aria-hidden="true" className="size-4" />
             Переместить вверх
           </DropdownMenuItem>
-          <DropdownMenuItem disabled={isLast} onClick={() => onMoveDown(pair)}>
+          <DropdownMenuItem
+            disabled={isLast}
+            onClick={() => {
+              onMoveDown(pair)
+            }}
+          >
             <ChevronDown aria-hidden="true" className="size-4" />
             Переместить вниз
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onClick={() => setRemoveOpen(true)}>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => {
+              setRemoveOpen(true)
+            }}
+          >
             <X aria-hidden="true" className="size-4" />
             Удалить
           </DropdownMenuItem>
@@ -78,7 +93,12 @@ export function FavoriteRowActionsDropdown({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Отмена</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => onRemove(pair)}>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                onRemove(pair)
+              }}
+            >
               Удалить
             </AlertDialogAction>
           </AlertDialogFooter>

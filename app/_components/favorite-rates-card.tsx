@@ -90,7 +90,12 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
         <CardTitle>Избранные курсы</CardTitle>
         <CardAction>
           <CurrencySearchProvider allRates={allRates}>
-            <AddFavoritesDialog allRates={allRates} onAdded={loadFavorites} />
+            <AddFavoritesDialog
+              allRates={allRates}
+              onAdded={() => {
+                void loadFavorites()
+              }}
+            />
           </CurrencySearchProvider>
         </CardAction>
       </CardHeader>
@@ -103,9 +108,15 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
           <FavoritesTable
             favorites={favorites}
             rates={rates}
-            onRemove={handleRemove}
-            onMoveUp={handleMoveUp}
-            onMoveDown={handleMoveDown}
+            onRemove={(pair) => {
+              void handleRemove(pair)
+            }}
+            onMoveUp={(pair) => {
+              void handleMoveUp(pair)
+            }}
+            onMoveDown={(pair) => {
+              void handleMoveDown(pair)
+            }}
           />
         )}
       </CardFooter>

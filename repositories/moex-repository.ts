@@ -7,6 +7,7 @@ import { parseIndexes } from './moex/parse-indexes'
 import { parseShares } from './moex/parse-shares'
 import { resolveTickers } from './moex/resolve-tickers'
 import { buildCurrencyToRubMap, convertToBtcPrice } from './moex/price-converter'
+import type { MoexResponse } from './moex/types'
 
 /** URL API MOEX ISS для валют (CETS, WAPRICE). */
 const CURRENCY_URL =
@@ -54,7 +55,7 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
    * Не поддерживается — MOEX требует 3 отдельных ответа.
    * Используйте fetchRates или parseRatesFromRaw.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   parseRates(_raw: string): ExchangeRate[] {
     throw new Error('MoexRepository.parseRates is not supported. Use fetchRates or parseRatesFromRaw.')
   }
@@ -85,7 +86,7 @@ export class MoexRepository implements FinanceApiRepositoryInterface {
   private async fetchJson(url: string): Promise<string> {
     const response = await fetch(url)
     if (!response.ok) {
-      throw new Error(`MOEX API error: ${response.status} ${response.statusText}`)
+      throw new Error(`MOEX API error: ${String(response.status)} ${response.statusText}`)
     }
     return response.text()
   }
@@ -260,9 +261,9 @@ function appendShareEntries(
 }
 
 /** Парсит JSON-строку, бросает ошибку с именем секции при неудаче. */
-function parseJsonOrThrow(raw: string, label: string) {
+function parseJsonOrThrow(raw: string, label: string): MoexResponse {
   try {
-    return JSON.parse(raw)
+    return JSON.parse(raw) as MoexResponse
   } catch {
     throw new Error(`MOEX: failed to parse ${label} JSON`)
   }

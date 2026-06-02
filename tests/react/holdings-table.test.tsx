@@ -44,7 +44,7 @@ describe('HoldingsCard — HoldingsTable', () => {
       await repo.removeHolding(h.id)
     }
 
-    await renderCard()
+    renderCard()
 
     await waitFor(() => {
       expect(screen.getByText('Нет сохранённых средств. Добавьте кнопкой справа вверху.')).toBeInTheDocument()
@@ -55,7 +55,7 @@ describe('HoldingsCard — HoldingsTable', () => {
 
   it('отображает лейблы всех 5 холдингов из трёх источников', async () => {
     repo = await createPopulatedRepo()
-    await renderCard()
+    renderCard()
 
     await waitFor(() => {
       for (const label of EXPECTED_LABELS) {
@@ -66,7 +66,7 @@ describe('HoldingsCard — HoldingsTable', () => {
 
   it('показывает итоговую валюту USDT', async () => {
     repo = await createPopulatedRepo()
-    await renderCard()
+    renderCard()
 
     await waitFor(() => {
       const usdtElements = screen.getAllByText('USDT')
@@ -76,7 +76,7 @@ describe('HoldingsCard — HoldingsTable', () => {
 
   it('рендерит 10 строк таблицы (5 холдингов × 2 строки на холдинг)', async () => {
     repo = await createPopulatedRepo()
-    await renderCard()
+    renderCard()
 
     await waitFor(() => {
       const tbody = document.querySelector('tbody')
@@ -89,7 +89,7 @@ describe('HoldingsCard — HoldingsTable', () => {
 
   it('отображает холдинги в порядке, заданном фикстурой (порядок = order)', async () => {
     repo = await createPopulatedRepo()
-    await renderCard()
+    renderCard()
 
     await waitFor(() => {
       const tbody = document.querySelector('tbody')
@@ -101,7 +101,7 @@ describe('HoldingsCard — HoldingsTable', () => {
       const labelTexts: string[] = []
       for (let index = 0; index < allRows.length; index += 2) {
         const labelRow = allRows[index + 1]
-        labelTexts.push(labelRow.textContent?.trim() ?? '')
+        labelTexts.push(labelRow.textContent.trim())
       }
 
       expect(labelTexts).toEqual(EXPECTED_LABELS)

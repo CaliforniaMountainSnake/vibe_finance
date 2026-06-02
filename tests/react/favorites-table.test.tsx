@@ -12,8 +12,12 @@ import type { DatabaseRepositoryInterface } from '@/repositories/database-reposi
 let repo: DatabaseRepositoryInterface
 
 function getRateTexts(): string[] {
-  const rateCells = document.querySelectorAll('span.tabular-nums')
-  return [...rateCells].map((cell) => cell.textContent ?? '')
+  const rateCells = document.querySelectorAll<HTMLSpanElement>('span.tabular-nums')
+  const result: string[] = []
+  for (const cell of rateCells) {
+    result.push(cell.textContent || '')
+  }
+  return result
 }
 
 function rateTextStartsWithDigit(text: string): boolean {
