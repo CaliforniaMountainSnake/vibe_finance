@@ -17,7 +17,7 @@
     "test:watch": "vitest",
     "format": "prettier . --write",
     "format-check": "prettier . --check",
-    "check-all": "concurrently --group npm:test-unit npm:test-react npm:build npm:lint npm:format-check"
+    "check-all": "npm run test && concurrently --group npm:build npm:lint npm:format-check"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",
