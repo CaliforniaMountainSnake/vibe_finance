@@ -1,10 +1,27 @@
 import { describe, expect, it } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { HoldingsCard } from '@/app/_components/holdings-card'
 import { makeRenderer } from './helpers'
 
-/** Ожидаемые лейблы в порядке, заданном fixtures/holdings.json. */
-const EXPECTED_LABELS = ['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка']
+/** Извлечь порядок лейблов холдингов из <tbody>. */
+function getLabelOrder(): string[] {
+  const tbody = document.querySelector('tbody')
+  if (!tbody) return []
+  const rows = tbody.querySelectorAll('tr')
+  const labels: string[] = []
+  for (let index = 0; index < rows.length; index += 2) {
+    const labelRow = rows[index + 1]
+    labels.push(labelRow.textContent.trim())
+  }
+  return labels
+}
+
+async function expectOrder(labels: string[]): Promise<void> {
+  await waitFor(() => {
+    expect(getLabelOrder()).toEqual(labels)
+  })
+}
 
 describe('HoldingsCard — HoldingsTable', () => {
   /* ── empty state ─────────────────────── */
@@ -32,7 +49,7 @@ describe('HoldingsCard — HoldingsTable', () => {
     render(<HoldingsCard />)
 
     await waitFor(() => {
-      for (const label of EXPECTED_LABELS) {
+      for (const label of ['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка']) {
         expect(screen.getByText(label)).toBeInTheDocument()
       }
     })
@@ -78,7 +95,63 @@ describe('HoldingsCard — HoldingsTable', () => {
         labelTexts.push(labelRow.textContent.trim())
       }
 
-      expect(labelTexts).toEqual(EXPECTED_LABELS)
+      expect(labelTexts).toEqual(['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка'])
     })
+  })
+
+  /* ── перестановка строк ─────────────── */
+
+  it('перемещает первый холдинг вниз по нажатию "Переместить вниз"', async () => {
+    const user = userEvent.setup()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
+
+    await expectOrder(['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка'])
+    await user.click(screen.getAllByRole('button', { name: 'Переместить вниз' })[0])
+    await expectOrder(['Стейкинг', 'Холодный кошелёк', 'Банковский счёт', 'Наличные', 'Копилка'])
+  })
+
+  it('перемещает последний холдинг вверх по нажатию "Переместить вверх"', async () => {
+    const user = userEvent.setup()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
+
+    await expectOrder(['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка'])
+    await user.click(screen.getAllByRole('button', { name: 'Переместить вверх' })[4])
+    await expectOrder(['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Копилка', 'Наличные'])
+  })
+
+  it('блокирует кнопку "Переместить вверх" у первого холдинга', async () => {
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Переместить вверх' })[0]).toBeDisabled()
+    })
+  })
+
+  it('блокирует кнопку "Переместить вниз" у последнего холдинга', async () => {
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Переместить вниз' })[4]).toBeDisabled()
+    })
+  })
+
+  it('выполняет последовательность перестановок: вниз → вниз → исходный порядок', async () => {
+    const user = userEvent.setup()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
+
+    await expectOrder(['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка'])
+
+    // Первый — вниз
+    await user.click(screen.getAllByRole('button', { name: 'Переместить вниз' })[0])
+    await expectOrder(['Стейкинг', 'Холодный кошелёк', 'Банковский счёт', 'Наличные', 'Копилка'])
+
+    // Бывший второй (теперь первый) — вниз → возвращаем исходный порядок
+    await user.click(screen.getAllByRole('button', { name: 'Переместить вниз' })[0])
+    await expectOrder(['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка'])
   })
 })
