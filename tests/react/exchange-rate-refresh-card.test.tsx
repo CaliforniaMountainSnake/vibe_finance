@@ -1,81 +1,62 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { DatabaseProvider } from '@/app/providers/database-provider'
-import { ExchangeRateProvider } from '@/app/providers/exchange-rate-provider'
-import { SettingsProvider } from '@/app/providers/settings-provider'
-import { LocaleProvider } from '@/app/providers/locale-provider'
-import { TooltipProvider } from '@/components/ui/tooltip'
 import { ExchangeRateRefreshCard } from '@/app/_components/exchange-rate-refresh-card'
-import { createMockFinanceRepos } from './helpers/create-mock-finance-repos'
-import { DexieRepository } from '@/repositories/dexie-repository'
-import { TEST_LOCALE } from '@/tests/helpers/test-locale'
-import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
-
-let repo: DatabaseRepositoryInterface
+import { makeRenderer } from './helpers'
 
 describe('ExchangeRateRefreshCard', () => {
-  afterEach(async () => {
-    await repo.clearAll()
-  })
-
-  function renderCard(onRefreshed?: () => void) {
-    repo = new DexieRepository()
-
-    return render(
-      <DatabaseProvider repo={repo}>
-        <ExchangeRateProvider repos={createMockFinanceRepos()}>
-          <SettingsProvider>
-            <LocaleProvider locale={TEST_LOCALE}>
-              <TooltipProvider>
-                <ExchangeRateRefreshCard onRefreshed={onRefreshed} />
-              </TooltipProvider>
-            </LocaleProvider>
-          </SettingsProvider>
-        </ExchangeRateProvider>
-      </DatabaseProvider>
-    )
-  }
-
-  it('отображает заголовок «Данные API» и кнопку обновления', () => {
-    renderCard()
+  it('отображает заголовок «Данные API» и кнопку обновления', async () => {
+    const { render } = await makeRenderer(false)
+    render(<ExchangeRateRefreshCard />)
 
     expect(screen.getByText('Данные API')).toBeInTheDocument()
     expect(screen.getByLabelText('Обновить курсы')).toBeInTheDocument()
   })
 
-  it('отображает строки для всех источников', () => {
-    renderCard()
+  it('отображает строки для всех источников со статусом «ещё не обновлялось»', async () => {
+    const { render } = await makeRenderer(false)
+    render(<ExchangeRateRefreshCard />)
 
     expect(screen.getByText('CoinGecko')).toBeInTheDocument()
     expect(screen.getByText('Binance')).toBeInTheDocument()
     expect(screen.getByText('MOEX')).toBeInTheDocument()
+
+    // На пустой БД у всех источников статус «ещё не обновлялось»
+    const fresh = screen.getAllByText('ещё не обновлялось')
+    expect(fresh).toHaveLength(3)
   })
 
-  it('нажатие кнопки обновления обновляет даты', async () => {
-    renderCard()
+  it('нажатие кнопки обновления обновляет курсы и показывает даты', async () => {
+    const { render } = await makeRenderer(false)
+    render(<ExchangeRateRefreshCard />)
 
-    // До обновления — «ещё не обновлялось»
-    const fresh = screen.getAllByText('ещё не обновлялось')
-    expect(fresh.length).toBe(3)
+    // До обновления — статус «ещё не обновлялось» и прочерки в дате
+    expect(screen.getAllByText('ещё не обновлялось')).toHaveLength(3)
+    expect(screen.getAllByText('—')).toHaveLength(3)
 
     const user = userEvent.setup()
     await user.click(screen.getByLabelText('Обновить курсы'))
 
-    // После обновления — даты появятся, «ещё не обновлялось» исчезнет
     await waitFor(() => {
+      // Статус «ещё не обновлялось» исчез
       expect(screen.queryByText('ещё не обновлялось')).toBeNull()
+      // Прочерки в дате исчезли — появились реальные даты
+      expect(screen.queryByText('—')).toBeNull()
+      // Ни у одного источника нет ошибки
+      expect(screen.queryByText('ошибка')).toBeNull()
     })
-
-    // Ни у одного источника нет ошибки
-    expect(screen.queryByText('ошибка')).toBeNull()
   })
 
   it('вызывает onRefreshed после завершения обновления', async () => {
+    const { render } = await makeRenderer(false)
     let called = false
-    renderCard(() => {
-      called = true
-    })
+    render(
+      <ExchangeRateRefreshCard
+        onRefreshed={() => {
+          called = true
+        }}
+      />
+    )
 
     const user = userEvent.setup()
     await user.click(screen.getByLabelText('Обновить курсы'))
@@ -86,7 +67,8 @@ describe('ExchangeRateRefreshCard', () => {
   })
 
   it('сохраняет курсы в БД после обновления', async () => {
-    renderCard()
+    const { render, repo } = await makeRenderer(false)
+    render(<ExchangeRateRefreshCard />)
 
     const user = userEvent.setup()
     await user.click(screen.getByLabelText('Обновить курсы'))
@@ -96,7 +78,6 @@ describe('ExchangeRateRefreshCard', () => {
       expect(allRates.length).toBeGreaterThan(0)
     })
 
-    // Проверяем, что данные есть для всех трёх источников
     const allRates = await repo.getAllRates()
     const sources = new Set(allRates.map((r) => r.source))
     expect(sources).toContain('coingecko')

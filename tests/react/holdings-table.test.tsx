@@ -1,42 +1,16 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { screen, waitFor } from '@testing-library/react'
 import { HoldingsCard } from '@/app/_components/holdings-card'
-import { DatabaseProvider } from '@/app/providers/database-provider'
-import { SettingsProvider } from '@/app/providers/settings-provider'
-import { LocaleProvider } from '@/app/providers/locale-provider'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { createPopulatedRepo, clearRepo } from './helpers/populate-mock-repo'
-import { TEST_LOCALE } from '@/tests/helpers/test-locale'
-import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
-
-let repo: DatabaseRepositoryInterface
+import { makeRenderer } from './helpers'
 
 /** Ожидаемые лейблы в порядке, заданном fixtures/holdings.json. */
 const EXPECTED_LABELS = ['Холодный кошелёк', 'Стейкинг', 'Банковский счёт', 'Наличные', 'Копилка']
 
-function renderCard(): void {
-  render(
-    <DatabaseProvider repo={repo}>
-      <SettingsProvider>
-        <LocaleProvider locale={TEST_LOCALE}>
-          <TooltipProvider>
-            <HoldingsCard />
-          </TooltipProvider>
-        </LocaleProvider>
-      </SettingsProvider>
-    </DatabaseProvider>
-  )
-}
-
 describe('HoldingsCard — HoldingsTable', () => {
-  afterEach(async () => {
-    await clearRepo(repo)
-  })
-
   /* ── empty state ─────────────────────── */
 
   it('показывает пустое состояние, если холдингов нет', async () => {
-    repo = await createPopulatedRepo()
+    const { render, repo } = await makeRenderer()
 
     // Удаляем все холдинги, оставляя курсы и настройки
     const holdings = await repo.getHoldings()
@@ -44,7 +18,7 @@ describe('HoldingsCard — HoldingsTable', () => {
       await repo.removeHolding(h.id)
     }
 
-    renderCard()
+    render(<HoldingsCard />)
 
     await waitFor(() => {
       expect(screen.getByText('Нет сохранённых средств. Добавьте кнопкой справа вверху.')).toBeInTheDocument()
@@ -54,8 +28,8 @@ describe('HoldingsCard — HoldingsTable', () => {
   /* ── default state ───────────────────── */
 
   it('отображает лейблы всех 5 холдингов из трёх источников', async () => {
-    repo = await createPopulatedRepo()
-    renderCard()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
 
     await waitFor(() => {
       for (const label of EXPECTED_LABELS) {
@@ -65,8 +39,8 @@ describe('HoldingsCard — HoldingsTable', () => {
   })
 
   it('показывает итоговую валюту USDT', async () => {
-    repo = await createPopulatedRepo()
-    renderCard()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
 
     await waitFor(() => {
       const usdtElements = screen.getAllByText('USDT')
@@ -75,8 +49,8 @@ describe('HoldingsCard — HoldingsTable', () => {
   })
 
   it('рендерит 10 строк таблицы (5 холдингов × 2 строки на холдинг)', async () => {
-    repo = await createPopulatedRepo()
-    renderCard()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
 
     await waitFor(() => {
       const tbody = document.querySelector('tbody')
@@ -88,8 +62,8 @@ describe('HoldingsCard — HoldingsTable', () => {
   })
 
   it('отображает холдинги в порядке, заданном фикстурой (порядок = order)', async () => {
-    repo = await createPopulatedRepo()
-    renderCard()
+    const { render } = await makeRenderer()
+    render(<HoldingsCard />)
 
     await waitFor(() => {
       const tbody = document.querySelector('tbody')

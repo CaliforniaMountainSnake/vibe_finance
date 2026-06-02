@@ -59,6 +59,13 @@ export async function createPopulatedRepo(): Promise<DatabaseRepositoryInterface
 }
 
 /**
+ * Создаёт пустой DexieRepository без данных фикстур.
+ */
+export function createEmptyRepo(): DatabaseRepositoryInterface {
+  return new DexieRepository()
+}
+
+/**
  * Очищает все таблицы в репозитории.
  */
 export async function clearRepo(repo: DatabaseRepositoryInterface): Promise<void> {

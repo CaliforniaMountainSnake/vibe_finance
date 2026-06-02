@@ -1,15 +1,7 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { screen, waitFor } from '@testing-library/react'
 import { FavoriteRatesCard } from '@/app/_components/favorite-rates-card'
-import { DatabaseProvider } from '@/app/providers/database-provider'
-import { SettingsProvider } from '@/app/providers/settings-provider'
-import { LocaleProvider } from '@/app/providers/locale-provider'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { createPopulatedRepo, clearRepo } from './helpers/populate-mock-repo'
-import { TEST_LOCALE } from '@/tests/helpers/test-locale'
-import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
-
-let repo: DatabaseRepositoryInterface
+import { makeRenderer } from './helpers'
 
 function getRateTexts(): string[] {
   const rateCells = document.querySelectorAll<HTMLSpanElement>('span.tabular-nums')
@@ -40,27 +32,9 @@ function assertRatesAreComputed(): void {
 }
 
 describe('FavoritesTable with populated mock data', () => {
-  afterEach(async () => {
-    await clearRepo(repo)
-  })
-
-  async function renderCard(): Promise<void> {
-    repo = await createPopulatedRepo()
-    render(
-      <DatabaseProvider repo={repo}>
-        <SettingsProvider>
-          <LocaleProvider locale={TEST_LOCALE}>
-            <TooltipProvider>
-              <FavoriteRatesCard />
-            </TooltipProvider>
-          </LocaleProvider>
-        </SettingsProvider>
-      </DatabaseProvider>
-    )
-  }
-
   it('отображает строки избранного вместо пустого состояния', async () => {
-    await renderCard()
+    const { render } = await makeRenderer()
+    render(<FavoriteRatesCard />)
 
     await waitFor(() => {
       expect(screen.queryByText('Нет избранных курсов.')).not.toBeInTheDocument()
@@ -68,7 +42,8 @@ describe('FavoritesTable with populated mock data', () => {
   })
 
   it('показывает from-тикеры в таблице', async () => {
-    await renderCard()
+    const { render } = await makeRenderer()
+    render(<FavoriteRatesCard />)
 
     await waitFor(() => {
       // CSS uppercase не меняет textContent — в DOM лежит 'btc', 'usdt', 'eth'.
@@ -81,13 +56,15 @@ describe('FavoritesTable with populated mock data', () => {
   })
 
   it('показывает рассчитанные курсы для избранных пар', async () => {
-    await renderCard()
+    const { render } = await makeRenderer()
+    render(<FavoriteRatesCard />)
 
     await waitFor(assertRatesAreComputed)
   })
 
   it('отображает иконки источников с правильными aria-labels', async () => {
-    await renderCard()
+    const { render } = await makeRenderer()
+    render(<FavoriteRatesCard />)
 
     await waitFor(() => {
       // sourceDisplayName('binance') → 'Binance'
@@ -100,7 +77,8 @@ describe('FavoritesTable with populated mock data', () => {
   })
 
   it('показывает 4 строки (по одной на избранную пару)', async () => {
-    await renderCard()
+    const { render } = await makeRenderer()
+    render(<FavoriteRatesCard />)
 
     await waitFor(() => {
       const tbody = document.querySelector('tbody')
