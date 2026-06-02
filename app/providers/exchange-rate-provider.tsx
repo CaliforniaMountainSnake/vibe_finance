@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { BinanceRepository } from '@/repositories/binance-repository'
+import { BybitRepository } from '@/repositories/bybit-repository'
 import { CoinGeckoRepository } from '@/repositories/coin-gecko-repository'
 import { MoexRepository } from '@/repositories/moex-repository'
 import { useDatabase } from '@/app/providers/database-provider'
@@ -26,6 +27,7 @@ type ExchangeRateContextValue = {
 const DEFAULT_REPOS: FinanceApiRepositoryInterface[] = [
   new CoinGeckoRepository(),
   new BinanceRepository(),
+  new BybitRepository(),
   new MoexRepository(),
 ]
 

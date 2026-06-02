@@ -19,11 +19,12 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
 
     expect(screen.getByText('CoinGecko')).toBeInTheDocument()
     expect(screen.getByText('Binance')).toBeInTheDocument()
+    expect(screen.getByText('Bybit')).toBeInTheDocument()
     expect(screen.getByText('MOEX')).toBeInTheDocument()
 
     // На пустой БД у всех источников статус «ещё не обновлялось»
     const fresh = screen.getAllByText('ещё не обновлялось')
-    expect(fresh).toHaveLength(3)
+    expect(fresh).toHaveLength(4)
   })
 
   it('нажатие кнопки обновления обновляет курсы и показывает даты', async () => {
@@ -31,8 +32,8 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     render(<ExchangeRateRefreshCard />)
 
     // До обновления — статус «ещё не обновлялось» и прочерки в дате
-    expect(screen.getAllByText('ещё не обновлялось')).toHaveLength(3)
-    expect(screen.getAllByText('—')).toHaveLength(3)
+    expect(screen.getAllByText('ещё не обновлялось')).toHaveLength(4)
+    expect(screen.getAllByText('—')).toHaveLength(4)
 
     const user = userEvent.setup()
     await user.click(screen.getByLabelText('Обновить курсы'))
@@ -82,6 +83,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     const sources = new Set(allRates.map((r) => r.source))
     expect(sources).toContain('coingecko')
     expect(sources).toContain('binance')
+    expect(sources).toContain('bybit')
     expect(sources).toContain('moex')
   })
 })

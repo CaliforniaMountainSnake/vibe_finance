@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { BinanceRepository } from '@/repositories/binance-repository'
+import { BybitRepository } from '@/repositories/bybit-repository'
 import { CoinGeckoRepository } from '@/repositories/coin-gecko-repository'
 import { MoexRepository } from '@/repositories/moex-repository'
 import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
@@ -51,6 +52,26 @@ class MockCoinGeckoRepository implements FinanceApiRepositoryInterface {
 }
 
 /** Репозиторий, возвращающий реальные данные из tests/raw_data/. */
+class MockBybitRepository implements FinanceApiRepositoryInterface {
+  readonly sourceName = 'bybit' as const
+  private readonly realRepo = new BybitRepository()
+  private readonly raw: string
+
+  constructor() {
+    this.raw = JSON.stringify(JSON.parse(readFileSync(path.join(rawDirectory, 'bybit', 'spot_tickers.json'), 'utf8')))
+  }
+
+  parseRates(raw: string): ExchangeRate[] {
+    return this.realRepo.parseRates(raw)
+  }
+
+  async fetchRates(): Promise<ExchangeRate[]> {
+    await Promise.resolve()
+    return this.realRepo.parseRates(this.raw)
+  }
+}
+
+/** Репозиторий, возвращающий реальные данные из tests/raw_data/. */
 class MockMoexRepository implements FinanceApiRepositoryInterface {
   readonly sourceName = 'moex' as const
   private readonly realRepo = new MoexRepository()
@@ -80,5 +101,10 @@ class MockMoexRepository implements FinanceApiRepositoryInterface {
  * Использует настоящий parseRates каждого репозитория.
  */
 export function createMockFinanceRepos(): FinanceApiRepositoryInterface[] {
-  return [new MockCoinGeckoRepository(), new MockBinanceRepository(), new MockMoexRepository()]
+  return [
+    new MockCoinGeckoRepository(),
+    new MockBinanceRepository(),
+    new MockBybitRepository(),
+    new MockMoexRepository(),
+  ]
 }

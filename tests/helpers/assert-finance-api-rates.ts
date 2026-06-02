@@ -4,7 +4,7 @@ import type { ExchangeRate } from '@/entities/exchange-rate'
 function assertRateShape(rate: ExchangeRate) {
   // source
   expect(typeof rate.source).toBe('string')
-  expect(['coingecko', 'binance', 'moex']).toContain(rate.source)
+  expect(['binance', 'bybit', 'coingecko', 'moex']).toContain(rate.source)
 
   // ticker
   expect(typeof rate.ticker).toBe('string')

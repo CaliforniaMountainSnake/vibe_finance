@@ -5,7 +5,7 @@
     "label": "Холодный кошелёк"
   },
   {
-    "ticker": { "source": "binance", "ticker": "eth", "name": "Ethereum" },
+    "ticker": { "source": "bybit", "ticker": "eth", "name": "Ethereum" },
     "amount": 10,
     "label": "Стейкинг"
   },

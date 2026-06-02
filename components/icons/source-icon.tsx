@@ -1,12 +1,14 @@
 import type { SVGProps } from 'react'
 import type { SourceName } from '@/entities/exchange-rate'
 import { BinanceIcon } from './binance-icon'
+import { BybitIcon } from './bybit-icon'
 import { CoinGeckoIcon } from './coingecko-icon'
 import { MoexIcon } from './moex-icon'
 import { sourceDisplayName } from '@/lib/source-display-name'
 
 const iconMap: Record<SourceName, React.ComponentType<SVGProps<SVGSVGElement>>> = {
   binance: BinanceIcon,
+  bybit: BybitIcon,
   coingecko: CoinGeckoIcon,
   moex: MoexIcon,
 }

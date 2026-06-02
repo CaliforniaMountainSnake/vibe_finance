@@ -1,5 +1,26 @@
 [
   {
+    "source": "bybit",
+    "ticker": "btc",
+    "name": "Bitcoin",
+    "btcPrice": 1,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "bybit",
+    "ticker": "eth",
+    "name": "Ethereum",
+    "btcPrice": 35,
+    "updatedAt": 1717200000
+  },
+  {
+    "source": "bybit",
+    "ticker": "usdt",
+    "name": "Tether",
+    "btcPrice": 77000,
+    "updatedAt": 1717200000
+  },
+  {
     "source": "binance",
     "ticker": "btc",
     "name": "Bitcoin",
