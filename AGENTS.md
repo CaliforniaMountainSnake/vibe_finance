@@ -20,7 +20,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Собрать приложение (`npm run build`).
 - Удостовериться, что линтер (`npm run lint`) не выдает ошибок.
 - Если линтер и тесты не выдают ошибок, в самом конце выполнить форматирование исходных кодов (`npm run format`).
-- Если нужно параллельно проверить сразу тесты, сборку, линтер, форматирование: `npm run check-all`.
 
 ## UI
 
