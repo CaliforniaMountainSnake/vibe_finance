@@ -3,7 +3,7 @@ import { MoexRepository } from '@/repositories/moex-repository'
 import { MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES } from '@/tests/mocks/moex-data'
 import { assertFinanceApiRates } from '../helpers/assert-finance-api-rates'
 
-describe('MoexRepository', () => {
+describe('MoexRepository — парсинг ответа', () => {
   const repo = new MoexRepository()
 
   const combined = MoexRepository.combineResponses(MOEX_MOCK_CURRENCIES, MOEX_MOCK_INDEXES, MOEX_MOCK_SHARES)

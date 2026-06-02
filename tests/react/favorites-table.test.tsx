@@ -31,7 +31,7 @@ function assertRatesAreComputed(): void {
   expect(hasDash).toBe(false)
 }
 
-describe('FavoritesTable with populated mock data', () => {
+describe('FavoritesTable с заполненными мок-данными', () => {
   it('отображает строки избранного вместо пустого состояния', async () => {
     const { render } = await makeRenderer()
     render(<FavoriteRatesCard />)

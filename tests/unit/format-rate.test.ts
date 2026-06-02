@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { formatAmount } from '@/lib/format-amount'
 import { TEST_LOCALE } from '@/tests/helpers/test-locale'
 
-describe('formatAmount', () => {
+describe('formatAmount — форматирование чисел', () => {
   describe('ноль', () => {
     it('возвращает "0" для нуля', () => {
       expect(formatAmount(0, TEST_LOCALE)).toBe('0')

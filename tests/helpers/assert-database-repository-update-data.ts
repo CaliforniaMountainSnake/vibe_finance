@@ -10,7 +10,7 @@ export function assertDatabaseRepositoryUpdateData(makeRepo: () => DatabaseRepos
     return repo.clearAll()
   })
 
-  describe('updateDataForSource', () => {
+  describe('updateDataForSource — обновление данных источника', () => {
     it('writes rates for a source', async () => {
       await repo.updateRatesForSource('binance', [
         makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 }),

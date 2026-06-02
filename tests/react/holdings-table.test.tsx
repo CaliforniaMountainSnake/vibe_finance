@@ -23,7 +23,7 @@ async function expectOrder(labels: string[]): Promise<void> {
   })
 }
 
-describe('HoldingsCard — HoldingsTable', () => {
+describe('HoldingsCard — таблица холдингов', () => {
   /* ── empty state ─────────────────────── */
 
   it('показывает пустое состояние, если холдингов нет', async () => {

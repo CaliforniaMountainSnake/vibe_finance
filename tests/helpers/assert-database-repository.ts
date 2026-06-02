@@ -2,7 +2,7 @@
  * Полная батарея тестов контракта DatabaseRepositoryInterface.
  *
  * Использование:
- *   describe('MyRepo', () => {
+ *   describe('MyRepo — контрактные тесты', () => {
  *     assertDatabaseRepository(() => new MyRepo())
  *   })
  *

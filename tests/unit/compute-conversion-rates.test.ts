@@ -21,7 +21,7 @@ async function seedRepo(repo: DexieRepository): Promise<void> {
   ])
 }
 
-describe('computeConversionRates (с реальным DexieRepository + fake-indexeddb)', () => {
+describe('computeConversionRates — реальный DexieRepository + fake-indexeddb', () => {
   let repo: DexieRepository
 
   beforeEach(async () => {

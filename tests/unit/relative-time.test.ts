@@ -17,7 +17,7 @@ function pastTs(diffSeconds: number): number {
   return now - diffSeconds
 }
 
-describe('relativeTime', () => {
+describe('relativeTime — относительное время', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })

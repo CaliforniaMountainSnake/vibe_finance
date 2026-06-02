@@ -3,7 +3,7 @@ import type { ExchangeRate } from '@/entities/exchange-rate'
 import { MoexRepository } from '@/repositories/moex-repository'
 import { assertFinanceApiRates } from '../helpers/assert-finance-api-rates'
 
-describe('MoexRepository', () => {
+describe('MoexRepository — интеграционный тест', () => {
   const repo = new MoexRepository()
   let rates: ExchangeRate[]
 

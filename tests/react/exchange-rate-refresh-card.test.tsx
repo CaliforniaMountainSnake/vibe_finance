@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { ExchangeRateRefreshCard } from '@/app/_components/exchange-rate-refresh-card'
 import { makeRenderer } from './helpers'
 
-describe('ExchangeRateRefreshCard', () => {
+describe('ExchangeRateRefreshCard — карточка обновления курсов', () => {
   it('отображает заголовок «Данные API» и кнопку обновления', async () => {
     const { render } = await makeRenderer(false)
     render(<ExchangeRateRefreshCard />)

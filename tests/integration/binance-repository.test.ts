@@ -3,7 +3,7 @@ import type { ExchangeRate } from '@/entities/exchange-rate'
 import { BinanceRepository } from '@/repositories/binance-repository'
 import { assertFinanceApiRates } from '../helpers/assert-finance-api-rates'
 
-describe('BinanceRepository', () => {
+describe('BinanceRepository — интеграционный тест', () => {
   const repo = new BinanceRepository()
   let rates: ExchangeRate[]
 

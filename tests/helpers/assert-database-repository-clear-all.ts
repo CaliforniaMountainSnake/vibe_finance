@@ -10,7 +10,7 @@ export function assertDatabaseRepositoryClearAll(makeRepo: () => DatabaseReposit
     return repo.clearAll()
   })
 
-  describe('clearAll', () => {
+  describe('clearAll — очистка всех данных', () => {
     it('removes all data — exchange rates and favorites', async () => {
       await repo.updateRatesForSource('binance', [makeRate({ source: 'binance', ticker: 'btc', btcPrice: 1 })])
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'eth', 'usdt'))

@@ -14,7 +14,7 @@ export function assertDatabaseRepositoryFavorites(makeRepo: () => DatabaseReposi
   // addFavoriteRate
   // ---------------------------------------------------------------------------
 
-  describe('addFavoriteRate', () => {
+  describe('addFavoriteRate — добавление избранной пары', () => {
     it('adds a ticker pair to favorites', async () => {
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'btc', 'usdt'))
 
@@ -63,7 +63,7 @@ export function assertDatabaseRepositoryFavorites(makeRepo: () => DatabaseReposi
   // removeFavoriteRate
   // ---------------------------------------------------------------------------
 
-  describe('removeFavoriteRate', () => {
+  describe('removeFavoriteRate — удаление избранной пары', () => {
     it('removes a pair from favorites', async () => {
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'btc', 'usdt'))
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'eth', 'usdt'))
@@ -108,7 +108,7 @@ export function assertDatabaseRepositoryFavorites(makeRepo: () => DatabaseReposi
   // getFavoriteRates
   // ---------------------------------------------------------------------------
 
-  describe('getFavoriteRates', () => {
+  describe('getFavoriteRates — получение избранных пар', () => {
     it('returns empty array when no favorites exist', async () => {
       const favorites = await repo.getFavoriteRates()
       expect(favorites).toEqual([])
@@ -151,7 +151,7 @@ export function assertDatabaseRepositoryFavorites(makeRepo: () => DatabaseReposi
   // isFavoriteRate
   // ---------------------------------------------------------------------------
 
-  describe('isFavoriteRate', () => {
+  describe('isFavoriteRate — проверка избранной пары', () => {
     it('returns true for a favorited pair', async () => {
       await repo.addFavoriteRate(sameSourcePair('coingecko', 'btc', 'usdt'))
 
@@ -183,7 +183,7 @@ export function assertDatabaseRepositoryFavorites(makeRepo: () => DatabaseReposi
   // moveFavoriteUp / moveFavoriteDown
   // ---------------------------------------------------------------------------
 
-  describe('moveFavoriteUp / moveFavoriteDown', () => {
+  describe('moveFavoriteUp / moveFavoriteDown — перемещение избранных пар', () => {
     it('moveFavoriteUp swaps the pair with its upper neighbor', async () => {
       const pair1 = sameSourcePair('coingecko', 'btc', 'usdt')
       const pair2 = sameSourcePair('coingecko', 'eth', 'usdt')

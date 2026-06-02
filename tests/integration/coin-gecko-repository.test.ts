@@ -3,7 +3,7 @@ import type { ExchangeRate } from '@/entities/exchange-rate'
 import { CoinGeckoRepository } from '@/repositories/coin-gecko-repository'
 import { assertFinanceApiRates } from '../helpers/assert-finance-api-rates'
 
-describe('CoinGeckoRepository', () => {
+describe('CoinGeckoRepository — интеграционный тест', () => {
   const repo = new CoinGeckoRepository()
   let rates: ExchangeRate[]
 

@@ -3,7 +3,7 @@ import { BinanceRepository } from '@/repositories/binance-repository'
 import { BINANCE_MOCK_JSON } from '@/tests/mocks/binance-data'
 import { assertFinanceApiRates } from '../helpers/assert-finance-api-rates'
 
-describe('BinanceRepository', () => {
+describe('BinanceRepository — парсинг ответа', () => {
   const repo = new BinanceRepository()
 
   assertFinanceApiRates(() => repo.parseRates(BINANCE_MOCK_JSON))

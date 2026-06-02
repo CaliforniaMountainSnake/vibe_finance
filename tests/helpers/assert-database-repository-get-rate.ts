@@ -10,7 +10,7 @@ export function assertDatabaseRepositoryGetRate(makeRepo: () => DatabaseReposito
     return repo.clearAll()
   })
 
-  describe('getRate', () => {
+  describe('getRate — получение курса пары', () => {
     beforeEach(async () => {
       await repo.updateRatesForSource('coingecko', [
         makeRate({ source: 'coingecko', ticker: 'btc', btcPrice: 1 }),

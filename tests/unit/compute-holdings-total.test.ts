@@ -24,7 +24,7 @@ function makeHolding(overrides: Partial<Holding> & { id: string }): Holding {
   }
 }
 
-describe('computeHoldingsTotal', () => {
+describe('computeHoldingsTotal — вычисление суммы холдингов', () => {
   describe('пустой список', () => {
     it('возвращает нулевую сумму, 0 contributed, 0 skipped', () => {
       const result = computeHoldingsTotal([], {})

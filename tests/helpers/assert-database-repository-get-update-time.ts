@@ -23,7 +23,7 @@ export function assertDatabaseRepositoryGetUpdateTime(makeRepo: () => DatabaseRe
     return repo.clearAll()
   })
 
-  describe('getUpdateTime', () => {
+  describe('getUpdateTime — время обновления источника', () => {
     it('returns null for source with no data', async () => {
       expect(await repo.getUpdateTime('binance')).toBeNull()
     })

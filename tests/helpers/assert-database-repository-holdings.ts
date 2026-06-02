@@ -17,7 +17,7 @@ export function assertDatabaseRepositoryHoldings(makeRepo: () => DatabaseReposit
   // getHoldings
   // ---------------------------------------------------------------------------
 
-  describe('getHoldings', () => {
+  describe('getHoldings — получение списка холдингов', () => {
     it('returns empty array when no holdings exist', async () => {
       const holdings = await repo.getHoldings()
       expect(holdings).toEqual([])
@@ -58,7 +58,7 @@ export function assertDatabaseRepositoryHoldings(makeRepo: () => DatabaseReposit
   // addHolding
   // ---------------------------------------------------------------------------
 
-  describe('addHolding', () => {
+  describe('addHolding — добавление холдинга', () => {
     it('adds a holding with all fields', async () => {
       await repo.addHolding(ticker('coingecko', 'btc'), 2.5, 'Кошелек №1')
 
@@ -107,7 +107,7 @@ export function assertDatabaseRepositoryHoldings(makeRepo: () => DatabaseReposit
   // updateHolding
   // ---------------------------------------------------------------------------
 
-  describe('updateHolding', () => {
+  describe('updateHolding — обновление холдинга', () => {
     it('updates amount without changing other fields', async () => {
       await repo.addHolding(ticker('binance', 'btc'), 1, 'Original')
       const holdings = await repo.getHoldings()
@@ -205,7 +205,7 @@ export function assertDatabaseRepositoryHoldings(makeRepo: () => DatabaseReposit
   // removeHolding
   // ---------------------------------------------------------------------------
 
-  describe('removeHolding', () => {
+  describe('removeHolding — удаление холдинга', () => {
     it('removes a holding by id', async () => {
       await repo.addHolding(ticker('binance', 'btc'), 1, 'First')
       await repo.addHolding(ticker('binance', 'eth'), 2, 'Second')
@@ -242,7 +242,7 @@ export function assertDatabaseRepositoryHoldings(makeRepo: () => DatabaseReposit
   // moveHoldingUp / moveHoldingDown
   // ---------------------------------------------------------------------------
 
-  describe('moveHoldingUp / moveHoldingDown', () => {
+  describe('moveHoldingUp / moveHoldingDown — перемещение холдингов', () => {
     it('moveHoldingUp swaps with upper neighbor', async () => {
       await repo.addHolding(ticker('binance', 'btc'), 1, 'First')
       await repo.addHolding(ticker('binance', 'eth'), 2, 'Second')

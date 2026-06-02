@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { makeRenderer } from './helpers'
 import App from '@/app/page'
 
-describe('App', () => {
+describe('App — главная страница', () => {
   it('отображает три основных карточки', async () => {
     const { render } = await makeRenderer()
     render(<App />)

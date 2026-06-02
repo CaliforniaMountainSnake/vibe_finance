@@ -11,7 +11,7 @@ function makeIndex(overrides: Partial<IndexEntry>): IndexEntry {
   return { ticker: '', secId: '', boardId: '', priceInCurrency: 0, currency: 'RUB', name: '', ...overrides }
 }
 
-describe('resolveTickers', () => {
+describe('resolveTickers — разрешение коллизий тикеров', () => {
   it('возвращает пустой массив для пустого входа', () => {
     expect(resolveTickers([])).toEqual([])
   })

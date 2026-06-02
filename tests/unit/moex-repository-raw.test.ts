@@ -6,7 +6,7 @@ import { MoexRepository } from '@/repositories/moex-repository'
 /**
  * Тесты парсинга на полных реальных данных из tests/raw_data/moex/.
  */
-describe('MoexRepository with real raw data', () => {
+describe('MoexRepository с реальными сырыми данными', () => {
   const repo = new MoexRepository()
 
   const rawDirectory = path.join(import.meta.dirname, '..', 'raw_data', 'moex')

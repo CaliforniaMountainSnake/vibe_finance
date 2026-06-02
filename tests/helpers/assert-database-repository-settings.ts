@@ -17,7 +17,7 @@ export function assertDatabaseRepositorySettings(makeRepo: () => DatabaseReposit
   // getSetting
   // ---------------------------------------------------------------------------
 
-  describe('getSetting', () => {
+  describe('getSetting — чтение настройки', () => {
     it('returns undefined for an unset setting', async () => {
       const value = await repo.getSetting('totalBaseTicker')
       expect(value).toBeUndefined()
@@ -28,7 +28,7 @@ export function assertDatabaseRepositorySettings(makeRepo: () => DatabaseReposit
   // setSetting / getSetting
   // ---------------------------------------------------------------------------
 
-  describe('setSetting / getSetting', () => {
+  describe('setSetting / getSetting — запись и чтение настройки', () => {
     it('persists a Ticker value', async () => {
       const btc = ticker('binance', 'btc')
       await repo.setSetting('totalBaseTicker', btc)
@@ -68,7 +68,7 @@ export function assertDatabaseRepositorySettings(makeRepo: () => DatabaseReposit
   // removeSetting
   // ---------------------------------------------------------------------------
 
-  describe('removeSetting', () => {
+  describe('removeSetting — удаление настройки', () => {
     it('removes a previously set value', async () => {
       await repo.setSetting('totalBaseTicker', ticker('binance', 'btc'))
       await repo.removeSetting('totalBaseTicker')

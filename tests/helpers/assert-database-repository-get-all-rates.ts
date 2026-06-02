@@ -10,7 +10,7 @@ export function assertDatabaseRepositoryGetAllRates(makeRepo: () => DatabaseRepo
     return repo.clearAll()
   })
 
-  describe('getAllRates', () => {
+  describe('getAllRates — получение всех курсов', () => {
     it('returns empty array when DB is empty', async () => {
       const rates = await repo.getAllRates()
       expect(rates).toEqual([])
