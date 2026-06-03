@@ -1,10 +1,15 @@
 [![MVP](https://img.shields.io/badge/MVP-FF6B6B?style=flat-square&logo=rocket&logoColor=white)](https://californiamountainsnake.github.io/vibe_finance/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
 [![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=flat-square&logo=capacitor&logoColor=white)](https://capacitorjs.com/)
 [![Dexie.js](https://img.shields.io/badge/Dexie.js-4B8BBE?style=flat-square&logo=indexeddb&logoColor=white)](https://dexie.org/)
+[![Fuse.js](https://img.shields.io/badge/Fuse.js-FFD700?style=flat-square&logo=javascript&logoColor=black)](https://fusejs.io/)
+[![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=eslint&logoColor=white)](https://eslint.org/)
+[![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=prettier&logoColor=black)](https://prettier.io/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](./LICENSE)
 
 # Vibe Finance
@@ -13,29 +18,36 @@
 
 _Всё локально. Никаких аккаунтов. Работает в браузере и на Android._
 
-**Vibe Finance** — это PWA-приложение для отслеживания криптовалютных курсов и управления личным портфелем. Данные подтягиваются из **CoinGecko** и **Binance** напрямую с клиента, а портфель и избранное хранятся локально в **IndexedDB** — никаких серверов и регистраций.
+**Vibe Finance** — PWA-приложение для отслеживания курсов валют, акций и криптовалют, а также управления личным портфелем. Данные подтягиваются из **четырёх источников** напрямую с клиента; портфель, избранное и настройки хранятся локально в **IndexedDB** — никаких серверов и регистраций.
 
 🌐 **Живая версия:** [californiamountainsnake.github.io/vibe_finance](https://californiamountainsnake.github.io/vibe_finance/)
 
 ## Возможности
 
-| 📊 **Два источника курсов**     | CoinGecko (~100+ валют) и Binance (~300+ USDT-пар) — данные из реального времени                                                            |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| ⭐ **Избранные пары**           | Добавляйте любые кросс-курсы, в том числе межбиржевые (Binance BTC → CoinGecko ETH), сортируйте их порядок                                  |
-| 💼 **Портфель (Holdings)**      | Ведите учёт средств: добавляйте валюты с количеством, подписывайте позиции (например, «Карта синего банка»), отключайте строки без удаления |
-| 💰 **Общая стоимость портфеля** | Выберите базовую валюту — приложение пересчитает все активы в неё по текущему курсу и покажет итог                                          |
-| 🌓 **Автоматическая тема**      | Светлая и тёмная темы — следуют за системными настройками устройства                                                                        |
-| 📱 **Android APK**              | Собирается в нативное приложение через Capacitor — работает как обычное Android-приложение                                                  |
-| 🏠 **Офлайн-режим**             | После загрузки курсов все данные доступны локально, интернет нужен только для обновления                                                    |
-| 🔒 **Конфиденциальность**       | Никаких серверов, аккаунтов и телеметрии — всё хранится в вашем браузере                                                                    |
+| 📊 **4 источника курсов**  | CoinGecko, Binance, Bybit, MOEX (Московская биржа)                                     |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| ⭐ **Избранные пары**      | Межбиржевые и межрыночные кросс-курсы (Binance BTC → MOEX IMOEX), перетаскивание строк |
+| 🔍 **Поиск валют**         | Нечёткий поиск (Fuse.js) по тикеру и названию при добавлении в избранное и портфель    |
+| 💼 **Портфель (Holdings)** | Учёт активов с подписями, отключение строк без удаления, перетаскивание                |
+| 💰 **Общая стоимость**     | Пересчёт всех активов в выбранную базовую валюту по текущему курсу                     |
+| ⚙️ **Настройки**           | 7 градаций размера шрифта, настройки сохраняются в IndexedDB между сессиями            |
+| 🌓 **Автоматическая тема** | Светлая и тёмная темы — следуют за системными настройками устройства                   |
+| 📱 **Android APK**         | Нативное приложение через Capacitor                                                    |
+| 🏠 **Офлайн-режим**        | Кэшированные курсы доступны локально, интернет нужен только для обновления             |
+| 🔒 **Конфиденциальность**  | Никаких серверов, аккаунтов и телеметрии — всё в вашем браузере                        |
 
 ## Как это устроено
 
-Приложение получает курсы из двух независимых источников, приводит их к единому формату и сохраняет локально. Для конвертации одной валюты в другую используется цена в BTC (btcPrice) — универсальный якорь, через который вычисляется cross-rate для любой пары, в том числе межбиржевой.
+Приложение получает курсы из четырёх независимых источников:
 
-Вся персистентность — на клиенте: IndexedDB через Dexie.js. Четыре таблицы: курсы валют, избранные пары, средства пользователя и настройки. При обновлении курсы для источника перезаписываются целиком.
+- **CoinGecko** — ~75+ криптовалют, фиатных валют и товаров (XAG, XAU)
+- **Binance** — ~600+ USDT-пар
+- **Bybit** — ~440+ USDT-пар
+- **MOEX ISS** — ~1200+ инструментов Московской биржи: валюты (USD/RUB, CNY/RUB и др.), индексы (IMOEX, RTSI, MOEXBTC), акции и ETF
 
-На устройствах Android приложение работает как нативное — Capacitor упаковывает веб-сборку в APK с поддержкой системной тёмной темы и safe area.
+Все курсы приводятся к единому формату (btcPrice) и сохраняются локально в IndexedDB через Dexie.js. Для конвертации одной валюты в другую используется цена в BTC — универсальный якорь, через который вычисляется cross-rate для любой пары, в том числе межбиржевой и межрыночной.
+
+На устройствах Android приложение работает как нативное — Capacitor упаковывает веб-сборку в APK.
 
 ## Быстрый старт
 
@@ -45,28 +57,6 @@ npm run dev
 ```
 
 Откройте [http://localhost:3000](http://localhost:3000) — приложение готово к использованию.
-
-## Команды
-
-### Разработка
-
-| Команда                | Описание                           |
-| ---------------------- | ---------------------------------- |
-| `npm run dev`          | Дев-сервер с HMR                   |
-| `npm run build`        | Production-сборка                  |
-| `npm run serve`        | Сборка и запуск production-сервера |
-| `npm run lint`         | Линтер (ESLint)                    |
-| `npm run format`       | Форматирование кода (Prettier)     |
-| `npm run format-check` | Проверка форматирования            |
-
-### Тестирование
-
-| Команда                    | Описание                                        |
-| -------------------------- | ----------------------------------------------- |
-| `npm run test`             | Unit-тесты (Vitest)                             |
-| `npm run test:watch`       | Unit-тесты в режиме наблюдения                  |
-| `npm run test-integration` | Интеграционные тесты с реальными HTTP-запросами |
-| `npm run check-all`        | Всё сразу: тесты + линтер + формат              |
 
 ### Android
 
@@ -82,12 +72,14 @@ npm run dev
 
 ## Технологии
 
-- **Next.js** (App Router) + **React 19** + **TypeScript**
+- **Next.js** (App Router) + **React 19** + **TypeScript** (strict)
 - **Tailwind CSS v4** + **shadcn/ui** (Radix UI, Lucide icons)
 - **Dexie.js** — клиентская БД на IndexedDB
 - **Capacitor** — нативная обёртка для Android
-- **Vitest** — тестирование (unit + integration)
-- **CoinGecko API** / **Binance API** — источники курсов
+- **Vitest** — unit + react-компонентные тесты (fake-indexeddb, jsdom)
+- **CoinGecko API** / **Binance API** / **Bybit API** / **MOEX ISS API** — источники курсов
+- **Fuse.js** — нечёткий поиск по тикерам и названиям
+- **ESLint** (typescript-eslint strict, sonarjs, unicorn) + **Prettier**
 
 ## Лицензия
 
