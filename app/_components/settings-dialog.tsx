@@ -116,27 +116,44 @@ function FontSizeControl() {
 }
 
 function SettingsControls() {
-  const { cardsRectangular, setCardsRectangular, cardPaddingRemoved, setCardPaddingRemoved } = useSettings()
+  const {
+    cardsRectangularLarge,
+    setCardsRectangularLarge,
+    cardsRectangularSmall,
+    setCardsRectangularSmall,
+    cardPaddingRemovedLarge,
+    setCardPaddingRemovedLarge,
+    cardPaddingRemovedSmall,
+    setCardPaddingRemovedSmall,
+  } = useSettings()
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">Прямоугольные карточки</span>
-        <Switch
-          checked={cardsRectangular}
-          onCheckedChange={(checked) => {
-            setCardsRectangular(checked)
-          }}
-        />
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <p className="text-sm font-medium">Прямоугольные карточки</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <span className="text-xs text-muted-foreground">Большой экран</span>
+            <Switch checked={cardsRectangularLarge} onCheckedChange={setCardsRectangularLarge} />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <span className="text-xs text-muted-foreground">Маленький экран</span>
+            <Switch checked={cardsRectangularSmall} onCheckedChange={setCardsRectangularSmall} />
+          </div>
+        </div>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">Убрать отступы от карточек на мобильном экране</span>
-        <Switch
-          checked={cardPaddingRemoved}
-          onCheckedChange={(checked) => {
-            setCardPaddingRemoved(checked)
-          }}
-        />
+      <div className="space-y-3">
+        <p className="text-sm font-medium">Убрать отступы от карточек</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <span className="text-xs text-muted-foreground">Большой экран</span>
+            <Switch checked={cardPaddingRemovedLarge} onCheckedChange={setCardPaddingRemovedLarge} />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <span className="text-xs text-muted-foreground">Маленький экран</span>
+            <Switch checked={cardPaddingRemovedSmall} onCheckedChange={setCardPaddingRemovedSmall} />
+          </div>
+        </div>
       </div>
     </div>
   )

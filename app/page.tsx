@@ -8,7 +8,7 @@ import { FavoriteRatesCard } from './_components/favorite-rates-card'
 import { HoldingsCard } from './_components/holdings-card'
 
 export default function App() {
-  const { cardPaddingRemoved } = useSettings()
+  const { cardPaddingRemovedLarge, cardPaddingRemovedSmall } = useSettings()
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleRefreshed = useCallback(() => {
@@ -19,7 +19,9 @@ export default function App() {
     <div
       className={cn(
         'flex flex-col flex-1 gap-3 mx-auto w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl',
-        cardPaddingRemoved ? 'sm:p-2' : 'p-2'
+        'p-2',
+        cardPaddingRemovedLarge && 'sm:p-0',
+        cardPaddingRemovedSmall && 'max-sm:p-0'
       )}
     >
       <ExchangeRateRefreshCard onRefreshed={handleRefreshed} />

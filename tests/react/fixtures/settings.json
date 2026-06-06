@@ -5,6 +5,8 @@
     "name": "Tether"
   },
   "fontSize": 1,
-  "cardsRectangular": false,
-  "cardPaddingRemoved": false
+  "cardsRectangularLarge": false,
+  "cardsRectangularSmall": false,
+  "cardPaddingRemovedLarge": false,
+  "cardPaddingRemovedSmall": false
 }

@@ -21,8 +21,12 @@ export type AppSettingsMap = {
   totalBaseTicker: Ticker | undefined
   /** Базовый размер шрифта в rem */
   fontSize: number
-  /** Прямоугольные карточки (без скругления) */
-  cardsRectangular: boolean
-  /** Убрать отступы от карточек по краям на телефоне */
-  cardPaddingRemoved: boolean
+  /** Прямоугольные карточки (без скругления) на большом экране (≥sm) */
+  cardsRectangularLarge: boolean
+  /** Прямоугольные карточки (без скругления) на маленьком экране (<sm) */
+  cardsRectangularSmall: boolean
+  /** Убрать отступы от карточек по краям на большом экране (≥sm) */
+  cardPaddingRemovedLarge: boolean
+  /** Убрать отступы от карточек по краям на маленьком экране (<sm) */
+  cardPaddingRemovedSmall: boolean
 }

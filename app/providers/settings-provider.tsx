@@ -2,18 +2,61 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useDatabase } from '@/app/providers/database-provider'
+import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 
 const DEFAULT_FONT_SIZE = 1.0625
-const DEFAULT_CARDS_RECTANGULAR = false
-const DEFAULT_CARD_PADDING_REMOVED = false
+const DEFAULT_CARDS_RECTANGULAR_LARGE = false
+const DEFAULT_CARDS_RECTANGULAR_SMALL = false
+const DEFAULT_CARD_PADDING_REMOVED_LARGE = false
+const DEFAULT_CARD_PADDING_REMOVED_SMALL = false
+
+type BooleanSettingKey =
+  | 'cardsRectangularLarge'
+  | 'cardsRectangularSmall'
+  | 'cardPaddingRemovedLarge'
+  | 'cardPaddingRemovedSmall'
+
+const DEFAULT_BY_KEY: Record<BooleanSettingKey, boolean> = {
+  cardsRectangularLarge: DEFAULT_CARDS_RECTANGULAR_LARGE,
+  cardsRectangularSmall: DEFAULT_CARDS_RECTANGULAR_SMALL,
+  cardPaddingRemovedLarge: DEFAULT_CARD_PADDING_REMOVED_LARGE,
+  cardPaddingRemovedSmall: DEFAULT_CARD_PADDING_REMOVED_SMALL,
+}
+
+function useBooleanSetting(
+  key: BooleanSettingKey,
+  databaseRepo: DatabaseRepositoryInterface
+): [boolean, (value: boolean) => void] {
+  const [value, setValue] = useState(DEFAULT_BY_KEY[key])
+
+  useEffect(() => {
+    void databaseRepo.getSetting(key).then((stored) => {
+      setValue(stored ?? DEFAULT_BY_KEY[key])
+    })
+  }, [databaseRepo, key])
+
+  const set = useCallback(
+    (newValue: boolean) => {
+      setValue(newValue)
+      void databaseRepo.setSetting(key, newValue)
+    },
+    [databaseRepo, key]
+  )
+
+  return [value, set]
+}
 
 type SettingsContextValue = {
   fontSize: number
   setFontSize: (value: number) => void
-  cardsRectangular: boolean
-  setCardsRectangular: (value: boolean) => void
-  cardPaddingRemoved: boolean
-  setCardPaddingRemoved: (value: boolean) => void
+  cardsRectangularLarge: boolean
+  setCardsRectangularLarge: (value: boolean) => void
+  cardsRectangularSmall: boolean
+  setCardsRectangularSmall: (value: boolean) => void
+  cardPaddingRemovedLarge: boolean
+  setCardPaddingRemovedLarge: (value: boolean) => void
+  cardPaddingRemovedSmall: boolean
+  setCardPaddingRemovedSmall: (value: boolean) => void
 }
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined)
@@ -32,22 +75,24 @@ function applyFontSize(value: number): void {
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontSize, setFontSizeState] = useState(DEFAULT_FONT_SIZE)
-  const [cardsRectangular, setCardsRectangularState] = useState(DEFAULT_CARDS_RECTANGULAR)
-  const [cardPaddingRemoved, setCardPaddingRemovedState] = useState(DEFAULT_CARD_PADDING_REMOVED)
-
   const databaseRepo = useDatabase()
+
+  const [cardsRectangularLarge, setCardsRectangularLarge] = useBooleanSetting('cardsRectangularLarge', databaseRepo)
+  const [cardsRectangularSmall, setCardsRectangularSmall] = useBooleanSetting('cardsRectangularSmall', databaseRepo)
+  const [cardPaddingRemovedLarge, setCardPaddingRemovedLarge] = useBooleanSetting(
+    'cardPaddingRemovedLarge',
+    databaseRepo
+  )
+  const [cardPaddingRemovedSmall, setCardPaddingRemovedSmall] = useBooleanSetting(
+    'cardPaddingRemovedSmall',
+    databaseRepo
+  )
 
   useEffect(() => {
     void databaseRepo.getSetting('fontSize').then((stored) => {
       const value = stored ?? DEFAULT_FONT_SIZE
       setFontSizeState(value)
       applyFontSize(value)
-    })
-    void databaseRepo.getSetting('cardsRectangular').then((stored) => {
-      setCardsRectangularState(stored ?? DEFAULT_CARDS_RECTANGULAR)
-    })
-    void databaseRepo.getSetting('cardPaddingRemoved').then((stored) => {
-      setCardPaddingRemovedState(stored ?? DEFAULT_CARD_PADDING_REMOVED)
     })
   }, [databaseRepo])
 
@@ -60,31 +105,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     [databaseRepo]
   )
 
-  const setCardsRectangular = useCallback(
-    (value: boolean) => {
-      setCardsRectangularState(value)
-      void databaseRepo.setSetting('cardsRectangular', value)
-    },
-    [databaseRepo]
-  )
-
-  const setCardPaddingRemoved = useCallback(
-    (value: boolean) => {
-      setCardPaddingRemovedState(value)
-      void databaseRepo.setSetting('cardPaddingRemoved', value)
-    },
-    [databaseRepo]
-  )
-
   return (
     <SettingsContext.Provider
       value={{
         fontSize,
         setFontSize,
-        cardsRectangular,
-        setCardsRectangular,
-        cardPaddingRemoved,
-        setCardPaddingRemoved,
+        cardsRectangularLarge,
+        setCardsRectangularLarge,
+        cardsRectangularSmall,
+        setCardsRectangularSmall,
+        cardPaddingRemovedLarge,
+        setCardPaddingRemovedLarge,
+        cardPaddingRemovedSmall,
+        setCardPaddingRemovedSmall,
       }}
     >
       {children}

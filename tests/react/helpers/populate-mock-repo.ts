@@ -1,4 +1,5 @@
 import { DexieRepository } from '@/repositories/dexie-repository'
+import type { AppSettingsMap } from '@/entities/app-setting'
 import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
 import type { Ticker } from '@/entities/ticker'
@@ -21,6 +22,36 @@ function groupBySource(rates: ExchangeRate[]): Map<SourceName, ExchangeRate[]> {
   return bySource
 }
 
+async function seedExchangeRates(repo: DatabaseRepositoryInterface): Promise<void> {
+  const bySource = groupBySource(exchangeRatesData as ExchangeRate[])
+  for (const [source, sourceRates] of bySource) {
+    await repo.updateRatesForSource(source, sourceRates)
+  }
+}
+
+async function seedFavoritePairs(repo: DatabaseRepositoryInterface): Promise<void> {
+  const pairs = favoritePairsData as TickerPair[]
+  for (const pair of pairs) {
+    await repo.addFavoriteRate(pair)
+  }
+}
+
+async function seedHoldings(repo: DatabaseRepositoryInterface): Promise<void> {
+  const holdings = holdingsData as { ticker: Ticker; amount: number; label: string }[]
+  for (const h of holdings) {
+    await repo.addHolding(h.ticker, h.amount, h.label)
+  }
+}
+
+async function seedSettings(repo: DatabaseRepositoryInterface): Promise<void> {
+  const settings = settingsData as Record<string, unknown>
+  for (const [key, value] of Object.entries(settings)) {
+    if (value !== undefined) {
+      await repo.setSetting(key as keyof AppSettingsMap, value as AppSettingsMap[keyof AppSettingsMap])
+    }
+  }
+}
+
 /**
  * Создаёт настоящий DexieRepository, наполненный данными из fixtures.
  * Работает в react-тестах благодаря полифилу fake-indexeddb/auto.
@@ -32,35 +63,10 @@ function groupBySource(rates: ExchangeRate[]): Map<SourceName, ExchangeRate[]> {
 export async function createPopulatedRepo(): Promise<DatabaseRepositoryInterface> {
   const repo = new DexieRepository()
 
-  const bySource = groupBySource(exchangeRatesData as ExchangeRate[])
-  for (const [source, sourceRates] of bySource) {
-    await repo.updateRatesForSource(source, sourceRates)
-  }
-
-  const pairs = favoritePairsData as TickerPair[]
-  for (const pair of pairs) {
-    await repo.addFavoriteRate(pair)
-  }
-
-  // 3. Добавляем холдинги
-  const holdings = holdingsData as { ticker: Ticker; amount: number; label: string }[]
-  for (const h of holdings) {
-    await repo.addHolding(h.ticker, h.amount, h.label)
-  }
-
-  // 4. Устанавливаем настройки
-  const settings = settingsData as {
-    totalBaseTicker: Ticker | undefined
-    fontSize: number
-    cardsRectangular: boolean
-    cardPaddingRemoved: boolean
-  }
-  if (settings.totalBaseTicker) {
-    await repo.setSetting('totalBaseTicker', settings.totalBaseTicker)
-  }
-  await repo.setSetting('fontSize', settings.fontSize)
-  await repo.setSetting('cardsRectangular', settings.cardsRectangular)
-  await repo.setSetting('cardPaddingRemoved', settings.cardPaddingRemoved)
+  await seedExchangeRates(repo)
+  await seedFavoritePairs(repo)
+  await seedHoldings(repo)
+  await seedSettings(repo)
 
   return repo
 }
