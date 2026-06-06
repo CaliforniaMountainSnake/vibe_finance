@@ -1,11 +1,14 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { useSettings } from '@/app/providers/settings-provider'
+import { cn } from '@/lib/utilities'
 import { ExchangeRateRefreshCard } from './_components/exchange-rate-refresh-card'
 import { FavoriteRatesCard } from './_components/favorite-rates-card'
 import { HoldingsCard } from './_components/holdings-card'
 
 export default function App() {
+  const { cardPaddingRemoved } = useSettings()
   const [refreshKey, setRefreshKey] = useState(0)
 
   const handleRefreshed = useCallback(() => {
@@ -13,7 +16,12 @@ export default function App() {
   }, [])
 
   return (
-    <div className="flex flex-col flex-1 p-2 gap-3 mx-auto w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
+    <div
+      className={cn(
+        'flex flex-col flex-1 gap-3 mx-auto w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl',
+        cardPaddingRemoved ? 'sm:p-2' : 'p-2'
+      )}
+    >
       <ExchangeRateRefreshCard onRefreshed={handleRefreshed} />
       <FavoriteRatesCard refreshKey={refreshKey} />
       <HoldingsCard refreshKey={refreshKey} />

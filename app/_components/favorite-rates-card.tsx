@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { AppCard, CardAction, CardFooter, CardHeader, CardTitle } from '@/app/_components/app-card'
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { TickerPair } from '@/entities/ticker-pair'
 import { AddFavoritesDialog } from './add-favorites-dropdown'
@@ -85,7 +85,7 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
   )
 
   return (
-    <Card>
+    <AppCard>
       <CardHeader>
         <CardTitle>Избранные курсы</CardTitle>
         <CardAction>
@@ -120,6 +120,6 @@ export function FavoriteRatesCard({ refreshKey }: FavoriteRatesCardProperties) {
           />
         )}
       </CardFooter>
-    </Card>
+    </AppCard>
   )
 }

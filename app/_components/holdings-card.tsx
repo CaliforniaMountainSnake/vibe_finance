@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { AppCard, CardAction, CardFooter, CardHeader, CardTitle } from '@/app/_components/app-card'
 import type { ExchangeRate } from '@/entities/exchange-rate'
 import type { Holding } from '@/entities/holding'
 import type { Ticker } from '@/entities/ticker'
@@ -107,7 +107,7 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
 
   return (
     <CurrencySearchProvider allRates={state.allRates}>
-      <Card>
+      <AppCard>
         <CardHeader>
           <CardTitle>Мои средства</CardTitle>
           <CardAction className="flex items-center gap-1.5">
@@ -134,7 +134,7 @@ export function HoldingsCard({ refreshKey = 0 }: { refreshKey?: number }) {
             />
           )}
         </CardFooter>
-      </Card>
+      </AppCard>
     </CurrencySearchProvider>
   )
 }

@@ -11,7 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+
 import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import { Minus, Plus, Settings, X } from 'lucide-react'
 
 const FONT_SIZE_XSMALL = 0.8125
@@ -58,7 +60,7 @@ function fontSizeLabel(step: number): string {
   return FONT_SIZE_LABELS[step] ?? 'Средний'
 }
 
-export function SettingsDialog() {
+function FontSizeControl() {
   const { fontSize, setFontSize } = useSettings()
   const currentStep = fontSizeToStep(fontSize)
 
@@ -67,6 +69,80 @@ export function SettingsDialog() {
     setFontSize(FONT_SIZE_STEPS[step])
   }
 
+  return (
+    <>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium">Размер шрифта</span>
+        <span className="text-xs text-muted-foreground">{fontSizeLabel(currentStep)}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-8 shrink-0"
+          aria-label="Уменьшить размер шрифта"
+          disabled={currentStep === 0}
+          onClick={() => {
+            setFontSize(FONT_SIZE_STEPS[currentStep - 1])
+          }}
+        >
+          <Minus className="size-3.5" />
+        </Button>
+        <span className="text-xs text-muted-foreground shrink-0">А</span>
+        <Slider
+          value={[currentStep]}
+          onValueChange={handleValueChange}
+          min={0}
+          max={FONT_SIZE_STEPS.length - 1}
+          step={1}
+          aria-label="Размер шрифта"
+        />
+        <span className="text-base text-muted-foreground shrink-0">А</span>
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-8 shrink-0"
+          aria-label="Увеличить размер шрифта"
+          disabled={currentStep === FONT_SIZE_STEPS.length - 1}
+          onClick={() => {
+            setFontSize(FONT_SIZE_STEPS[currentStep + 1])
+          }}
+        >
+          <Plus className="size-3.5" />
+        </Button>
+      </div>
+    </>
+  )
+}
+
+function SettingsControls() {
+  const { cardsRectangular, setCardsRectangular, cardPaddingRemoved, setCardPaddingRemoved } = useSettings()
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Прямоугольные карточки</span>
+        <Switch
+          checked={cardsRectangular}
+          onCheckedChange={(checked) => {
+            setCardsRectangular(checked)
+          }}
+        />
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Убрать отступы от карточек на мобильном экране</span>
+        <Switch
+          checked={cardPaddingRemoved}
+          onCheckedChange={(checked) => {
+            setCardPaddingRemoved(checked)
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+export function SettingsDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -84,46 +160,10 @@ export function SettingsDialog() {
           </DialogClose>
         </DialogHeader>
         <div className="px-4 pb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Размер шрифта</span>
-            <span className="text-xs text-muted-foreground">{fontSizeLabel(currentStep)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8 shrink-0"
-              aria-label="Уменьшить размер шрифта"
-              disabled={currentStep === 0}
-              onClick={() => {
-                setFontSize(FONT_SIZE_STEPS[currentStep - 1])
-              }}
-            >
-              <Minus className="size-3.5" />
-            </Button>
-            <span className="text-xs text-muted-foreground shrink-0">А</span>
-            <Slider
-              value={[currentStep]}
-              onValueChange={handleValueChange}
-              min={0}
-              max={FONT_SIZE_STEPS.length - 1}
-              step={1}
-              aria-label="Размер шрифта"
-            />
-            <span className="text-base text-muted-foreground shrink-0">А</span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8 shrink-0"
-              aria-label="Увеличить размер шрифта"
-              disabled={currentStep === FONT_SIZE_STEPS.length - 1}
-              onClick={() => {
-                setFontSize(FONT_SIZE_STEPS[currentStep + 1])
-              }}
-            >
-              <Plus className="size-3.5" />
-            </Button>
-          </div>
+          <FontSizeControl />
+        </div>
+        <div className="px-4 pb-4">
+          <SettingsControls />
         </div>
       </DialogContent>
     </Dialog>

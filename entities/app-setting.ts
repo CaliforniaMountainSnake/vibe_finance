@@ -21,4 +21,8 @@ export type AppSettingsMap = {
   totalBaseTicker: Ticker | undefined
   /** Базовый размер шрифта в rem */
   fontSize: number
+  /** Прямоугольные карточки (без скругления) */
+  cardsRectangular: boolean
+  /** Убрать отступы от карточек по краям на телефоне */
+  cardPaddingRemoved: boolean
 }

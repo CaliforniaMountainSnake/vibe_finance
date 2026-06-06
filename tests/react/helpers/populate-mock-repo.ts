@@ -49,11 +49,18 @@ export async function createPopulatedRepo(): Promise<DatabaseRepositoryInterface
   }
 
   // 4. Устанавливаем настройки
-  const settings = settingsData as { totalBaseTicker: Ticker | undefined; fontSize: number }
+  const settings = settingsData as {
+    totalBaseTicker: Ticker | undefined
+    fontSize: number
+    cardsRectangular: boolean
+    cardPaddingRemoved: boolean
+  }
   if (settings.totalBaseTicker) {
     await repo.setSetting('totalBaseTicker', settings.totalBaseTicker)
   }
   await repo.setSetting('fontSize', settings.fontSize)
+  await repo.setSetting('cardsRectangular', settings.cardsRectangular)
+  await repo.setSetting('cardPaddingRemoved', settings.cardPaddingRemoved)
 
   return repo
 }

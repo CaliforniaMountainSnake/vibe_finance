@@ -4,5 +4,7 @@
     "ticker": "usdt",
     "name": "Tether"
   },
-  "fontSize": 1
+  "fontSize": 1,
+  "cardsRectangular": false,
+  "cardPaddingRemoved": false
 }

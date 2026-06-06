@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { AppCard, CardAction, CardFooter, CardHeader, CardTitle } from '@/app/_components/app-card'
 import { useExchangeRate } from '@/app/providers/exchange-rate-provider'
 import type { ExchangeRateSourceStatus } from '@/app/providers/exchange-rate-provider'
 import { useLocale } from '@/app/providers/locale-provider'
@@ -106,7 +106,7 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
   }, [refreshAll, onRefreshed])
 
   return (
-    <Card>
+    <AppCard>
       <CardHeader>
         <CardTitle>Данные API</CardTitle>
         <CardAction className="flex items-center gap-2">
@@ -130,6 +130,6 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
       <CardFooter className="block p-0">
         <SourcesStatusTable statuses={sourceStatuses} />
       </CardFooter>
-    </Card>
+    </AppCard>
   )
 }
