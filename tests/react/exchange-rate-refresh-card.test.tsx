@@ -7,7 +7,7 @@ import { makeRenderer } from './helpers'
 describe('ExchangeRateRefreshCard — карточка обновления курсов', () => {
   it('отображает заголовок «Данные API» и кнопку обновления', async () => {
     const { render } = await makeRenderer(false)
-    render(<ExchangeRateRefreshCard />)
+    render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
     expect(screen.getByText('Данные API')).toBeInTheDocument()
     expect(screen.getByLabelText('Обновить курсы')).toBeInTheDocument()
@@ -15,7 +15,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
 
   it('отображает строки для всех источников со статусом «ещё не обновлялось»', async () => {
     const { render } = await makeRenderer(false)
-    render(<ExchangeRateRefreshCard />)
+    render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
     expect(screen.getByText('CoinGecko')).toBeInTheDocument()
     expect(screen.getByText('Binance')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
 
   it('нажатие кнопки обновления обновляет курсы и показывает даты', async () => {
     const { render } = await makeRenderer(false)
-    render(<ExchangeRateRefreshCard />)
+    render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
     // До обновления — статус «ещё не обновлялось» и прочерки в дате
     expect(screen.getAllByText('ещё не обновлялось')).toHaveLength(4)
@@ -53,6 +53,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     let called = false
     render(
       <ExchangeRateRefreshCard
+        compactRefreshCard={false}
         onRefreshed={() => {
           called = true
         }}
@@ -69,7 +70,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
 
   it('сохраняет курсы в БД после обновления', async () => {
     const { render, repo } = await makeRenderer(false)
-    render(<ExchangeRateRefreshCard />)
+    render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
     const user = userEvent.setup()
     await user.click(screen.getByLabelText('Обновить курсы'))
@@ -85,5 +86,43 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     expect(sources).toContain('binance')
     expect(sources).toContain('bybit')
     expect(sources).toContain('moex')
+  })
+
+  describe('компактный режим', () => {
+    it('по умолчанию свёрнут и показывает «ещё не обновлялось»', async () => {
+      const { render } = await makeRenderer(false)
+      render(<ExchangeRateRefreshCard compactRefreshCard />)
+
+      expect(screen.getByText('Данные API')).toBeInTheDocument()
+      expect(screen.getByText('ещё не обновлялось')).toBeInTheDocument()
+      expect(screen.queryByText('CoinGecko')).toBeNull()
+      expect(screen.getByLabelText('Развернуть')).toBeInTheDocument()
+    })
+
+    it('по тапу «Развернуть» показывает таблицу с источниками', async () => {
+      const { render } = await makeRenderer(false)
+      render(<ExchangeRateRefreshCard compactRefreshCard />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Развернуть'))
+
+      expect(screen.getByText('CoinGecko')).toBeInTheDocument()
+      expect(screen.getByText('Binance')).toBeInTheDocument()
+      expect(screen.getByText('Bybit')).toBeInTheDocument()
+      expect(screen.getByText('MOEX')).toBeInTheDocument()
+      expect(screen.getByLabelText('Свернуть')).toBeInTheDocument()
+    })
+
+    it('после обновления показывает относительное время самого старого источника', async () => {
+      const { render } = await makeRenderer(false)
+      render(<ExchangeRateRefreshCard compactRefreshCard />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/Обновлено:/)).toBeInTheDocument()
+      })
+    })
   })
 })

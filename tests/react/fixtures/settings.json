@@ -8,5 +8,6 @@
   "cardsRectangularLarge": false,
   "cardsRectangularSmall": false,
   "cardPaddingRemovedLarge": false,
-  "cardPaddingRemovedSmall": false
+  "cardPaddingRemovedSmall": false,
+  "compactRefreshCard": true
 }

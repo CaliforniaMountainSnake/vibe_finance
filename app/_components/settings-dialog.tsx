@@ -125,6 +125,8 @@ function SettingsControls() {
     setCardPaddingRemovedLarge,
     cardPaddingRemovedSmall,
     setCardPaddingRemovedSmall,
+    compactRefreshCard,
+    setCompactRefreshCard,
   } = useSettings()
 
   return (
@@ -153,6 +155,13 @@ function SettingsControls() {
             <span className="text-xs text-muted-foreground">Маленький экран</span>
             <Switch checked={cardPaddingRemovedSmall} onCheckedChange={setCardPaddingRemovedSmall} />
           </div>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <p className="text-sm font-medium">Вид карточки данных</p>
+        <div className="flex items-center justify-between rounded-lg border p-3">
+          <span className="text-xs text-muted-foreground">Компактная карточка обновления данных</span>
+          <Switch checked={compactRefreshCard} onCheckedChange={setCompactRefreshCard} />
         </div>
       </div>
     </div>

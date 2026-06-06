@@ -6,12 +6,13 @@ import { AppCard, CardAction, CardFooter, CardHeader, CardTitle } from '@/app/_c
 import { useExchangeRate } from '@/app/providers/exchange-rate-provider'
 import type { ExchangeRateSourceStatus } from '@/app/providers/exchange-rate-provider'
 import { useLocale } from '@/app/providers/locale-provider'
+import { useSettings } from '@/app/providers/settings-provider'
 import { SourceIcon } from '@/components/icons/source-icon'
 import { MS_PER_SEC, relativeTime } from '@/lib/time-helpers'
 import { sourceDisplayName } from '@/lib/source-display-name'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { RefreshCw } from 'lucide-react'
+import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
 import { SettingsDialog } from './settings-dialog'
 
 function StatusCell({ status }: { status: ExchangeRateSourceStatus }) {
@@ -79,15 +80,100 @@ function SourcesStatusTable({ statuses }: { statuses: ExchangeRateSourceStatus[]
   )
 }
 
+function CompactSummary({ statuses }: { statuses: ExchangeRateSourceStatus[] }) {
+  const isLoading = statuses.some((s) => s.loading)
+  const hasError = statuses.some((s) => s.error !== undefined)
+  const updatedAts = statuses.map((s) => s.updatedAt).filter((u): u is number => u !== undefined)
+
+  if (isLoading) {
+    return <span>Обновление…</span>
+  }
+
+  if (updatedAts.length > 0) {
+    return (
+      <div className="flex items-center justify-between">
+        <span>Обновлено:</span>
+        <span>{relativeTime(Math.min(...updatedAts))}</span>
+      </div>
+    )
+  }
+
+  if (hasError) {
+    return <span className="text-destructive">Ошибка обновления</span>
+  }
+
+  return <span>ещё не обновлялось</span>
+}
+
 type ExchangeRateRefreshCardProperties = {
   onRefreshed?: () => void
+  compactRefreshCard?: boolean
 }
 
 const RELATIVE_TIME_UPDATE_INTERVAL_MS = 30_000
 
-export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCardProperties) {
-  const { sourceStatuses, refreshAll, isLoading } = useExchangeRate()
+function CardToggleButton({ isCollapsed, onToggle }: { isCollapsed: boolean; onToggle: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button onClick={onToggle} variant="outline" size="icon" aria-label={isCollapsed ? 'Развернуть' : 'Свернуть'}>
+          {isCollapsed ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{isCollapsed ? 'Развернуть' : 'Свернуть'}</TooltipContent>
+    </Tooltip>
+  )
+}
 
+function CardActions({
+  showToggle,
+  isCollapsed,
+  onToggle,
+  isLoading,
+  onRefresh,
+}: {
+  showToggle: boolean
+  isCollapsed: boolean
+  onToggle: () => void
+  isLoading: boolean
+  onRefresh: () => void
+}) {
+  return (
+    <CardAction className="flex items-center gap-2">
+      {showToggle ? <CardToggleButton isCollapsed={isCollapsed} onToggle={onToggle} /> : undefined}
+      <SettingsDialog />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button onClick={onRefresh} disabled={isLoading} variant="outline" size="icon" aria-label="Обновить курсы">
+            <RefreshCw className={isLoading ? 'animate-spin' : ''} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{isLoading ? 'Обновление…' : 'Обновить'}</TooltipContent>
+      </Tooltip>
+    </CardAction>
+  )
+}
+
+function CardBody({ isCollapsed, statuses }: { isCollapsed: boolean; statuses: ExchangeRateSourceStatus[] }) {
+  if (isCollapsed) {
+    return (
+      <div className="px-4 py-3 text-sm">
+        <CompactSummary statuses={statuses} />
+      </div>
+    )
+  }
+  return <SourcesStatusTable statuses={statuses} />
+}
+
+export function ExchangeRateRefreshCard({
+  onRefreshed,
+  compactRefreshCard: compactOverride,
+}: ExchangeRateRefreshCardProperties) {
+  const { sourceStatuses, refreshAll, isLoading } = useExchangeRate()
+  const { compactRefreshCard: compactSetting } = useSettings()
+  const effectiveCompact = compactOverride === undefined ? compactSetting : compactOverride
+
+  const [expanded, setExpanded] = useState(false)
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -105,30 +191,26 @@ export function ExchangeRateRefreshCard({ onRefreshed }: ExchangeRateRefreshCard
     })
   }, [refreshAll, onRefreshed])
 
+  const handleToggleExpand = useCallback(() => {
+    setExpanded((v) => !v)
+  }, [])
+
+  const isCollapsed = effectiveCompact && !expanded
+
   return (
     <AppCard>
       <CardHeader>
         <CardTitle>Данные API</CardTitle>
-        <CardAction className="flex items-center gap-2">
-          <SettingsDialog />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={handleRefresh}
-                disabled={isLoading}
-                variant="outline"
-                size="icon"
-                aria-label="Обновить курсы"
-              >
-                <RefreshCw className={isLoading ? 'animate-spin' : ''} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{isLoading ? 'Обновление…' : 'Обновить'}</TooltipContent>
-          </Tooltip>
-        </CardAction>
+        <CardActions
+          showToggle={effectiveCompact}
+          isCollapsed={isCollapsed}
+          onToggle={handleToggleExpand}
+          isLoading={isLoading}
+          onRefresh={handleRefresh}
+        />
       </CardHeader>
       <CardFooter className="block p-0">
-        <SourcesStatusTable statuses={sourceStatuses} />
+        <CardBody isCollapsed={isCollapsed} statuses={sourceStatuses} />
       </CardFooter>
     </AppCard>
   )

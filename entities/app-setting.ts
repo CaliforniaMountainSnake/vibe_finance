@@ -29,4 +29,6 @@ export type AppSettingsMap = {
   cardPaddingRemovedLarge: boolean
   /** Убрать отступы от карточек по краям на маленьком экране (<sm) */
   cardPaddingRemovedSmall: boolean
+  /** Компактная карточка обновления данных (свёрнутая по умолчанию) */
+  compactRefreshCard: boolean
 }

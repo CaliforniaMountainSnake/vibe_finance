@@ -9,18 +9,21 @@ const DEFAULT_CARDS_RECTANGULAR_LARGE = false
 const DEFAULT_CARDS_RECTANGULAR_SMALL = false
 const DEFAULT_CARD_PADDING_REMOVED_LARGE = false
 const DEFAULT_CARD_PADDING_REMOVED_SMALL = false
+const DEFAULT_COMPACT_REFRESH_CARD = true
 
 type BooleanSettingKey =
   | 'cardsRectangularLarge'
   | 'cardsRectangularSmall'
   | 'cardPaddingRemovedLarge'
   | 'cardPaddingRemovedSmall'
+  | 'compactRefreshCard'
 
 const DEFAULT_BY_KEY: Record<BooleanSettingKey, boolean> = {
   cardsRectangularLarge: DEFAULT_CARDS_RECTANGULAR_LARGE,
   cardsRectangularSmall: DEFAULT_CARDS_RECTANGULAR_SMALL,
   cardPaddingRemovedLarge: DEFAULT_CARD_PADDING_REMOVED_LARGE,
   cardPaddingRemovedSmall: DEFAULT_CARD_PADDING_REMOVED_SMALL,
+  compactRefreshCard: DEFAULT_COMPACT_REFRESH_CARD,
 }
 
 function useBooleanSetting(
@@ -57,6 +60,8 @@ type SettingsContextValue = {
   setCardPaddingRemovedLarge: (value: boolean) => void
   cardPaddingRemovedSmall: boolean
   setCardPaddingRemovedSmall: (value: boolean) => void
+  compactRefreshCard: boolean
+  setCompactRefreshCard: (value: boolean) => void
 }
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined)
@@ -87,6 +92,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     'cardPaddingRemovedSmall',
     databaseRepo
   )
+  const [compactRefreshCard, setCompactRefreshCard] = useBooleanSetting('compactRefreshCard', databaseRepo)
 
   useEffect(() => {
     void databaseRepo.getSetting('fontSize').then((stored) => {
@@ -118,6 +124,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setCardPaddingRemovedLarge,
         cardPaddingRemovedSmall,
         setCardPaddingRemovedSmall,
+        compactRefreshCard,
+        setCompactRefreshCard,
       }}
     >
       {children}
