@@ -7,6 +7,7 @@ import { SettingsProvider } from '@/app/providers/settings-provider'
 import { LocaleProvider } from '@/app/providers/locale-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
+import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
 import { createPopulatedRepo, createEmptyRepo } from './populate-mock-repo'
 import { createMockFinanceRepos } from './create-mock-finance-repos'
 import { TEST_LOCALE } from '@/tests/helpers/test-locale'
@@ -15,23 +16,31 @@ import { TEST_LOCALE } from '@/tests/helpers/test-locale'
 // Гарантированная очистка после каждого теста
 // ---------------------------------------------------------------------------
 
-let currentRepo: DatabaseRepositoryInterface | undefined
+const allDatabaseRepos = new Set<DatabaseRepositoryInterface>()
 
 afterEach(async () => {
-  if (currentRepo) {
-    await currentRepo.clearAll()
-    currentRepo = undefined
+  for (const databaseRepo of allDatabaseRepos) {
+    await databaseRepo.clearAll()
   }
+  allDatabaseRepos.clear()
 })
 
 // ---------------------------------------------------------------------------
 // Единый провайдер со всеми контекстами, зеркалит app/layout.tsx
 // ---------------------------------------------------------------------------
 
-function AllProviders({ repo, children }: { repo: DatabaseRepositoryInterface; children: React.ReactNode }) {
+function AllProviders({
+  databaseRepo,
+  financeRepos,
+  children,
+}: {
+  databaseRepo: DatabaseRepositoryInterface
+  financeRepos: FinanceApiRepositoryInterface[]
+  children: React.ReactNode
+}) {
   return (
-    <DatabaseProvider repo={repo}>
-      <ExchangeRateProvider repos={createMockFinanceRepos()}>
+    <DatabaseProvider repo={databaseRepo}>
+      <ExchangeRateProvider repos={financeRepos}>
         <SettingsProvider>
           <LocaleProvider locale={TEST_LOCALE}>
             <TooltipProvider>{children}</TooltipProvider>
@@ -53,18 +62,28 @@ function AllProviders({ repo, children }: { repo: DatabaseRepositoryInterface; c
  * @param populateDatabase  true → createPopulatedRepo (фикстуры),
  *                          false → createEmptyRepo.
  *                          По умолчанию true.
+ * @param financeRepos      Опциональный массив репозиториев API.
+ *                          Если не передан, используются createMockFinanceRepos().
  */
-export async function makeRenderer(populateDatabase = true): Promise<{
+export async function makeRenderer(
+  populateDatabase = true,
+  financeRepos?: FinanceApiRepositoryInterface[]
+): Promise<{
   render: (ui: ReactElement) => RenderResult
-  repo: DatabaseRepositoryInterface
+  databaseRepo: DatabaseRepositoryInterface
 }> {
-  const repo = populateDatabase ? await createPopulatedRepo() : createEmptyRepo()
-  currentRepo = repo
+  const databaseRepo = populateDatabase ? await createPopulatedRepo() : createEmptyRepo()
+  const resolvedFinanceRepos = financeRepos ?? createMockFinanceRepos()
+  allDatabaseRepos.add(databaseRepo)
 
   return {
-    repo,
+    databaseRepo,
     render: (ui: ReactElement) => {
-      return render(<AllProviders repo={repo}>{ui}</AllProviders>)
+      return render(
+        <AllProviders databaseRepo={databaseRepo} financeRepos={resolvedFinanceRepos}>
+          {ui}
+        </AllProviders>
+      )
     },
   }
 }

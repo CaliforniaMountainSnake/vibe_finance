@@ -3,9 +3,11 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExchangeRateRefreshCard } from '@/app/_components/exchange-rate-refresh-card'
 import { makeRenderer } from './helpers'
+import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
+import { createMockFinanceRepos, createErrorMockRepo } from './helpers/create-mock-finance-repos'
 
 describe('ExchangeRateRefreshCard — карточка обновления курсов', () => {
-  it('отображает заголовок «Данные API» и кнопку обновления', async () => {
+  it('в развёрнутой карточке отображает заголовок «Данные API» и кнопку обновления', async () => {
     const { render } = await makeRenderer(false)
     render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
@@ -13,7 +15,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     expect(screen.getByLabelText('Обновить курсы')).toBeInTheDocument()
   })
 
-  it('отображает строки для всех источников со статусом «ещё не обновлялось»', async () => {
+  it('в развёрнутой карточке отображает строки для всех источников со статусом «ещё не обновлялось»', async () => {
     const { render } = await makeRenderer(false)
     render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
@@ -27,7 +29,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     expect(fresh).toHaveLength(4)
   })
 
-  it('нажатие кнопки обновления обновляет курсы и показывает даты', async () => {
+  it('в развёрнутой карточке нажатие кнопки обновления обновляет курсы и показывает даты', async () => {
     const { render } = await makeRenderer(false)
     render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
@@ -48,7 +50,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     })
   })
 
-  it('вызывает onRefreshed после завершения обновления', async () => {
+  it('в развёрнутой карточке вызывает onRefreshed после завершения обновления', async () => {
     const { render } = await makeRenderer(false)
     let called = false
     render(
@@ -68,19 +70,19 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     })
   })
 
-  it('сохраняет курсы в БД после обновления', async () => {
-    const { render, repo } = await makeRenderer(false)
+  it('в развёрнутой карточке сохраняет курсы в БД после обновления', async () => {
+    const { render, databaseRepo } = await makeRenderer(false)
     render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
 
     const user = userEvent.setup()
     await user.click(screen.getByLabelText('Обновить курсы'))
 
     await waitFor(async () => {
-      const allRates = await repo.getAllRates()
+      const allRates = await databaseRepo.getAllRates()
       expect(allRates.length).toBeGreaterThan(0)
     })
 
-    const allRates = await repo.getAllRates()
+    const allRates = await databaseRepo.getAllRates()
     const sources = new Set(allRates.map((r) => r.source))
     expect(sources).toContain('coingecko')
     expect(sources).toContain('binance')
@@ -88,8 +90,68 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
     expect(sources).toContain('moex')
   })
 
+  describe('отображение ошибок в развёрнутой карточке', () => {
+    it('в развёрнутой карточке показывает ошибку при сбое одного источника', async () => {
+      const defaultRepos = createMockFinanceRepos()
+      const financeRepos: FinanceApiRepositoryInterface[] = defaultRepos.map((r) =>
+        r.sourceName === 'binance' ? createErrorMockRepo('binance', 'API timeout') : r
+      )
+      const { render } = await makeRenderer(false, financeRepos)
+      render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getByText('ошибка')).toBeInTheDocument()
+        expect(screen.getByText(/API timeout/)).toBeInTheDocument()
+      })
+    })
+
+    it('в развёрнутой карточке показывает ошибки всех сбойных источников', async () => {
+      const defaultRepos = createMockFinanceRepos()
+      const financeRepos: FinanceApiRepositoryInterface[] = defaultRepos.map((r) => {
+        if (r.sourceName === 'binance') return createErrorMockRepo('binance', 'API timeout')
+        if (r.sourceName === 'bybit') return createErrorMockRepo('bybit', 'rate limit')
+        return r
+      })
+      const { render } = await makeRenderer(false, financeRepos)
+      render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getAllByText('ошибка')).toHaveLength(2)
+        expect(screen.getByText(/API timeout/)).toBeInTheDocument()
+        expect(screen.getByText(/rate limit/)).toBeInTheDocument()
+      })
+    })
+
+    it('в развёрнутой карточке показывает ошибки и успешные обновления (mixed state)', async () => {
+      const defaultRepos = createMockFinanceRepos()
+      const financeRepos: FinanceApiRepositoryInterface[] = defaultRepos.map((r) => {
+        if (r.sourceName === 'binance') return createErrorMockRepo('binance', 'API timeout')
+        if (r.sourceName === 'bybit') return createErrorMockRepo('bybit', 'rate limit')
+        return r
+      })
+      const { render } = await makeRenderer(false, financeRepos)
+      render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getAllByText('ошибка')).toHaveLength(2)
+        expect(screen.getByText(/API timeout/)).toBeInTheDocument()
+        expect(screen.getByText(/rate limit/)).toBeInTheDocument()
+        expect(screen.queryByText('—')).toBeNull()
+      })
+    })
+  })
+
   describe('компактный режим', () => {
-    it('по умолчанию свёрнут и показывает «ещё не обновлялось»', async () => {
+    it('в компактной карточке по умолчанию свёрнут и показывает «ещё не обновлялось»', async () => {
       const { render } = await makeRenderer(false)
       render(<ExchangeRateRefreshCard compactRefreshCard />)
 
@@ -99,7 +161,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
       expect(screen.getByLabelText('Развернуть')).toBeInTheDocument()
     })
 
-    it('по тапу «Развернуть» показывает таблицу с источниками', async () => {
+    it('в компактной карточке по тапу «Развернуть» показывает таблицу с источниками', async () => {
       const { render } = await makeRenderer(false)
       render(<ExchangeRateRefreshCard compactRefreshCard />)
 
@@ -113,7 +175,7 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
       expect(screen.getByLabelText('Свернуть')).toBeInTheDocument()
     })
 
-    it('после обновления показывает относительное время самого старого источника', async () => {
+    it('в компактной карточке после обновления показывает относительное время самого старого источника', async () => {
       const { render } = await makeRenderer(false)
       render(<ExchangeRateRefreshCard compactRefreshCard />)
 
@@ -122,6 +184,61 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
 
       await waitFor(() => {
         expect(screen.getByText(/Обновлено:/)).toBeInTheDocument()
+      })
+    })
+
+    it('в компактной карточке показывает ошибку при сбое одного источника', async () => {
+      const defaultRepos = createMockFinanceRepos()
+      const financeRepos: FinanceApiRepositoryInterface[] = defaultRepos.map((r) =>
+        r.sourceName === 'binance' ? createErrorMockRepo('binance', 'API timeout') : r
+      )
+      const { render } = await makeRenderer(false, financeRepos)
+      render(<ExchangeRateRefreshCard compactRefreshCard />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/API timeout/)).toBeInTheDocument()
+      })
+    })
+
+    it('в компактной карточке показывает ошибки всех сбойных источников', async () => {
+      const defaultRepos = createMockFinanceRepos()
+      const financeRepos: FinanceApiRepositoryInterface[] = defaultRepos.map((r) => {
+        if (r.sourceName === 'binance') return createErrorMockRepo('binance', 'API timeout')
+        if (r.sourceName === 'bybit') return createErrorMockRepo('bybit', 'rate limit')
+        return r
+      })
+      const { render } = await makeRenderer(false, financeRepos)
+      render(<ExchangeRateRefreshCard compactRefreshCard />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/API timeout/)).toBeInTheDocument()
+        expect(screen.getByText(/rate limit/)).toBeInTheDocument()
+      })
+    })
+
+    it('в компактной карточке показывает ошибки вместе с временем успешных обновлений (mixed state)', async () => {
+      const defaultRepos = createMockFinanceRepos()
+      const financeRepos: FinanceApiRepositoryInterface[] = defaultRepos.map((r) => {
+        if (r.sourceName === 'binance') return createErrorMockRepo('binance', 'API timeout')
+        if (r.sourceName === 'bybit') return createErrorMockRepo('bybit', 'rate limit')
+        return r
+      })
+      const { render } = await makeRenderer(false, financeRepos)
+      render(<ExchangeRateRefreshCard compactRefreshCard />)
+
+      const user = userEvent.setup()
+      await user.click(screen.getByLabelText('Обновить курсы'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/Обновлено:/)).toBeInTheDocument()
+        expect(screen.getByText(/API timeout/)).toBeInTheDocument()
+        expect(screen.getByText(/rate limit/)).toBeInTheDocument()
       })
     })
   })
