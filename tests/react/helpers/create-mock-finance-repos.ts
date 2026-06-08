@@ -5,7 +5,7 @@ import { BybitRepository } from '@/repositories/bybit-repository'
 import { CoinGeckoRepository } from '@/repositories/coin-gecko-repository'
 import { MoexRepository } from '@/repositories/moex-repository'
 import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
-import type { ExchangeRate } from '@/entities/exchange-rate'
+import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
 
 const rawDirectory = path.join(import.meta.dirname, '..', '..', 'raw_data')
 
@@ -91,6 +91,19 @@ class MockMoexRepository implements FinanceApiRepositoryInterface {
   async fetchRates(): Promise<ExchangeRate[]> {
     await Promise.resolve()
     return this.realRepo.parseRates(this.combined)
+  }
+}
+
+/**
+ * Создаёт репозиторий-заглушку, который всегда кидает ошибку
+ * с заданным сообщением в fetchRates().
+ * Используется в тестах для проверки обработки сбоев источников.
+ */
+export function createErrorMockRepo(sourceName: SourceName, errorMessage: string): FinanceApiRepositoryInterface {
+  return {
+    sourceName,
+    parseRates: () => [],
+    fetchRates: () => Promise.reject(new Error(errorMessage)),
   }
 }
 

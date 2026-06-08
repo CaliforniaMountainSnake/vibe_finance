@@ -27,12 +27,12 @@ describe('HoldingsCard — таблица холдингов', () => {
   /* ── empty state ─────────────────────── */
 
   it('показывает пустое состояние, если холдингов нет', async () => {
-    const { render, repo } = await makeRenderer()
+    const { render, databaseRepo } = await makeRenderer()
 
     // Удаляем все холдинги, оставляя курсы и настройки
-    const holdings = await repo.getHoldings()
+    const holdings = await databaseRepo.getHoldings()
     for (const h of holdings) {
-      await repo.removeHolding(h.id)
+      await databaseRepo.removeHolding(h.id)
     }
 
     render(<HoldingsCard />)

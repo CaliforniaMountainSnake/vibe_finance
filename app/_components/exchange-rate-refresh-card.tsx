@@ -82,27 +82,29 @@ function SourcesStatusTable({ statuses }: { statuses: ExchangeRateSourceStatus[]
 
 function CompactSummary({ statuses }: { statuses: ExchangeRateSourceStatus[] }) {
   const isLoading = statuses.some((s) => s.loading)
-  const hasError = statuses.some((s) => s.error !== undefined)
+  const erroredStatuses = statuses.filter((s) => s.error !== undefined)
   const updatedAts = statuses.map((s) => s.updatedAt).filter((u): u is number => u !== undefined)
 
   if (isLoading) {
     return <span>Обновление…</span>
   }
 
-  if (updatedAts.length > 0) {
-    return (
-      <div className="flex items-center justify-between">
-        <span>Обновлено:</span>
-        <span>{relativeTime(Math.min(...updatedAts))}</span>
-      </div>
-    )
-  }
-
-  if (hasError) {
-    return <span className="text-destructive">Ошибка обновления</span>
-  }
-
-  return <span>ещё не обновлялось</span>
+  return (
+    <>
+      {erroredStatuses.map((s) => (
+        <div key={s.source} className="text-destructive">
+          {sourceDisplayName(s.source)}: {s.error}
+        </div>
+      ))}
+      {updatedAts.length > 0 && (
+        <div className="flex items-center justify-between">
+          <span>Обновлено:</span>
+          <span>{relativeTime(Math.min(...updatedAts))}</span>
+        </div>
+      )}
+      {updatedAts.length === 0 && erroredStatuses.length === 0 && <span>ещё не обновлялось</span>}
+    </>
+  )
 }
 
 type ExchangeRateRefreshCardProperties = {
