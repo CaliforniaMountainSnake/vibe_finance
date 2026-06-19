@@ -9,6 +9,8 @@ import { useDatabase } from '@/app/providers/database-provider'
 import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
 import type { SourceName } from '@/entities/exchange-rate'
+import type { ExchangeRateSnapshot } from '@/entities/exchange-rate-snapshot'
+import { makeSnapshotKey } from '@/lib/snapshot-date'
 
 /** Статус одного источника: дата обновления, ошибка, флаг загрузки. */
 export type ExchangeRateSourceStatus = {
@@ -24,7 +26,7 @@ type ExchangeRateContextValue = {
   isLoading: boolean
 }
 
-const DEFAULT_REPOS: FinanceApiRepositoryInterface[] = [
+const DEFAULT_FINANCE_REPOS: FinanceApiRepositoryInterface[] = [
   new CoinGeckoRepository(),
   new BinanceRepository(),
   new BybitRepository(),
@@ -46,7 +48,7 @@ function buildInitialStatus(source: SourceName): ExchangeRateSourceStatus {
 }
 
 export function ExchangeRateProvider({
-  repos = DEFAULT_REPOS,
+  repos = DEFAULT_FINANCE_REPOS,
   children,
 }: {
   repos?: FinanceApiRepositoryInterface[]
@@ -68,7 +70,7 @@ export function ExchangeRateProvider({
   }, [databaseRepo, repos])
 
   const refreshAll = useCallback(async () => {
-    const tasks = repos.map((repo) => refreshSource(repo, setStatuses, databaseRepo))
+    const tasks = repos.map((financeRepo) => refreshSource(financeRepo, databaseRepo, setStatuses))
     await Promise.allSettled(tasks)
   }, [repos, databaseRepo])
 
@@ -83,19 +85,28 @@ export function ExchangeRateProvider({
 }
 
 async function refreshSource(
-  repo: FinanceApiRepositoryInterface,
-  setStatuses: React.Dispatch<React.SetStateAction<ExchangeRateSourceStatus[]>>,
-  databaseRepo: DatabaseRepositoryInterface
+  financeRepo: FinanceApiRepositoryInterface,
+  databaseRepo: DatabaseRepositoryInterface,
+  setStatuses: React.Dispatch<React.SetStateAction<ExchangeRateSourceStatus[]>>
 ): Promise<void> {
-  const { sourceName } = repo
+  const { sourceName } = financeRepo
 
   setStatuses((previous) =>
     previous.map((s) => (s.source === sourceName ? { ...s, loading: true, error: undefined } : s))
   )
 
   try {
-    const rates = await repo.fetchRates()
+    const rates = await financeRepo.fetchRates()
     await databaseRepo.updateRatesForSource(sourceName, rates)
+
+    const today = makeSnapshotKey(new Date())
+    const snapshots: ExchangeRateSnapshot[] = rates.map((r) => ({
+      date: today,
+      source: r.source,
+      ticker: r.ticker,
+      btcPrice: r.btcPrice,
+    }))
+    await databaseRepo.saveSnapshot(snapshots)
 
     const updatedAt = rates.length > 0 ? Math.max(...rates.map((r) => r.updatedAt)) : undefined
 

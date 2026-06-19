@@ -5,6 +5,7 @@ import { ExchangeRateRefreshCard } from '@/app/_components/exchange-rate-refresh
 import { makeRenderer } from './helpers'
 import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
 import { createMockFinanceRepos, createErrorMockRepo } from './helpers/create-mock-finance-repos'
+import { makeSnapshotKey } from '@/lib/snapshot-date'
 
 describe('ExchangeRateRefreshCard — карточка обновления курсов', () => {
   it('в развёрнутой карточке отображает заголовок «Данные API» и кнопку обновления', async () => {
@@ -47,6 +48,47 @@ describe('ExchangeRateRefreshCard — карточка обновления ку
       expect(screen.queryByText('—')).toBeNull()
       // Ни у одного источника нет ошибки
       expect(screen.queryByText('ошибка')).toBeNull()
+    })
+  })
+
+  it('сохраняет исторические снимки после обновления', async () => {
+    const { render, databaseRepo } = await makeRenderer(false)
+    render(<ExchangeRateRefreshCard compactRefreshCard={false} />)
+
+    const user = userEvent.setup()
+    await user.click(screen.getByLabelText('Обновить курсы'))
+
+    const today = makeSnapshotKey(new Date())
+
+    await waitFor(async () => {
+      // CoinGecko — содержит btc с btcPrice = 1
+      const coingeckoSnapshots = await databaseRepo.getSnapshots({
+        source: 'coingecko',
+        ticker: 'btc',
+        fromDate: today,
+        toDate: today,
+      })
+      expect(coingeckoSnapshots.length).toBeGreaterThan(0)
+      expect(coingeckoSnapshots[0].date).toBe(today)
+      expect(coingeckoSnapshots[0].btcPrice).toBe(1)
+
+      // Binance
+      const binanceSnapshots = await databaseRepo.getSnapshots({
+        source: 'binance',
+        ticker: 'btc',
+        fromDate: today,
+        toDate: today,
+      })
+      expect(binanceSnapshots.length).toBeGreaterThan(0)
+
+      // Bybit
+      const bybitSnapshots = await databaseRepo.getSnapshots({
+        source: 'bybit',
+        ticker: 'btc',
+        fromDate: today,
+        toDate: today,
+      })
+      expect(bybitSnapshots.length).toBeGreaterThan(0)
     })
   })
 
