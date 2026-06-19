@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import { type ExchangeRate, type SourceName } from '@/entities/exchange-rate'
+import { type ExchangeRateSnapshot } from '@/entities/exchange-rate-snapshot'
 import { type FavoriteRate } from '@/entities/favorite-rate'
 import { type Ticker } from '@/entities/ticker'
 import { type TickerPair } from '@/entities/ticker-pair'
@@ -14,12 +15,14 @@ const DB_VERSION_3 = 3
 const DB_VERSION_4 = 4
 const DB_VERSION_5 = 5
 const DB_VERSION_6 = 6
+const DB_VERSION_7 = 7
 
 /**
  * Схема БД
  */
 class FinanceDatabase extends Dexie {
   exchangeRates!: Table<ExchangeRate, [string, string]>
+  exchangeRateSnapshots!: Table<ExchangeRateSnapshot, [string, string, string]>
   favoriteRates!: Table<FavoriteRate, string>
   holdings!: Table<Holding, string>
   settings!: Table<AppSetting, string>
@@ -74,6 +77,15 @@ class FinanceDatabase extends Dexie {
       holdings: 'id, order',
       settings: '&key',
     })
+
+    // v7: добавляем таблицу exchangeRateSnapshots для исторических данных
+    this.version(DB_VERSION_7).stores({
+      exchangeRates: '[source+ticker], source, ticker',
+      favoriteRates: 'id, order',
+      holdings: 'id, order',
+      settings: '&key',
+      exchangeRateSnapshots: '[source+ticker+date], date',
+    })
   }
 }
 
@@ -107,6 +119,27 @@ export class DexieRepository implements DatabaseRepositoryInterface {
     })
   }
 
+  async saveSnapshot(snapshots: ExchangeRateSnapshot[]): Promise<void> {
+    await this.db.exchangeRateSnapshots.bulkPut(snapshots)
+  }
+
+  async getSnapshots({
+    source,
+    ticker,
+    fromDate,
+    toDate,
+  }: {
+    source: SourceName
+    ticker: string
+    fromDate: string
+    toDate: string
+  }): Promise<ExchangeRateSnapshot[]> {
+    return await this.db.exchangeRateSnapshots
+      .where('[source+ticker+date]')
+      .between([source, ticker, fromDate], [source, ticker, toDate], true, true)
+      .toArray()
+  }
+
   async getRate(pair: TickerPair): Promise<number> {
     const { from, to } = pair
 
@@ -134,6 +167,7 @@ export class DexieRepository implements DatabaseRepositoryInterface {
 
   async clearAll(): Promise<void> {
     await this.db.exchangeRates.clear()
+    await this.db.exchangeRateSnapshots.clear()
     await this.db.favoriteRates.clear()
     await this.db.holdings.clear()
     await this.db.settings.clear()

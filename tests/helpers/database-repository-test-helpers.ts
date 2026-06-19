@@ -1,4 +1,5 @@
 import { type ExchangeRate } from '@/entities/exchange-rate'
+import { type ExchangeRateSnapshot } from '@/entities/exchange-rate-snapshot'
 import { type Ticker } from '@/entities/ticker'
 import { type TickerPair } from '@/entities/ticker-pair'
 
@@ -8,6 +9,15 @@ export function makeRate(overrides: Partial<ExchangeRate> = {}): ExchangeRate {
     ticker: 'btc',
     btcPrice: 1,
     updatedAt: 1_700_000_000,
+    ...overrides,
+  }
+}
+
+export function makeSnapshot(overrides: Partial<ExchangeRateSnapshot> & { date: string }): ExchangeRateSnapshot {
+  return {
+    source: 'binance',
+    ticker: 'btc',
+    btcPrice: 1,
     ...overrides,
   }
 }

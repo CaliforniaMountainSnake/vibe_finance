@@ -16,6 +16,7 @@ import { assertDatabaseRepositoryFavorites } from './assert-database-repository-
 import { assertDatabaseRepositoryGetAllRates } from './assert-database-repository-get-all-rates'
 import { assertDatabaseRepositoryGetRate } from './assert-database-repository-get-rate'
 import { assertDatabaseRepositoryGetUpdateTime } from './assert-database-repository-get-update-time'
+import { assertDatabaseRepositorySnapshots } from './assert-database-repository-snapshots'
 import { assertDatabaseRepositoryUpdateData } from './assert-database-repository-update-data'
 import { assertDatabaseRepositoryHoldings } from './assert-database-repository-holdings'
 import { assertDatabaseRepositorySettings } from './assert-database-repository-settings'
@@ -29,4 +30,5 @@ export function assertDatabaseRepository(makeRepo: () => DatabaseRepositoryInter
   assertDatabaseRepositorySettings(makeRepo)
   assertDatabaseRepositoryClearAll(makeRepo)
   assertDatabaseRepositoryGetUpdateTime(makeRepo)
+  assertDatabaseRepositorySnapshots(makeRepo)
 }

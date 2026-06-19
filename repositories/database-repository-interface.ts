@@ -1,7 +1,8 @@
 import { type ExchangeRate, type SourceName } from '@/entities/exchange-rate'
+import { type ExchangeRateSnapshot } from '@/entities/exchange-rate-snapshot'
 import { type TickerPair } from '@/entities/ticker-pair'
 import { type Holding, type HoldingUpdate } from '@/entities/holding'
-import { type Ticker } from '@/entities/ticker'
+import { type TickerBaseInfo, type Ticker } from '@/entities/ticker'
 import { type AppSettingsMap } from '@/entities/app-setting'
 
 /**
@@ -10,6 +11,7 @@ import { type AppSettingsMap } from '@/entities/app-setting'
 export interface DatabaseRepositoryInterface
   extends
     ExchangeRatesDatabaseRepositoryInterface,
+    ExchangeRateSnapshotsDatabaseRepositoryInterface,
     FavoriteRatesDatabaseRepositoryInterface,
     HoldingsDatabaseRepositoryInterface,
     SettingsDatabaseRepositoryInterface {
@@ -50,6 +52,32 @@ interface ExchangeRatesDatabaseRepositoryInterface {
    * @returns Наибольший updatedAt среди всех курсов source, либо null если данных нет.
    */
   getUpdateTime(source: SourceName): Promise<number | null>
+}
+
+interface ExchangeRateSnapshotsDatabaseRepositoryInterface {
+  /**
+   * Сохранить дневные снимки курсов.
+   * Если снимки с таким же `[source + ticker + date]` уже существуют — они перезаписываются.
+   * Каждый объект в массиве должен содержать заполненное поле `date`.
+   */
+  saveSnapshot(snapshots: ExchangeRateSnapshot[]): Promise<void>
+
+  /**
+   * Получить снимки для указанного источника, тикера и диапазона дат.
+   *
+   * Диапазон дат **включительный**: `fromDate` и `toDate` входят в результат.
+   * Результат отсортирован по дате (возрастание).
+   *
+   * @example
+   * getSnapshots({ source: 'binance', ticker: 'btc', fromDate: '2026-06-01', toDate: '2026-06-30' })
+   * // → снапшоты за 1, 15 и 30 июня (если они есть)
+   */
+  getSnapshots(
+    options: TickerBaseInfo & {
+      fromDate: string
+      toDate: string
+    }
+  ): Promise<ExchangeRateSnapshot[]>
 }
 
 interface FavoriteRatesDatabaseRepositoryInterface {
