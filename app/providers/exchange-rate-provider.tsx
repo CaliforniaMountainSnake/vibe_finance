@@ -8,7 +8,7 @@ import { MoexRepository } from '@/repositories/moex-repository'
 import { useDatabase } from '@/app/providers/database-provider'
 import type { DatabaseRepositoryInterface } from '@/repositories/database-repository-interface'
 import type { FinanceApiRepositoryInterface } from '@/repositories/finance-api-repository-interface'
-import type { SourceName } from '@/entities/exchange-rate'
+import type { ExchangeRate, SourceName } from '@/entities/exchange-rate'
 import type { ExchangeRateSnapshot } from '@/entities/exchange-rate-snapshot'
 import { makeSnapshotKey } from '@/lib/snapshot-date'
 
@@ -84,6 +84,36 @@ export function ExchangeRateProvider({
   return <ExchangeRateContext.Provider value={value}>{children}</ExchangeRateContext.Provider>
 }
 
+/**
+ * Точечно меняет указанные поля статуса для одного источника,
+ * не затрагивая остальные (например, выставить loading без сброса updatedAt).
+ */
+function patchSourceStatus(
+  setStatuses: React.Dispatch<React.SetStateAction<ExchangeRateSourceStatus[]>>,
+  sourceName: SourceName,
+  updates: Partial<ExchangeRateSourceStatus>
+): void {
+  setStatuses((previous) => previous.map((s) => (s.source === sourceName ? { ...s, ...updates } : s)))
+}
+
+/**
+ * Создать дневные снимки из массива курсов и сохранить в БД.
+ */
+async function saveSourceSnapshots(rates: ExchangeRate[], databaseRepo: DatabaseRepositoryInterface): Promise<void> {
+  const today = makeSnapshotKey(new Date())
+  const snapshots: ExchangeRateSnapshot[] = rates.map((r) => ({
+    date: today,
+    source: r.source,
+    ticker: r.ticker,
+    btcPrice: r.btcPrice,
+  }))
+  await databaseRepo.saveSnapshot(snapshots)
+}
+
+/**
+ * Запросить курсы у одного источника, сохранить их в БД и обновить статус.
+ * Каждый источник обрабатывается независимо — сбой одного не влияет на другие.
+ */
 async function refreshSource(
   financeRepo: FinanceApiRepositoryInterface,
   databaseRepo: DatabaseRepositoryInterface,
@@ -91,33 +121,18 @@ async function refreshSource(
 ): Promise<void> {
   const { sourceName } = financeRepo
 
-  setStatuses((previous) =>
-    previous.map((s) => (s.source === sourceName ? { ...s, loading: true, error: undefined } : s))
-  )
+  patchSourceStatus(setStatuses, sourceName, { loading: true, error: undefined })
 
   try {
     const rates = await financeRepo.fetchRates()
     await databaseRepo.updateRatesForSource(sourceName, rates)
-
-    const today = makeSnapshotKey(new Date())
-    const snapshots: ExchangeRateSnapshot[] = rates.map((r) => ({
-      date: today,
-      source: r.source,
-      ticker: r.ticker,
-      btcPrice: r.btcPrice,
-    }))
-    await databaseRepo.saveSnapshot(snapshots)
+    await saveSourceSnapshots(rates, databaseRepo)
 
     const updatedAt = rates.length > 0 ? Math.max(...rates.map((r) => r.updatedAt)) : undefined
-
-    setStatuses((previous) =>
-      previous.map((s) => (s.source === sourceName ? { ...s, error: undefined, loading: false, updatedAt } : s))
-    )
+    patchSourceStatus(setStatuses, sourceName, { loading: false, error: undefined, updatedAt })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    setStatuses((previous) =>
-      previous.map((s) => (s.source === sourceName ? { ...s, error: message, loading: false } : s))
-    )
+    patchSourceStatus(setStatuses, sourceName, { loading: false, error: message })
   }
 }
 
