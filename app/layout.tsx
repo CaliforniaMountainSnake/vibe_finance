@@ -27,6 +27,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Vibe Finance',
   description: 'Криптокошелёк с курсами валют',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 }
 
 export default function RootLayout({
