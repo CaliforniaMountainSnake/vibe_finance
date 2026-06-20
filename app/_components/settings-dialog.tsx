@@ -15,6 +15,7 @@ import {
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Minus, Plus, Settings, X } from 'lucide-react'
+import { BackupControls } from './backup-controls'
 
 const FONT_SIZE_XSMALL = 0.8125
 const FONT_SIZE_SMALL = 0.875
@@ -190,6 +191,9 @@ export function SettingsDialog() {
         </div>
         <div className="px-4 pb-4">
           <SettingsControls />
+        </div>
+        <div className="px-4 pb-4">
+          <BackupControls />
         </div>
       </DialogContent>
     </Dialog>

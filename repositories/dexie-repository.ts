@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import type { ExportOptions, ImportOptions } from 'dexie-export-import'
 import { type ExchangeRate, type SourceName } from '@/entities/exchange-rate'
 import { type ExchangeRateSnapshot } from '@/entities/exchange-rate-snapshot'
 import { type FavoriteRate } from '@/entities/favorite-rate'
@@ -289,6 +290,20 @@ export class DexieRepository implements DatabaseRepositoryInterface {
 
   async removeSetting(key: string): Promise<void> {
     await this.db.settings.delete(key)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Backup / Restore
+  // ---------------------------------------------------------------------------
+
+  async exportBackup(options?: ExportOptions): Promise<Blob> {
+    await import('dexie-export-import')
+    return await this.db.export(options)
+  }
+
+  async importBackup(blob: Blob, options?: ImportOptions): Promise<void> {
+    await import('dexie-export-import')
+    await this.db.import(blob, { clearTablesBeforeImport: true, ...options })
   }
 
   private async swapWithNeighbor(pair: TickerPair, direction: 'above' | 'below'): Promise<void> {

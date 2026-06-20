@@ -4,6 +4,7 @@ import { type TickerPair } from '@/entities/ticker-pair'
 import { type Holding, type HoldingUpdate } from '@/entities/holding'
 import { type TickerBaseInfo, type Ticker } from '@/entities/ticker'
 import { type AppSettingsMap } from '@/entities/app-setting'
+import type { ExportOptions, ImportOptions } from 'dexie-export-import'
 
 /**
  * Контракт репозитория для локального хранения курсов валют в IndexedDB.
@@ -19,6 +20,18 @@ export interface DatabaseRepositoryInterface
    * Очистить всю базу
    */
   clearAll(): Promise<void>
+
+  /**
+   * Экспортировать всю БД в Blob (бэкап).
+   * Использует dexie-export-import с потоковой обработкой — не загружает всю БД в RAM.
+   */
+  exportBackup(options?: ExportOptions): Promise<Blob>
+
+  /**
+   * Импортировать БД из Blob (восстановление из бэкапа).
+   * Очищает существующие таблицы перед импортом.
+   */
+  importBackup(blob: Blob, options?: ImportOptions): Promise<void>
 }
 
 interface ExchangeRatesDatabaseRepositoryInterface {
