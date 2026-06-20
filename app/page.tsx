@@ -24,7 +24,7 @@ export default function App() {
         cardPaddingRemovedSmall && 'max-sm:p-0'
       )}
     >
-      <ExchangeRateRefreshCard onRefreshed={handleRefreshed} />
+      <ExchangeRateRefreshCard onRefreshed={handleRefreshed} onRestored={handleRefreshed} />
       <FavoriteRatesCard refreshKey={refreshKey} />
       <HoldingsCard refreshKey={refreshKey} />
     </div>

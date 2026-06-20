@@ -25,13 +25,13 @@ export interface DatabaseRepositoryInterface
    * Экспортировать всю БД в Blob (бэкап).
    * Использует dexie-export-import с потоковой обработкой — не загружает всю БД в RAM.
    */
-  exportBackup(options?: ExportOptions): Promise<Blob>
+  exportBackup(onProgress?: ExportOptions['progressCallback']): Promise<Blob>
 
   /**
    * Импортировать БД из Blob (восстановление из бэкапа).
    * Очищает существующие таблицы перед импортом.
    */
-  importBackup(blob: Blob, options?: ImportOptions): Promise<void>
+  importBackup(blob: Blob, onProgress?: ImportOptions['progressCallback']): Promise<void>
 }
 
 interface ExchangeRatesDatabaseRepositoryInterface {

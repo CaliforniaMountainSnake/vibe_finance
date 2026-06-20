@@ -169,7 +169,7 @@ function SettingsControls() {
   )
 }
 
-export function SettingsDialog() {
+export function SettingsDialog({ onRestored }: { onRestored?: () => void }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -193,7 +193,7 @@ export function SettingsDialog() {
           <SettingsControls />
         </div>
         <div className="px-4 pb-4">
-          <BackupControls />
+          <BackupControls onRestored={onRestored} />
         </div>
       </DialogContent>
     </Dialog>

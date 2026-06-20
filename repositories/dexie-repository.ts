@@ -296,14 +296,26 @@ export class DexieRepository implements DatabaseRepositoryInterface {
   // Backup / Restore
   // ---------------------------------------------------------------------------
 
-  async exportBackup(options?: ExportOptions): Promise<Blob> {
+  async exportBackup(onProgress?: ExportOptions['progressCallback']): Promise<Blob> {
     await import('dexie-export-import')
-    return await this.db.export(options)
+    return await this.db.export({ progressCallback: onProgress })
   }
 
-  async importBackup(blob: Blob, options?: ImportOptions): Promise<void> {
-    await import('dexie-export-import')
-    await this.db.import(blob, { clearTablesBeforeImport: true, ...options })
+  async importBackup(blob: Blob, onProgress?: ImportOptions['progressCallback']): Promise<void> {
+    const { peakImportFile } = await import('dexie-export-import')
+
+    const meta = await peakImportFile(blob)
+    if (meta.data.databaseVersion > this.db.verno) {
+      throw new Error(
+        'Версия базы данных в резервной копии новее, чем в приложении. ' + 'Пожалуйста, обновите приложение.'
+      )
+    }
+
+    await this.db.import(blob, {
+      clearTablesBeforeImport: true,
+      acceptVersionDiff: true,
+      progressCallback: onProgress,
+    })
   }
 
   private async swapWithNeighbor(pair: TickerPair, direction: 'above' | 'below'): Promise<void> {

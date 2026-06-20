@@ -109,6 +109,7 @@ function CompactSummary({ statuses }: { statuses: ExchangeRateSourceStatus[] }) 
 
 type ExchangeRateRefreshCardProperties = {
   onRefreshed?: () => void
+  onRestored?: () => void
   compactRefreshCard?: boolean
 }
 
@@ -133,17 +134,19 @@ function CardActions({
   onToggle,
   isLoading,
   onRefresh,
+  onRestored,
 }: {
   showToggle: boolean
   isCollapsed: boolean
   onToggle: () => void
   isLoading: boolean
   onRefresh: () => void
+  onRestored?: () => void
 }) {
   return (
     <CardAction className="flex items-center gap-2">
       {showToggle ? <CardToggleButton isCollapsed={isCollapsed} onToggle={onToggle} /> : undefined}
-      <SettingsDialog />
+      <SettingsDialog onRestored={onRestored} />
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={onRefresh} disabled={isLoading} variant="outline" size="icon" aria-label="Обновить курсы">
@@ -169,6 +172,7 @@ function CardBody({ isCollapsed, statuses }: { isCollapsed: boolean; statuses: E
 
 export function ExchangeRateRefreshCard({
   onRefreshed,
+  onRestored,
   compactRefreshCard: compactOverride,
 }: ExchangeRateRefreshCardProperties) {
   const { sourceStatuses, refreshAll, isLoading } = useExchangeRate()
@@ -209,6 +213,7 @@ export function ExchangeRateRefreshCard({
           onToggle={handleToggleExpand}
           isLoading={isLoading}
           onRefresh={handleRefresh}
+          onRestored={onRestored}
         />
       </CardHeader>
       <CardFooter className="block p-0">

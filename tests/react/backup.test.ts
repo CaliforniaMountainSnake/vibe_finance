@@ -64,7 +64,7 @@ describe('Backup / Restore — кругосветка (roundtrip)', () => {
     // после очистки БД пуста
     await assertEmpty(repo)
 
-    await repo.importBackup(blob, { clearTablesBeforeImport: true })
+    await repo.importBackup(blob)
 
     // после импорта данные совпадают с исходными
     const restoredRates = await getAllRates(repo)
@@ -85,7 +85,7 @@ describe('Backup / Restore — кругосветка (roundtrip)', () => {
     const blob = await repo.exportBackup()
 
     await clearRepo(repo)
-    await repo.importBackup(blob, { clearTablesBeforeImport: true })
+    await repo.importBackup(blob)
 
     await assertEmpty(repo)
   })
@@ -94,11 +94,9 @@ describe('Backup / Restore — кругосветка (roundtrip)', () => {
     const repo = createEmptyRepo()
     await clearRepo(repo)
     const progressCalls: ExportProgress[] = []
-    const blob = await repo.exportBackup({
-      progressCallback(p) {
-        progressCalls.push(p)
-        return true
-      },
+    const blob = await repo.exportBackup((p) => {
+      progressCalls.push(p)
+      return true
     })
 
     expect(blob).toBeInstanceOf(Blob)
@@ -115,12 +113,9 @@ describe('Backup / Restore — кругосветка (roundtrip)', () => {
     await assertEmpty(repo)
 
     const progressCalls: ImportProgress[] = []
-    await repo.importBackup(blob, {
-      clearTablesBeforeImport: true,
-      progressCallback(p) {
-        progressCalls.push(p)
-        return true
-      },
+    await repo.importBackup(blob, (p) => {
+      progressCalls.push(p)
+      return true
     })
 
     // после импорта данные восстановлены
@@ -135,7 +130,7 @@ describe('Backup / Restore — кругосветка (roundtrip)', () => {
     await clearRepo(repo1)
 
     const repo2 = new DexieRepository()
-    await repo2.importBackup(blob, { clearTablesBeforeImport: true })
+    await repo2.importBackup(blob)
 
     // данные импортировались в repo2 (новая БД)
     await assertNotEmpty(repo2)
@@ -151,5 +146,47 @@ describe('Backup / Restore — кругосветка (roundtrip)', () => {
     expect(restoredRates.toSorted(compareRates)).toEqual(originalRates.toSorted(compareRates))
     expect(restoredFavorites).toEqual(originalFavorites)
     expect(restoredHoldings).toEqual(originalHoldings)
+  })
+})
+
+describe('Backup / Restore — контроль версий', () => {
+  it('отклоняет бекап с версией больше текущей', async () => {
+    const repo = await createPopulatedRepo()
+    const blob = await repo.exportBackup()
+
+    // подменяем версию в бекапе на заведомо большую
+    const text = await blob.text()
+    const parsed = JSON.parse(text) as { data: { databaseVersion: number } }
+    parsed.data.databaseVersion = 999
+    const badBlob = new Blob([JSON.stringify(parsed)], { type: blob.type })
+
+    await expect(repo.importBackup(badBlob)).rejects.toThrow('Версия базы данных в резервной копии новее')
+
+    // данные в БД не должны пострадать
+    await assertNotEmpty(repo)
+  })
+
+  it('пропускает бекап с версией равной текущей', async () => {
+    const repo = await createPopulatedRepo()
+    const blob = await repo.exportBackup()
+    await clearRepo(repo)
+
+    await repo.importBackup(blob)
+    await assertNotEmpty(repo)
+  })
+
+  it('пропускает бекап с версией меньше текущей', async () => {
+    const repo = await createPopulatedRepo()
+    const blob = await repo.exportBackup()
+
+    // подменяем версию на меньшую
+    const text = await blob.text()
+    const parsed = JSON.parse(text) as { data: { databaseVersion: number } }
+    parsed.data.databaseVersion = 1
+    const oldBlob = new Blob([JSON.stringify(parsed)], { type: blob.type })
+    await clearRepo(repo)
+
+    await repo.importBackup(oldBlob)
+    await assertNotEmpty(repo)
   })
 })
